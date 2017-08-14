@@ -1,0 +1,1 @@
+Copy config.ini.template to config.ini and run main.php
