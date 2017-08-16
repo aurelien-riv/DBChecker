@@ -32,11 +32,11 @@ class Config
         $this->pdo = new \PDO($this->getDsn(), $this->login, $this->password);
     }
 
-    public function getDsn() : string
+    public function getDsn()
     {
         return "{$this->engine}:dbname={$this->db};host={$this->host};port={$this->port}";
     }
-    public function getPdo() : \PDO
+    public function getPdo()
     {
         return $this->pdo;
     }

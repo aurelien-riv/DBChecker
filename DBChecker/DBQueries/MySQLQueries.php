@@ -7,18 +7,18 @@ class MySQLQueries
     private $pdo;
     private $database = null;
 
-    public function __construct(\PDO $pdo, string $database)
+    public function __construct(\PDO $pdo, $database)
     {
         $this->database = $database;
         $this->pdo = $pdo;
     }
 
-    public function getTableNames() : \PDOStatement
+    public function getTableNames()
     {
         return $this->pdo->query("SHOW TABLES;");
     }
 
-    public function getFk(string $table) : \PDOStatement
+    public function getFk($table)
     {
         $stmt = $this->pdo->prepare("
             SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
@@ -32,14 +32,14 @@ class MySQLQueries
         return $stmt;
     }
 
-    public function getDistinctValuesWithoutNulls($table, $column) : \PDOStatement
+    public function getDistinctValuesWithoutNulls($table, $column)
     {
         $stmt = $this->pdo->prepare("SELECT DISTINCT $column FROM $table WHERE $column IS NOT NULL;");
         $stmt->execute();
         return $stmt;
     }
 
-    public function getValue($table, $column, $value) : \PDOStatement
+    public function getValue($table, $column, $value)
     {
         $stmt = $this->pdo->prepare("SELECT DISTINCT $column FROM $table WHERE $column = :value;");
         $stmt->bindParam(':value', $value, \PDO::PARAM_STR);
