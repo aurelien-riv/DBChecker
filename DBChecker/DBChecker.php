@@ -15,22 +15,49 @@ class DBChecker
 
     public function run()
     {
+        if ($this->config->isScenarioActive("relcheck"))
+            foreach ($this->relcheck() as $msg)
+                yield $msg;
+        if ($this->config->isScenarioActive("filecheck"))
+            foreach ($this->filecheck() as $msg)
+                yield $msg;
+    }
+
+    public function relcheck()
+    {
         $queries = $this->config->getQueries();
 
-        $tables = $queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
-        foreach ($tables as $table)
+        $fkeys = $queries->getFks()->fetchAll(\PDO::FETCH_OBJ);
+        foreach ($fkeys as $fkey)
         {
-            $fkeys = $queries->getFk($table)->fetchAll(\PDO::FETCH_OBJ);
-            foreach ($fkeys as $fkey)
+            $values = $queries->getDistinctValuesWithoutNulls($fkey->TABLE_NAME, $fkey->REFERENCED_COLUMN_NAME)->fetchAll(\PDO::FETCH_COLUMN);
+            foreach ($values as $value)
             {
-                $values = $queries->getDistinctValuesWithoutNulls($table, $fkey->REFERENCED_COLUMN_NAME)->fetchAll(\PDO::FETCH_COLUMN);
+                $valueExists = $queries->getValue($fkey->REFERENCED_TABLE_NAME, $fkey->REFERENCED_COLUMN_NAME, $value)->fetchAll();
+                if (empty($valueExists))
+                {
+                    yield "{$fkey->TABLE_NAME}.{$fkey->COLUMN_NAME} -> {$fkey->REFERENCED_TABLE_NAME}.{$fkey->REFERENCED_COLUMN_NAME} # $value\n";
+                }
+            }
+        }
+    }
+
+    public function filecheck()
+    {
+        $queries = $this->config->getQueries();
+        foreach ($queries->getFilecheckSettings()->fetchAll(\PDO::FETCH_OBJ) as $setting)
+        {
+            if (! is_dir($setting->basepath))
+            {
+                yield "{$setting->table}.{$setting->column} : {$setting->basepath} is not a directory - skiping";
+            }
+            else
+            {
+                $values = $queries->getDistinctValuesWithoutNulls($setting->table, $setting->column)->fetchAll(\PDO::FETCH_COLUMN);
                 foreach ($values as $value)
                 {
-                    $valueExists = $queries->getValue($fkey->REFERENCED_TABLE_NAME, $fkey->REFERENCED_COLUMN_NAME, $value)->fetchAll();
-                    if (empty($valueExists))
-                    {
-                        yield "$table.{$fkey->COLUMN_NAME} -> {$fkey->REFERENCED_TABLE_NAME}.{$fkey->REFERENCED_COLUMN_NAME} # $value\n";
-                    }
+                    if (! is_file($value))
+                        yield "{$setting->table}.{$setting->column} : {$setting->basepath}/{$value} : no such file or directory\n";
                 }
             }
         }

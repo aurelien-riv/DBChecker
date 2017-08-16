@@ -1,7 +1,11 @@
 [database]
-db       = '';
-login    = 'root';
-password = '';
-engine   = 'mysql';
-host     = 'localhost';
-port     = '3306';
+db       = ''
+login    = 'root'
+password = ''
+engine   = 'mysql'
+host     = 'localhost'
+port     = '3306'
+
+[scenarii]
+relcheck  = true
+filecheck = true

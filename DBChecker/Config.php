@@ -14,6 +14,7 @@ class Config
     private $engine   = '';
     private $host     = '';
     private $port     = '';
+    private $scenarii = [];
 
     private $pdo = null;
 
@@ -29,7 +30,15 @@ class Config
         $this->host     = $dbsettings['host'];
         $this->port     = $dbsettings['port'];
 
+        foreach ($settings['scenarii'] as $k => $v)
+            $this->scenarii[$k] = boolval($v);
+
         $this->pdo = new \PDO($this->getDsn(), $this->login, $this->password);
+    }
+
+    public function isScenarioActive($scenario)
+    {
+        return isset($this->scenarii[$scenario]) && $this->scenarii[$scenario];
     }
 
     public function getDsn()
