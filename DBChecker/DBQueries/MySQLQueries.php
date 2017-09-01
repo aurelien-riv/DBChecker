@@ -2,26 +2,17 @@
 
 namespace DBChecker\DBQueries;
 
-class MySQLQueries
+require_once 'AbstractDbQueries.php';
+
+class MySQLQueries extends AbstractDbQueries
 {
-    private $pdo;
-    private $database = null;
-
-    public function __construct(\PDO $pdo, $database)
-    {
-        $this->database = $database;
-        $this->pdo = $pdo;
-    }
-
-    #region relcheck
     public function getFks()
     {
         $stmt = $this->pdo->prepare("
             SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
             FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-            WHERE REFERENCED_TABLE_SCHEMA = :database;
+            WHERE REFERENCED_TABLE_SCHEMA = DATABASE();
         ");
-        $stmt->bindParam(':database', $this->database, \PDO::PARAM_STR);
         $stmt->execute();
         return $stmt;
     }
@@ -40,24 +31,29 @@ class MySQLQueries
         $stmt->execute();
         return $stmt;
     }
-    #endregion
 
-    #region filecheck
-    public function createFilecheckTable()
+    public function getConcatenatedColumnNames($table)
     {
-        $query = "CREATE TABLE `_sqldb_checker_filecheck` (
-                `table` varchar(64) NOT NULL,
-                `column` varchar(64) NOT NULL,
-                `basepath` varchar(512) NOT NULL
-            ) ENGINE='MyISAM' COLLATE 'utf8_general_ci';";
-        $this->pdo->exec($query);
-    }
-
-    public function getFilecheckSettings()
-    {
-        $stmt = $this->pdo->prepare("SELECT `table`, `column`, `basepath` FROM _sqldb_checker_filecheck;");
+        $stmt = $this->pdo->prepare("
+            SELECT GROUP_CONCAT(column_name)
+            FROM information_schema.columns 
+            WHERE table_schema=DATABASE() AND table_name=:table
+        ");
+        $stmt->bindParam(':table', $table, \PDO::PARAM_STR);
         $stmt->execute();
-        return $stmt;
+        $result = $stmt->fetchColumn();
+        $stmt->closeCursor();
+        return $result;
+
     }
-    #endregion
+    public function getTableSha1sum($table)
+    {
+        $columns = $this->getConcatenatedColumnNames($table);
+        $stmt = $this->pdo->prepare("select SHA1(group_concat(:columns)) from $table");
+        $stmt->bindParam(':columns', $columns, \PDO::PARAM_STR);
+        $stmt->execute();
+        $result = $stmt->fetchColumn();
+        $stmt->closeCursor();
+        return $result;
+    }
 }

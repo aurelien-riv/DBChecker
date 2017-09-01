@@ -8,13 +8,14 @@ require_once('DBQueries/MySQLQueries.php');
 
 class Config
 {
-    private $db       = '';
-    private $login    = '';
-    private $password = '';
-    private $engine   = '';
-    private $host     = '';
-    private $port     = '';
-    private $scenarii = [];
+    private $db            = '';
+    private $login         = '';
+    private $password      = '';
+    private $engine        = '';
+    private $host          = '';
+    private $port          = '';
+    private $filecheck     = [];
+    private $dataintegrity = [];
 
     private $pdo = null;
 
@@ -30,15 +31,30 @@ class Config
         $this->host     = $dbsettings['host'];
         $this->port     = $dbsettings['port'];
 
-        foreach ($settings['scenarii'] as $k => $v)
-            $this->scenarii[$k] = boolval($v);
+        foreach ($settings['filecheck'] as $k => $v)
+        {
+            $this->filecheck[$k] = [
+                'table'  => explode('.', $k)[0],
+                'column' => explode('.', $k)[1],
+                'path'   => $v
+            ];
+        }
+        foreach ($settings['dataintegrity'] as $table => $checksum)
+        {
+            $this->dataintegrity[$table] = $checksum;
+        }
 
         $this->pdo = new \PDO($this->getDsn(), $this->login, $this->password);
     }
 
-    public function isScenarioActive($scenario)
+    public function getFilecheckConfig()
     {
-        return isset($this->scenarii[$scenario]) && $this->scenarii[$scenario];
+        return $this->filecheck;
+    }
+
+    public function getDataintegrityConfig()
+    {
+        return $this->dataintegrity;
     }
 
     public function getDsn()

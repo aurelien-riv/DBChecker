@@ -5,7 +5,3 @@ password = ''
 engine   = 'mysql'
 host     = 'localhost'
 port     = '3306'
-
-[scenarii]
-relcheck  = true
-filecheck = true
