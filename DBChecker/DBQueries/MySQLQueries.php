@@ -6,6 +6,11 @@ require_once 'AbstractDbQueries.php';
 
 class MySQLQueries extends AbstractDbQueries
 {
+    public function getTableNames()
+    {
+        return $this->pdo->query("SHOW TABLES;");
+    }
+
     public function getFks()
     {
         $stmt = $this->pdo->prepare("
@@ -54,6 +59,8 @@ class MySQLQueries extends AbstractDbQueries
         $stmt->execute();
         $result = $stmt->fetchColumn();
         $stmt->closeCursor();
+        if (empty($result))
+            $result = 0;
         return $result;
     }
 }

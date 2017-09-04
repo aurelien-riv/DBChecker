@@ -26,4 +26,26 @@ class DataIntegrityCheck
                 yield new DataIntegrityCheckMatch($table);
         }
     }
+
+    public function updateConfig()
+    {
+        $queries = $this->config->getQueries();
+        foreach ($this->config->getDataintegrityConfig() as $table => $_unused_expectedChecksum)
+        {
+            $checksum = $queries->getTableSha1sum($table);
+            if ($checksum)
+                echo "$table: $checksum\n";
+        }
+    }
+
+    public function generateConfig()
+    {
+        $queries = $this->config->getQueries();
+        foreach ($queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
+        {
+            $checksum = $queries->getTableSha1sum($table);
+            if ($checksum)
+                echo "$table: $checksum\n";
+        }
+    }
 }

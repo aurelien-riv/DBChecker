@@ -11,6 +11,8 @@ abstract class AbstractDbQueries
         $this->pdo = $pdo;
     }
 
+    public abstract function getTableNames();
+
     public abstract function getFks();
 
     public abstract function getDistinctValuesWithoutNulls($table, $column);
