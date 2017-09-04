@@ -70,7 +70,7 @@ class Config
     {
         switch ($this->engine)
         {
-            case 'mysql': return new MySQLQueries($this->pdo, $this->db);
+            case 'mysql': return new MySQLQueries($this->pdo);
             default: throw new \InvalidArgumentException("Unsupported engine {$this->engine}");
         }
     }
