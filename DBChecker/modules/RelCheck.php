@@ -20,7 +20,7 @@ class RelCheck
         $fkeys = $queries->getFks()->fetchAll(\PDO::FETCH_OBJ);
         foreach ($fkeys as $fkey)
         {
-            $values = $queries->getDistinctValuesWithoutNulls($fkey->TABLE_NAME, $fkey->REFERENCED_COLUMN_NAME)->fetchAll(\PDO::FETCH_COLUMN);
+            $values = $queries->getDistinctValuesWithoutNulls($fkey->TABLE_NAME, $fkey->COLUMN_NAME)->fetchAll(\PDO::FETCH_COLUMN);
             foreach ($values as $value)
             {
                 $valueExists = $queries->getValue($fkey->REFERENCED_TABLE_NAME, $fkey->REFERENCED_COLUMN_NAME, $value)->fetchAll();
