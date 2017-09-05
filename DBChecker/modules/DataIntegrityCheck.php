@@ -23,7 +23,7 @@ class DataIntegrityCheck
         {
             $checksum = $queries->getTableSha1sum($table);
             if ($checksum !== $expectedChecksum)
-                yield new DataIntegrityCheckMatch($table);
+                yield new DataIntegrityCheckMatch($table, $checksum);
         }
     }
 

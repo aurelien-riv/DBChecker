@@ -5,10 +5,12 @@ namespace DBChecker;
 class DataIntegrityCheckMatch
 {
     private $table;
+    private $checksum;
 
-    public function __construct($table)
+    public function __construct($table, $checksum)
     {
-        $this->table    = $table;
+        $this->table            = $table;
+        $this->checksum         = $checksum;
     }
 
     public function __toString()
@@ -18,7 +20,7 @@ class DataIntegrityCheckMatch
 
     public function getMessage()
     {
-        return "{$this->table} : checksum does not match\n";
+        return "{$this->table} : checksum does not match ({$this->checksum})\n";
     }
 
     #region getters
