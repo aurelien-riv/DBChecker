@@ -34,7 +34,7 @@ class DataIntegrityCheck
         {
             $checksum = $queries->getTableSha1sum($table);
             if ($checksum)
-                echo "$table: $checksum\n";
+                echo "$table = $checksum\n";
         }
     }
 
@@ -45,7 +45,7 @@ class DataIntegrityCheck
         {
             $checksum = $queries->getTableSha1sum($table);
             if ($checksum)
-                echo "$table: $checksum\n";
+                echo "$table = $checksum\n";
         }
     }
 }
