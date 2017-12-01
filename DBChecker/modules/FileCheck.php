@@ -16,7 +16,7 @@ class FileCheck
     public function run()
     {
         $queries = $this->config->getQueries();
-        foreach ($this->config->getFilecheckConfig() as $setting)
+        foreach ($this->config->getFilecheck() as $setting)
         {
             if (! is_dir($setting['path']))
             {

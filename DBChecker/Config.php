@@ -16,6 +16,8 @@ class Config
     private $port          = '';
     private $filecheck     = [];
     private $dataintegrity = [];
+    private $schemaintegrity = [];
+    private $schemaintegrity_config = [];
 
     private $pdo = null;
 
@@ -40,21 +42,33 @@ class Config
             ];
         }
         foreach ($settings['dataintegrity'] as $table => $checksum)
-        {
             $this->dataintegrity[$table] = $checksum;
-        }
+        foreach ($settings['schemaintegrity'] as $table => $checksum)
+            $this->schemaintegrity[$table] = $checksum;
+        foreach ($settings['schemaintegrity_config'] as $option => $value)
+            $this->schemaintegrity_config[$option] = $value;
 
         $this->pdo = new \PDO($this->getDsn(), $this->login, $this->password);
     }
 
-    public function getFilecheckConfig()
+    public function getFilecheck()
     {
         return $this->filecheck;
     }
 
-    public function getDataintegrityConfig()
+    public function getDataintegrity()
     {
         return $this->dataintegrity;
+    }
+
+    public function getSchemaIntegrity()
+    {
+        return $this->schemaintegrity;
+    }
+
+    public function getSchemaintegrityConfig()
+    {
+        return $this->schemaintegrity_config;
     }
 
     public function getDsn()

@@ -19,9 +19,9 @@ class DataIntegrityCheck
     public function run()
     {
         $queries = $this->config->getQueries();
-        foreach ($this->config->getDataintegrityConfig() as $table => $expectedChecksum)
+        foreach ($this->config->getDataintegrity() as $table => $expectedChecksum)
         {
-            $checksum = $queries->getTableSha1sum($table);
+            $checksum = $queries->getTableDataSha1sum($table);
             if ($checksum !== $expectedChecksum)
                 yield new DataIntegrityCheckMatch($table, $checksum);
         }
@@ -30,9 +30,9 @@ class DataIntegrityCheck
     public function updateConfig()
     {
         $queries = $this->config->getQueries();
-        foreach ($this->config->getDataintegrityConfig() as $table => $_unused_expectedChecksum)
+        foreach ($this->config->getDataintegrity() as $table => $_unused_expectedChecksum)
         {
-            $checksum = $queries->getTableSha1sum($table);
+            $checksum = $queries->getTableDataSha1sum($table);
             if ($checksum)
                 echo "$table = $checksum\n";
         }
@@ -43,7 +43,7 @@ class DataIntegrityCheck
         $queries = $this->config->getQueries();
         foreach ($queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
         {
-            $checksum = $queries->getTableSha1sum($table);
+            $checksum = $queries->getTableDataSha1sum($table);
             if ($checksum)
                 echo "$table = $checksum\n";
         }

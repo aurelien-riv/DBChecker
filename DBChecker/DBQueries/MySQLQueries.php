@@ -56,10 +56,11 @@ class MySQLQueries extends AbstractDbQueries
         return $result;
 
     }
-    public function getTableSha1sum($table)
+
+    public function getTableDataSha1sum($table)
     {
         $columns = $this->getConcatenatedColumnNames($table);
-        $stmt = $this->pdo->prepare("select SHA1(group_concat(:columns)) from $table");
+        $stmt = $this->pdo->prepare("SELECT SHA1(group_concat(:columns)) FROM $table");
         $stmt->bindParam(':columns', $columns, \PDO::PARAM_STR);
         $stmt->execute();
         $result = $stmt->fetchColumn();
@@ -67,5 +68,11 @@ class MySQLQueries extends AbstractDbQueries
         if (empty($result))
             $result = 0;
         return $result;
+    }
+
+    public function getTableSchemaSha1sum($table)
+    {
+        $columns = $this->getConcatenatedColumnNames($table);
+        return hash('sha1', $columns);
     }
 }
