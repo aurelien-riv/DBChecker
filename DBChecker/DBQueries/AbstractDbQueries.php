@@ -15,6 +15,14 @@ abstract class AbstractDbQueries
 
     public abstract function getFks();
 
+    public abstract function getUniqueIndexes($table);
+
+    /**
+     * @param string $table The table name
+     * @param string $columns A coma separated list of columns
+     */
+    public abstract function getDuplicateForColumnsWithCount($table, $columns);
+
     public abstract function getDistinctValuesWithoutNulls($table, $column);
 
     public abstract function getValue($table, $column, $value);

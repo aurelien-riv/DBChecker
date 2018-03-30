@@ -6,5 +6,5 @@ $dbChecker = new \DBChecker\DBChecker();
 
 foreach ($dbChecker->run() as $error)
 {
-    echo $error;
+    echo get_class($error).' '.$error;
 }

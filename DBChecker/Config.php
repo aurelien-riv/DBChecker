@@ -33,20 +33,29 @@ class Config
         $this->host     = $dbsettings['host'];
         $this->port     = $dbsettings['port'];
 
-        foreach ($settings['filecheck'] as $k => $v)
+        if (isset($settings['filecheck']))
         {
-            $this->filecheck[$k] = [
-                'table'  => explode('.', $k)[0],
-                'column' => explode('.', $k)[1],
-                'path'   => $v
-            ];
+            foreach ($settings['filecheck'] as $k => $v)
+            {
+                $this->filecheck[$k] = [
+                    'table'  => explode('.', $k)[0],
+                    'column' => explode('.', $k)[1],
+                    'path'   => $v
+                ];
+            }
         }
-        foreach ($settings['dataintegrity'] as $table => $checksum)
-            $this->dataintegrity[$table] = $checksum;
-        foreach ($settings['schemaintegrity'] as $table => $checksum)
-            $this->schemaintegrity[$table] = $checksum;
-        foreach ($settings['schemaintegrity_config'] as $option => $value)
-            $this->schemaintegrity_config[$option] = $value;
+        if (isset($settings['dataintegrity']))
+        {
+            foreach ($settings['dataintegrity'] as $table => $checksum)
+                $this->dataintegrity[$table] = $checksum;
+        }
+        if (isset($settings['schemaintegrity']))
+        {
+            foreach ($settings['schemaintegrity'] as $table => $checksum)
+                $this->schemaintegrity[$table] = $checksum;
+            foreach ($settings['schemaintegrity_config'] as $option => $value)
+                $this->schemaintegrity_config[$option] = $value;
+        }
 
         $this->pdo = new \PDO($this->getDsn(), $this->login, $this->password);
     }

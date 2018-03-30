@@ -27,6 +27,60 @@ class MySQLQueries extends AbstractDbQueries
         return $stmt;
     }
 
+    protected function getUniqueIndexesV1($table)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT GROUP_CONCAT(f.name)
+            FROM information_schema.innodb_sys_tables  t 
+            JOIN information_schema.innodb_sys_indexes i USING (table_id) 
+            JOIN information_schema.innodb_sys_fields  f USING (index_id)
+            WHERE 
+                t.schema = DATABASE() 
+                AND t.name = '$table'
+                AND i.TYPE = 2
+            GROUP BY f.index_id
+        ");
+        $stmt->execute();
+        return $stmt;
+    }
+    protected function getUniqueIndexesV2($table)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT GROUP_CONCAT(f.name)
+            FROM information_schema.innodb_sys_tables  t 
+            JOIN information_schema.innodb_sys_indexes i USING (table_id) 
+            JOIN information_schema.innodb_sys_fields  f USING (index_id)
+            WHERE 
+                t.name = CONCAT(DATABASE(), '/$table')
+                AND i.TYPE = 2
+            GROUP BY f.index_id
+        ");
+        $stmt->execute();
+        return $stmt;
+    }
+    public function getUniqueIndexes($table)
+    {
+        $stmt = $this->getUniqueIndexesV1($table);
+        $error = $stmt->errorInfo();
+        if (isset($error[1]) && $error[1] === 1054)
+        {
+            $stmt = $this->getUniqueIndexesV2($table);
+        }
+        return $stmt;
+    }
+
+    public function getDuplicateForColumnsWithCount($table, $columns)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT $columns, COUNT(*)
+            FROM tbl_user
+            GROUP BY $columns
+            HAVING COUNT(*) > 1 AND CONCAT_WS($columns, NULL) IS NOT NULL
+        ");
+        $stmt->execute();
+        return $stmt;
+    }
+
     public function getDistinctValuesWithoutNulls($table, $column)
     {
         $stmt = $this->pdo->prepare("SELECT DISTINCT $column FROM $table WHERE $column IS NOT NULL;");
@@ -65,9 +119,7 @@ class MySQLQueries extends AbstractDbQueries
         $stmt->execute();
         $result = $stmt->fetchColumn();
         $stmt->closeCursor();
-        if (empty($result))
-            $result = 0;
-        return $result;
+        return empty($result) ? 0 : $result;
     }
 
     public function getTableSchemaSha1sum($table)

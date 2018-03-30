@@ -24,7 +24,7 @@ class FileCheck
             }
             else
             {
-                $values = $queries->getDistinctValuesWithoutNulls($setting->table, $setting->column)->fetchAll(\PDO::FETCH_COLUMN);
+                $values = $queries->getDistinctValuesWithoutNulls($setting['table'], $setting['column'])->fetchAll(\PDO::FETCH_COLUMN);
                 foreach ($values as $value)
                 {
                     if (! is_file($setting['path'].'/'.$value))
