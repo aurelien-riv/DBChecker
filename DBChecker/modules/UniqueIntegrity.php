@@ -23,7 +23,7 @@ class UniqueIntegrity
             $indexColumns = $queries->getUniqueIndexes($table)->fetchAll(\PDO::FETCH_COLUMN);
             foreach ($indexColumns as $columns)
             {
-                $resultset = $queries->getDuplicateForColumnsWithCount($table, $columns)->fetchAll(\PDO::FETCH_COLUMN);
+                $resultset = $queries->getDuplicateForColumnsWithCount($table, $columns)->fetchAll(\PDO::FETCH_OBJ);
                 foreach ($resultset as $result)
                 {
                     yield new UniqueIntegrityMatch($table, $columns, $result);

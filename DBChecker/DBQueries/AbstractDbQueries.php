@@ -20,6 +20,9 @@ abstract class AbstractDbQueries
     /**
      * @param string $table The table name
      * @param string $columns A coma separated list of columns
+     * If $columns references a single column (= the string contains no coma), NULL values won't be considered as
+     * duplicates, otherwise a null column will be treated as a duplicate contrary to the SQL norm as it may be
+     * not wanted.
      */
     public abstract function getDuplicateForColumnsWithCount($table, $columns);
 

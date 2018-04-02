@@ -71,12 +71,18 @@ class MySQLQueries extends AbstractDbQueries
 
     public function getDuplicateForColumnsWithCount($table, $columns)
     {
-        $stmt = $this->pdo->prepare("
-            SELECT $columns, COUNT(*)
-            FROM tbl_user
+        $query = "
+            SELECT $columns, COUNT(*) as __count__
+            FROM $table
             GROUP BY $columns
-            HAVING COUNT(*) > 1 AND CONCAT_WS($columns, NULL) IS NOT NULL
-        ");
+            HAVING COUNT(*) > 1
+        ";
+        // If there is one column, ignore null values
+        if (! strpos($columns, ','))
+        {
+            $query .= " AND $columns IS NOT NULL";
+        }
+        $stmt = $this->pdo->prepare($query);
         $stmt->execute();
         return $stmt;
     }
