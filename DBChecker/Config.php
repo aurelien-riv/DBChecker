@@ -8,12 +8,12 @@ require_once('DBQueries/MySQLQueries.php');
 
 class Config
 {
-    private $db            = '';
-    private $login         = '';
-    private $password      = '';
-    private $engine        = '';
-    private $host          = '';
-    private $port          = '';
+    private $db;
+    private $login;
+    private $password;
+    private $engine;
+    private $host;
+    private $port;
     private $filecheck     = [];
     private $dataintegrity = [];
     private $schemaintegrity = [];

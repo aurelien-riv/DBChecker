@@ -15,6 +15,9 @@ class SchemaIntegrityCheck
 
     public function run()
     {
+        if (empty($this->config->getSchemaIntegrity()))
+            return;
+
         $queries = $this->config->getQueries();
         $tables = $this->config->getSchemaIntegrity();
         foreach ($tables as $table => $expectedChecksum)
