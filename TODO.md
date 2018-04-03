@@ -2,6 +2,9 @@
 - Proper command line arguments handling instead of positionnal parameters
 - Use composer and autoloader instead of require_once
 
+## FileCheck ##
+- Add an option to disable remove file verification through HTTP(S)
+
 ## Configuration ##
 - Migrate to yaml format
 

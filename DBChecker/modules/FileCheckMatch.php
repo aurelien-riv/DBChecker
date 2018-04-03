@@ -4,9 +4,9 @@ namespace DBChecker;
 
 class FileCheckMatch
 {
-    private $table;
-    private $columns;
-    private $path;
+    protected $table;
+    protected $columns;
+    protected $path;
 
     public function __construct($table, $columns, $path)
     {
