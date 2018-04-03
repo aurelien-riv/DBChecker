@@ -18,17 +18,26 @@ class FileCheck
         $queries = $this->config->getQueries();
         foreach ($this->config->getFilecheck() as $setting)
         {
-            if (! is_dir($setting['path']))
+            $columns = [];
+            preg_match_all('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', $setting['path'], $matches);
+            if (count($matches) === 2)
             {
-                yield new FileCheckMatch($setting['table'], $setting['column'], $setting['path'], "");
-            }
-            else
-            {
-                $values = $queries->getDistinctValuesWithoutNulls($setting['table'], $setting['column'])->fetchAll(\PDO::FETCH_COLUMN);
-                foreach ($values as $value)
+                foreach ($matches[1] as $match)
                 {
-                    if (! is_file($setting['path'].'/'.$value))
-                        yield new FileCheckMatch($setting['table'], $setting['column'], $setting['path'], $value);
+                    $columns[] = $match;
+                }
+            }
+
+            $values = $queries->getDistinctValuesWithoutNulls($setting['table'], $columns)
+                              ->fetchAll(\PDO::FETCH_OBJ);
+            foreach ($values as $value)
+            {
+                $path = preg_replace_callback('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', function($match) use ($value) {
+                    return $value->{$match[1]};
+                }, $setting['path']);
+                if (! is_file($path))
+                {
+                    yield new FileCheckMatch($setting['table'], $columns, $path);
                 }
             }
         }

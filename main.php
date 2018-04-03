@@ -2,7 +2,9 @@
 
 require_once('DBChecker/DBChecker.php');
 
-$dbChecker = new \DBChecker\DBChecker();
+$iniPath = $argc == 2 ? $argv[1] : '';
+
+$dbChecker = new \DBChecker\DBChecker($iniPath);
 
 foreach ($dbChecker->run() as $error)
 {

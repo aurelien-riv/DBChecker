@@ -26,7 +26,12 @@ abstract class AbstractDbQueries
      */
     public abstract function getDuplicateForColumnsWithCount($table, $columns);
 
-    public abstract function getDistinctValuesWithoutNulls($table, $column);
+    /**
+     * @param string          $table
+     * @param string|string[] $columns
+     * @return bool|\PDOStatement
+     */
+    public abstract function getDistinctValuesWithoutNulls($table, $columns);
 
     public abstract function getValue($table, $column, $value);
 

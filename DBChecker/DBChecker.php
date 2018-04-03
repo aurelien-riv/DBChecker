@@ -13,9 +13,9 @@ class DBChecker
 {
     private $config;
 
-    public function __construct()
+    public function __construct($iniPath='')
     {
-        $this->config = new Config();
+        $this->config = new Config($iniPath);
     }
 
     public function run()

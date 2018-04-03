@@ -5,16 +5,14 @@ namespace DBChecker;
 class FileCheckMatch
 {
     private $table;
-    private $column;
-    private $basePath;
-    private $value;
+    private $columns;
+    private $path;
 
-    public function __construct($table, $column, $basePath, $value)
+    public function __construct($table, $columns, $path)
     {
-        $this->table    = $table;
-        $this->column   = $column;
-        $this->basePath = $basePath;
-        $this->value    = $value;
+        $this->table   = $table;
+        $this->columns = $columns;
+        $this->path    = $path;
     }
 
     public function __toString()
@@ -24,7 +22,10 @@ class FileCheckMatch
 
     public function getMessage()
     {
-        return "{$this->table}.{$this->column} : {$this->basePath}/{$this->value} : no such file or directory\n";
+        $cols = $this->columns;
+        if (is_array($this->columns))
+            $cols = implode(',', $this->columns);
+        return "{$this->table}.{{$cols}} : {$this->path} : no such file or directory\n";
     }
 
     #region getters
@@ -35,17 +36,12 @@ class FileCheckMatch
 
     public function getColumn()
     {
-        return $this->column;
+        return $this->columns;
     }
 
-    public function getBasePath()
+    public function getPath()
     {
-        return $this->basePath;
-    }
-
-    public function getValue()
-    {
-        return $this->value;
+        return $this->path;
     }
     #endregion
 }

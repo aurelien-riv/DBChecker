@@ -87,9 +87,16 @@ class MySQLQueries extends AbstractDbQueries
         return $stmt;
     }
 
-    public function getDistinctValuesWithoutNulls($table, $column)
+    public function getDistinctValuesWithoutNulls($table, $columns)
     {
-        $stmt = $this->pdo->prepare("SELECT DISTINCT $column FROM $table WHERE $column IS NOT NULL;");
+        $selectColumns = $whereColumns = $columns;
+        if (is_array($columns))
+        {
+            $selectColumns = implode(',', $columns);
+            $whereColumns = implode(' IS NOT NULL AND ', $columns);
+        }
+        $query = "SELECT DISTINCT $selectColumns FROM $table WHERE $whereColumns IS NOT NULL;";
+        $stmt = $this->pdo->prepare($query);
         $stmt->execute();
         return $stmt;
     }

@@ -21,9 +21,13 @@ class Config
 
     private $pdo = null;
 
-    public function __construct()
+    public function __construct($iniPath='')
     {
-        $settings = parse_ini_file(__DIR__.DIRECTORY_SEPARATOR."config.ini", true);
+        if (empty($iniPath))
+        {
+            $iniPath = __DIR__.DIRECTORY_SEPARATOR."config.ini";
+        }
+        $settings = parse_ini_file($iniPath, true);
         $dbsettings = $settings['database'];
 
         $this->db       = $dbsettings['db'];
@@ -37,9 +41,9 @@ class Config
         {
             foreach ($settings['filecheck'] as $k => $v)
             {
+                // the second part of $k is unused but necessary to allow several checks on one table
                 $this->filecheck[$k] = [
                     'table'  => explode('.', $k)[0],
-                    'column' => explode('.', $k)[1],
                     'path'   => $v
                 ];
             }
