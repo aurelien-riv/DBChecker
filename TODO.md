@@ -5,5 +5,8 @@
 ## Configuration ##
 - Migrate to yaml format
 
+## MySQLQueries ##
+- Make getDistinctValuesWithJoinColumnsWithoutNulls support composite FK
+
 ## Modules ##
 - Add a module to detect possibly missing foreign keys

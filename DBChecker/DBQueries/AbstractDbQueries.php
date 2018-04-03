@@ -4,6 +4,8 @@ namespace DBChecker\DBQueries;
 
 abstract class AbstractDbQueries
 {
+    const IDENTIFIER = '[a-zA-Z_][a-zA-Z0-9_]*';
+
     protected $pdo;
 
     public function __construct(\PDO $pdo)
@@ -32,6 +34,14 @@ abstract class AbstractDbQueries
      * @return bool|\PDOStatement
      */
     public abstract function getDistinctValuesWithoutNulls($table, $columns);
+
+    /**
+     * @param string   $table
+     * @param string[] $columns
+     * @param string[] $innerJoinColumns
+     * @return bool|\PDOStatement
+     */
+    public abstract function getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoinColumns);
 
     public abstract function getValue($table, $column, $value);
 

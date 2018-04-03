@@ -41,7 +41,8 @@ class Config
         {
             foreach ($settings['filecheck'] as $k => $v)
             {
-                // the second part of $k is unused but necessary to allow several checks on one table
+                // the second part of $k is unused and optional,  use it to
+                // perform several checks on a table
                 $this->filecheck[$k] = [
                     'table'  => explode('.', $k)[0],
                     'path'   => $v

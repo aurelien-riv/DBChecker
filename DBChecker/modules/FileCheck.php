@@ -2,10 +2,13 @@
 
 namespace DBChecker;
 
+use DBChecker\DBQueries\AbstractDbQueries;
+
 require_once 'FileCheckMatch.php';
 
 class FileCheck
 {
+
     private $config;
 
     public function __construct(Config $config)
@@ -19,22 +22,26 @@ class FileCheck
         foreach ($this->config->getFilecheck() as $setting)
         {
             $columns = [];
-            preg_match_all('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', $setting['path'], $matches);
-            if (count($matches) === 2)
+            $innerJoins = [];
+            preg_match_all("/\{(" . AbstractDbQueries::IDENTIFIER ."(?:\." . AbstractDbQueries::IDENTIFIER .")?)\}/", $setting['path'], $matches);
+            foreach ($matches[1] as $match)
             {
-                foreach ($matches[1] as $match)
+                $fragments = mb_split('\.', $match);
+                if (count($fragments) == 2)
                 {
-                    $columns[] = $match;
+                    $innerJoins[] = $fragments[0];
                 }
+                $columns[]    = $match;
             }
 
-            $values = $queries->getDistinctValuesWithoutNulls($setting['table'], $columns)
+            $values = $queries->getDistinctValuesWithJoinColumnsWithoutNulls($setting['table'], $columns, $innerJoins)
                               ->fetchAll(\PDO::FETCH_OBJ);
             foreach ($values as $value)
             {
-                $path = preg_replace_callback('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', function($match) use ($value) {
+                $path = preg_replace_callback("/\{(" . AbstractDbQueries::IDENTIFIER ."(?:\." . AbstractDbQueries::IDENTIFIER .")?)\}/", function($match) use ($value, $setting) {
                     return $value->{$match[1]};
                 }, $setting['path']);
+
                 if (! is_file($path))
                 {
                     yield new FileCheckMatch($setting['table'], $columns, $path);
