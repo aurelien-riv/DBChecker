@@ -20,24 +20,24 @@ class DBChecker
 
     public function run()
     {
-//        $check = new RelCheck($this->config);
-//        foreach ($check->run() as $msg)
-//            yield $msg;
+        $check = new RelCheck($this->config);
+        foreach ($check->run() as $msg)
+            yield $msg;
 
         $check = new FileCheck($this->config);
         foreach ($check->run() as $msg)
             yield $msg;
 
-//        $check = new DataIntegrityCheck($this->config);
-//        foreach ($check->run() as $msg)
-//            yield $msg;
-//
-//        $check = new SchemaIntegrityCheck($this->config);
-//        foreach ($check->run() as $msg)
-//            yield $msg;
-//
-//        $check = new UniqueIntegrity($this->config);
-//        foreach ($check->run() as $msg)
-//            yield $msg;
+        $check = new DataIntegrityCheck($this->config);
+        foreach ($check->run() as $msg)
+            yield $msg;
+
+        $check = new SchemaIntegrityCheck($this->config);
+        foreach ($check->run() as $msg)
+            yield $msg;
+
+        $check = new UniqueIntegrity($this->config);
+        foreach ($check->run() as $msg)
+            yield $msg;
     }
 }
