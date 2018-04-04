@@ -9,7 +9,6 @@ require_once 'FileCheckURLMatch.php';
 
 class FileCheck
 {
-
     private $config;
 
     public function __construct(Config $config)
@@ -19,6 +18,7 @@ class FileCheck
 
     public function run()
     {
+        // TODO restore context
         stream_context_set_default([
             'http' => [
                 'method' => 'HEAD'

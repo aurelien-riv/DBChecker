@@ -89,6 +89,10 @@ class Config
     {
         return "{$this->engine}:dbname={$this->db};host={$this->host};port={$this->port}";
     }
+
+    /**
+     * @return null|\PDO
+     */
     public function getPdo()
     {
         return $this->pdo;

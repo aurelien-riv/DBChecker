@@ -8,6 +8,7 @@ require_once('modules/RelCheck.php');
 require_once('modules/DataIntegrityCheck.php');
 require_once('modules/SchemaIntegrityCheck.php');
 require_once('modules/UniqueIntegrity.php');
+require_once('modules/MissingKeyDetect.php');
 
 class DBChecker
 {
@@ -37,6 +38,10 @@ class DBChecker
             yield $msg;
 
         $check = new UniqueIntegrity($this->config);
+        foreach ($check->run() as $msg)
+            yield $msg;
+
+        $check = new MissingKeyDetect($this->config);
         foreach ($check->run() as $msg)
             yield $msg;
     }

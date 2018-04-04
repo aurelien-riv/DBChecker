@@ -15,9 +15,23 @@ abstract class AbstractDbQueries
 
     public abstract function getTableNames();
 
+    public abstract function getColumnNames();
+
+    public abstract function getColumnNamesInTable($table);
+
+    public abstract function getPKs($table);
+
     public abstract function getFks();
 
     public abstract function getUniqueIndexes($table);
+
+    /**
+     * @param string $table
+     * @param string $column
+     * @return bool|\PDOStatement
+     * Get the table name and the column name on the other side of a foreign key relation
+     */
+    public abstract function getDistantTableAndColumnFromTableAndColumnFK($table, $column);
 
     /**
      * @param string $table The table name

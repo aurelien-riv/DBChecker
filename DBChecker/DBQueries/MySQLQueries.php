@@ -11,17 +11,27 @@ class MySQLQueries extends AbstractDbQueries
         return $this->pdo->query("SHOW TABLES;");
     }
 
-    public function getColumnNames($table)
+    public function getColumnNames()
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT TABLE_NAME, COLUMN_NAME
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE();
+        ");
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function getColumnNamesInTable($table)
     {
         return $this->pdo->query("SHOW COLUMNS FROM $table");
     }
 
-    /**
-     * @param string $table
-     * @param string $column
-     * @return bool|\PDOStatement
-     * Get the table name and the column name on the other side of a foreign key relation
-     */
+    public function getPKs($table)
+    {
+        return $this->pdo->query("SHOW INDEX FROM $table WHERE Key_name = 'PRIMARY'");
+    }
+
     public function getDistantTableAndColumnFromTableAndColumnFK($table, $column)
     {
         $stmt = $this->pdo->prepare("

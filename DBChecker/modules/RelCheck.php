@@ -72,7 +72,7 @@ class RelCheck
         }
         else
         {
-            $columns = $this->config->getQueries()->getColumnNames($tbl)->fetchAll(\PDO::FETCH_COLUMN);
+            $columns = $this->config->getQueries()->getColumnNamesInTable($tbl)->fetchAll(\PDO::FETCH_COLUMN);
             if (! in_array($col, $columns))
                 yield new ColumnNotFoundMatch($tbl, $col);
         }
