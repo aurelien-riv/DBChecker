@@ -22,10 +22,29 @@ class FileCheckMatch
 
     public function getMessage()
     {
-        $cols = $this->columns;
-        if (is_array($this->columns))
-            $cols = implode(',', $this->columns);
+        $cols = '';
+        foreach ($this->columns as $column => $value)
+        {
+            $cols .= "$column=$value, ";
+        }
+        $cols = rtrim($cols, ', ');
         return "{$this->table}.{{$cols}} : {$this->path} : no such file or directory\n";
+    }
+
+    public function toSQLDelete()
+    {
+        $cols = '';
+        foreach ($this->columns as $column => $value)
+        {
+            if (strpos($column, '.'))
+                throw new \InvalidArgumentException("Joins are not supported yet in this function");
+
+            $cols .= "$column='$value', ";
+        }
+        $cols = rtrim($cols, ', ');
+
+        return "DELETE FROM {$this->getTable()} "
+            . "WHERE $cols;\n";
     }
 
     #region getters

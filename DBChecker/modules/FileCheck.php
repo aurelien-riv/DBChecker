@@ -19,11 +19,11 @@ class FileCheck
     public function run()
     {
         // TODO restore context
-        stream_context_set_default([
-            'http' => [
-                'method' => 'HEAD'
-            ]
-        ]);
+//        stream_context_set_default([
+//            'http' => [
+//                'method' => 'HEAD'
+//            ]
+//        ]);
 
         $queries = $this->config->getQueries();
         foreach ($this->config->getFilecheck() as $setting)
@@ -38,26 +38,28 @@ class FileCheck
                 {
                     $innerJoins[] = $fragments[0];
                 }
-                $columns[]    = $match;
+                $columns[$match] = null;
             }
 
-            $values = $queries->getDistinctValuesWithJoinColumnsWithoutNulls($setting['table'], $columns, $innerJoins)
+            $values = $queries->getDistinctValuesWithJoinColumnsWithoutNulls($setting['table'], array_keys($columns), $innerJoins)
                               ->fetchAll(\PDO::FETCH_OBJ);
             foreach ($values as $value)
             {
-                $path = preg_replace_callback("/\{(" . AbstractDbQueries::IDENTIFIER ."(?:\." . AbstractDbQueries::IDENTIFIER .")?)\}/", function($match) use ($value, $setting) {
+                $tmpColumns = $columns;
+                $path = preg_replace_callback("/\{(" . AbstractDbQueries::IDENTIFIER ."(?:\." . AbstractDbQueries::IDENTIFIER .")?)\}/", function($match) use ($value, &$tmpColumns) {
+                    $tmpColumns[$match[1]] = $value->{$match[1]};
                     return $value->{$match[1]};
                 }, $setting['path']);
 
-                if (preg_match('/^https?:\/\//', $path))
+                if (preg_match('/^https?:\/\//', $path)) // disabled until an option exists to enable it (slows the process down too much when not needed)
                 {
-                    $urlStatus = $this->testUrl($setting, $columns, $path);
-                    if ($urlStatus instanceof FileCheckURLMatch)
-                        yield $urlStatus;
+//                    $urlStatus = $this->testUrl($setting, $columns, $path);
+//                    if ($urlStatus instanceof FileCheckURLMatch)
+//                        yield $urlStatus;
                 }
                 else if (! is_file($path))
                 {
-                    yield new FileCheckMatch($setting['table'], $columns, $path);
+                    yield new FileCheckMatch($setting['table'], $tmpColumns, $path);
                 }
             }
         }
