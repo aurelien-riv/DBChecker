@@ -24,7 +24,7 @@ class MissingKeyDetect
             {
                 if ($pk->Column_name === $columnName->COLUMN_NAME)
                 {
-                    $keys[] = [$columnName->TABLE_NAME, $columnName->COLUMN_NAME];
+                    $keys[] = $columnName->COLUMN_NAME;
                     continue;
                 }
             }
@@ -33,7 +33,7 @@ class MissingKeyDetect
                             ->fetch(\PDO::FETCH_OBJ) !== false;
             if ($isFk)
             {
-                $keys[] = [$columnName->TABLE_NAME, $columnName->COLUMN_NAME];
+                $keys[] = $columnName->COLUMN_NAME;
                 continue;
             }
 
@@ -46,7 +46,7 @@ class MissingKeyDetect
         $fragments = [];
         foreach ($identifiers as $identifier)
         {
-            foreach ($this->split($identifier[1]) as $fragment)
+            foreach ($this->split($identifier) as $fragment)
             {
                 $fragments[] = $fragment;
             }
@@ -59,10 +59,9 @@ class MissingKeyDetect
 
         $count = count($fragments);
         $fragments = array_filter($fragments, function($item) use ($count) {
-            return ($item > ($count * 0.20));
+            return ($item > ($count * 0.30));
         });
 
-        asort($fragments);
         return array_keys($fragments);
     }
 
@@ -101,6 +100,7 @@ class MissingKeyDetect
                 if (in_array($fragment, $keyFragments))
                 {
                     yield new MissingKeyMatch($notKey[0], $notKey[1]);
+                    break;
                 }
             }
         }
