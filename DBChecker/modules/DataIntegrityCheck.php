@@ -18,12 +18,16 @@ class DataIntegrityCheck
 
     public function run()
     {
-        $queries = $this->config->getQueries();
-        foreach ($this->config->getDataintegrity() as $table => $expectedChecksum)
+        $settings = $this->config->getDataintegrity();
+        if (isset($settings['mapping']))
         {
-            $checksum = $queries->getTableDataSha1sum($table);
-            if ($checksum !== $expectedChecksum)
-                yield new DataIntegrityCheckMatch($table, $checksum);
+            $queries = $this->config->getQueries();
+            foreach ($settings['mapping'] as $table => $expectedChecksum)
+            {
+                $checksum = $queries->getTableDataSha1sum($table);
+                if ($checksum !== $expectedChecksum)
+                    yield new DataIntegrityCheckMatch($table, $checksum);
+            }
         }
     }
 

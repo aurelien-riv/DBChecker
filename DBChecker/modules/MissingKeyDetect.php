@@ -58,8 +58,9 @@ class MissingKeyDetect
         $fragments = array_count_values($this->getIdentifiersFragments($identifiers));
 
         $count = count($fragments);
-        $fragments = array_filter($fragments, function($item) use ($count) {
-            return ($item > ($count * 0.30));
+        $threshold = $this->config->getMissingKey()['threshold'];
+        $fragments = array_filter($fragments, function($item) use ($count, $threshold) {
+            return ($item > ($count * $threshold));
         });
 
         return array_keys($fragments);
@@ -90,17 +91,33 @@ class MissingKeyDetect
     public function run()
     {
         $this->initAlgorithm($notKeys, $keys);
+        $settings = $this->config->getMissingKey();
 
-        $keyFragments = $this->getFrequentIdentifiersFragments($keys);
+        if (! isset($settings['patterns']))
+            $keyFragments = $this->getFrequentIdentifiersFragments($keys);
 
         foreach ($notKeys as $notKey)
         {
-            foreach ($this->split($notKey[1]) as $fragment)
+            if (isset($settings['patterns']))
             {
-                if (in_array($fragment, $keyFragments))
+                foreach ($settings['patterns'] as $pattern)
                 {
-                    yield new MissingKeyMatch($notKey[0], $notKey[1]);
-                    break;
+                    if (preg_match('/'.$pattern.'/', $notKey[1]))
+                    {
+                        yield new MissingKeyMatch($notKey[0], $notKey[1]);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                foreach ($this->split($notKey[1]) as $fragment)
+                {
+                    if (in_array($fragment, $keyFragments))
+                    {
+                        yield new MissingKeyMatch($notKey[0], $notKey[1]);
+                        break;
+                    }
                 }
             }
         }

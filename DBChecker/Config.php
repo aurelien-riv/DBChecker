@@ -15,10 +15,10 @@ class Config
     private $engine;
     private $host;
     private $port;
-    private $filecheck     = [];
-    private $dataintegrity = [];
+    private $filecheck       = [];
+    private $dataintegrity   = [];
     private $schemaintegrity = [];
-    private $schemaintegrity_config = [];
+    private $missingkey      = [];
 
     private $pdo = null;
 
@@ -53,9 +53,9 @@ class Config
 
         if (isset($settings['dataintegrity']))
         {
-            foreach ($settings['dataintegrity'] as $item)
+            foreach ($settings['dataintegrity']['mapping'] as $item)
             {
-                $this->dataintegrity[key($item)] = $item[key($item)];
+                $this->dataintegrity['mapping'][key($item)] = $item[key($item)];
             }
         }
 
@@ -79,6 +79,20 @@ class Config
             foreach ($settings['schemaintegrity']['mapping'] as $item)
             {
                 $this->schemaintegrity['mapping'][key($item)] = $item[key($item)];
+            }
+        }
+
+        if (isset($settings['missingkey']))
+        {
+            $this->missingkey['threshold'] = 0.3;
+            if (isset($settings['missingkey']['threshold']))
+            {
+                $this->missingkey['threshold'] = $settings['missingkey']['threshold'];
+            }
+
+            if (isset($settings['missingkey']['patterns']))
+            {
+                $this->missingkey['patterns'] = $settings['missingkey']['patterns'];
             }
         }
     }
@@ -105,9 +119,9 @@ class Config
         return $this->schemaintegrity;
     }
 
-    public function getSchemaintegrityConfig()
+    public function getMissingKey()
     {
-        return $this->schemaintegrity_config;
+        return $this->missingkey;
     }
 
     public function getDsn()
