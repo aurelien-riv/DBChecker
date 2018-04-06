@@ -16,17 +16,11 @@ class FileCheck
         $this->config = $config;
     }
 
-    public function run()
+    protected function doRun()
     {
-        // TODO restore context
-//        stream_context_set_default([
-//            'http' => [
-//                'method' => 'HEAD'
-//            ]
-//        ]);
-
+        $configuration = $this->config->getFilecheck();
         $queries = $this->config->getQueries();
-        foreach ($this->config->getFilecheck() as $setting)
+        foreach ($configuration['mapping'] as $setting)
         {
             $columns = [];
             $innerJoins = [];
@@ -53,9 +47,12 @@ class FileCheck
 
                 if (preg_match('/^https?:\/\//', $path)) // disabled until an option exists to enable it (slows the process down too much when not needed)
                 {
-//                    $urlStatus = $this->testUrl($setting, $columns, $path);
-//                    if ($urlStatus instanceof FileCheckURLMatch)
-//                        yield $urlStatus;
+                    if ($configuration['settings']['enable_remotes'])
+                    {
+                        $urlStatus = $this->testUrl($setting, $columns, $path);
+                        if ($urlStatus instanceof FileCheckURLMatch)
+                            yield $urlStatus;
+                    }
                 }
                 else if (! is_file($path))
                 {
@@ -63,6 +60,27 @@ class FileCheck
                 }
             }
         }
+    }
+
+    public function run()
+    {
+        $configuration = $this->config->getFilecheck();
+
+        if ($configuration['settings']['enable_remotes'])
+        {
+            stream_context_set_default([
+                'http' => [
+                    'method' => 'HEAD'
+                ]
+            ]);
+        }
+
+        foreach ($this->doRun() as $msg)
+        {
+            yield $msg;
+        }
+
+        // TODO restore stream_context
     }
 
     protected function testUrl($setting, $columns, $path)

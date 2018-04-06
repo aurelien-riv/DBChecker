@@ -3,6 +3,7 @@
 namespace DBChecker;
 
 use DBChecker\DBQueries\MySQLQueries;
+use Symfony\Component\Yaml\Yaml;
 
 require_once('DBQueries/MySQLQueries.php');
 
@@ -21,15 +22,11 @@ class Config
 
     private $pdo = null;
 
-    public function __construct($iniPath='')
+    protected function parseYaml($yamlPath)
     {
-        if (empty($iniPath))
-        {
-            $iniPath = __DIR__.DIRECTORY_SEPARATOR."config.ini";
-        }
-        $settings = parse_ini_file($iniPath, true);
-        $dbsettings = $settings['database'];
+        $settings = Yaml::parseFile($yamlPath);
 
+        $dbsettings     = $settings['database'];
         $this->db       = $dbsettings['db'];
         $this->login    = $dbsettings['login'];
         $this->password = $dbsettings['password'];
@@ -37,30 +34,58 @@ class Config
         $this->host     = $dbsettings['host'];
         $this->port     = $dbsettings['port'];
 
+        // FIXME move to the modules themselves
         if (isset($settings['filecheck']))
         {
-            foreach ($settings['filecheck'] as $k => $v)
+            $this->filecheck['settings']['enable_remotes'] = false;
+            if (isset($settings['filecheck']['settings']['enable_remotes']))
             {
-                // the second part of $k is unused and optional,  use it to
-                // perform several checks on a table
-                $this->filecheck[$k] = [
-                    'table'  => explode('.', $k)[0],
-                    'path'   => $v
+                $this->filecheck['settings']['enable_remotes'] = $settings['filecheck']['settings']['enable_remotes'];
+            }
+            foreach ($settings['filecheck']['mapping'] as $item)
+            {
+                $this->filecheck['mapping'][] = [
+                    'table'  => key($item),
+                    'path'   => $item[key($item)]
                 ];
             }
         }
+
         if (isset($settings['dataintegrity']))
         {
-            foreach ($settings['dataintegrity'] as $table => $checksum)
-                $this->dataintegrity[$table] = $checksum;
+            foreach ($settings['dataintegrity'] as $item)
+            {
+                $this->dataintegrity[key($item)] = $item[key($item)];
+            }
         }
+
         if (isset($settings['schemaintegrity']))
         {
-            foreach ($settings['schemaintegrity'] as $table => $checksum)
-                $this->schemaintegrity[$table] = $checksum;
-            foreach ($settings['schemaintegrity_config'] as $option => $value)
-                $this->schemaintegrity_config[$option] = $value;
+            $this->schemaintegrity['settings']['allow_extras'] = false;
+            if (isset($settings['schemaintegrity']['settings']['allow_extras']))
+            {
+                $this->schemaintegrity['settings']['allow_extras'] = $settings['schemaintegrity']['settings']['allow_extras'];
+            }
+
+            $this->schemaintegrity['settings']['ignore'] = [];
+            if (isset($settings['schemaintegrity']['settings']['ignore']))
+            {
+                foreach ($settings['schemaintegrity']['settings']['ignore'] as $ignore)
+                {
+                    $this->schemaintegrity['settings']['ignore'][] = $ignore;
+                }
+            }
+
+            foreach ($settings['schemaintegrity']['mapping'] as $item)
+            {
+                $this->schemaintegrity['mapping'][key($item)] = $item[key($item)];
+            }
         }
+    }
+
+    public function __construct($yamlPath)
+    {
+        $this->parseYaml($yamlPath);
 
         $this->pdo = new \PDO($this->getDsn(), $this->login, $this->password);
     }

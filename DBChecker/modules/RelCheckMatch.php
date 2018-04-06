@@ -31,9 +31,7 @@ class RelCheckMatch
 
     public function toSQLDelete()
     {
-        return "DELETE FROM {$this->getTable()} "
-            . "WHERE {$this->getColumn()} NOT IN "
-            . "(SELECT {$this->getReferencedColumn()} FROM {$this->getReferencedTable()});\n";
+        return "DELETE FROM {$this->getTable()} WHERE {$this->getColumn()} = '{$this->value}';\n";
     }
 
     #region getters

@@ -3,11 +3,10 @@
 use DBChecker\FileCheckMatch;
 use DBChecker\RelCheckMatch;
 
+require_once('DBChecker/vendor/autoload.php');
 require_once('DBChecker/DBChecker.php');
 
-$iniPath = $argc == 2 ? $argv[1] : '';
-
-$dbChecker = new \DBChecker\DBChecker($iniPath);
+$dbChecker = new \DBChecker\DBChecker($argv[1]);
 
 foreach ($dbChecker->run() as $error)
 {
@@ -19,7 +18,7 @@ foreach ($dbChecker->run() as $error)
         }
         catch(InvalidArgumentException $e)
         {
-//            echo get_class($error).' '.$error;
+            echo get_class($error).' '.$error;
         }
     }
     else

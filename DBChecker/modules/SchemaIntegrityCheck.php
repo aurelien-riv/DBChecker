@@ -19,23 +19,26 @@ class SchemaIntegrityCheck
             return;
 
         $queries = $this->config->getQueries();
-        $tables = $this->config->getSchemaIntegrity();
-        foreach ($tables as $table => $expectedChecksum)
+        $settings = $this->config->getSchemaIntegrity();
+        foreach ($settings['mapping'] as $table => $expectedChecksum)
         {
             $checksum = $queries->getTableSchemaSha1sum($table);
             if ($checksum !== $expectedChecksum)
                 yield new SchemaIntegrityCheckMatch($table, $checksum);
         }
-        $config = $this->config->getDataintegrity();
-        foreach ($queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
+
+        if (! $settings['settings']['allow_extras'])
         {
-            if (isset($config['ignore']))
+            foreach ($queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
             {
-                if (preg_match('/'.$config['ignore'].'/', $table))
-                    continue;
+                foreach ($settings['settings']['ignore'] as $ignore)
+                {
+                    if (preg_match('/'.$ignore.'/', $table))
+                        continue;
+                }
+                if (! isset($settings['mapping'][$table]))
+                    yield new SchemaIntegrityCheckMatch($table, 'unexpected table');
             }
-            if (! isset($tables[$table]))
-                yield new SchemaIntegrityCheckMatch($table, 'unexpected table');
         }
     }
 

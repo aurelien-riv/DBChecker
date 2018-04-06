@@ -6,7 +6,7 @@
 - Add an option to disable remove file verification through HTTP(S)
 
 ## Configuration ##
-- Migrate to yaml format
+- Move module configurations to the modules themselves
 
 ## MySQLQueries ##
 - Make getDistinctValuesWithJoinColumnsWithoutNulls support composite FK
