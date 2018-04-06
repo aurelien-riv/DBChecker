@@ -1,0 +1,24 @@
+database:
+  db: mydb
+  login: root
+  password:
+  engine: mysql
+  host: localhost
+  port: 3306
+
+filecheck:
+  settings:
+    enable_remotes: false
+  mapping:
+    - tbl_simulation_document: "/var/www/octroi.mylizmer.com/web/uploads/simulationDocuments/LOA/{simulation_id}/{type_document_id.document_type_libelle_court}/{document}"
+
+dataintegrity:
+  - gac_ref_ca: 7f72049b1b7ea2e3e2cb1db6abf46bf1d1f1f2ef
+
+schemaintegrity:
+  settings:
+    allow_extras: true
+    ignore:
+      - rep_*
+  mapping:
+    - gac_ref_ca: 7f72049b1b7ea2e3e2cb1db6abf46bf1d1f1f2ef
