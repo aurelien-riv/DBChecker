@@ -1,6 +1,6 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\RelCheck;
 
 class RelCheckMatch
 {

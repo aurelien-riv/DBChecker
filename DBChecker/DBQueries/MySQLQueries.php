@@ -2,8 +2,6 @@
 
 namespace DBChecker\DBQueries;
 
-require_once 'AbstractDbQueries.php';
-
 class MySQLQueries extends AbstractDbQueries
 {
     public function getTableNames()

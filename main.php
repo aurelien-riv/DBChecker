@@ -1,10 +1,9 @@
 <?php
 
-use DBChecker\FileCheckMatch;
-use DBChecker\RelCheckMatch;
-
 require_once('DBChecker/vendor/autoload.php');
-require_once('DBChecker/DBChecker.php');
+
+use DBChecker\modules\FileCheck\FileCheckMatch;
+use DBChecker\modules\RelCheck\RelCheckMatch;
 
 $dbChecker = new \DBChecker\DBChecker($argv[1]);
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\UniqueIntegrityCheck;
 
-require_once 'UniqueIntegrityMatch.php';
+use DBChecker\Config;
 
-class UniqueIntegrity
+class UniqueIntegrityCheck
 {
     private $config;
 
@@ -26,7 +26,7 @@ class UniqueIntegrity
                 $resultset = $queries->getDuplicateForColumnsWithCount($table, $columns)->fetchAll(\PDO::FETCH_OBJ);
                 foreach ($resultset as $result)
                 {
-                    yield new UniqueIntegrityMatch($table, $columns, $result);
+                    yield new UniqueIntegrityCheckMatch($table, $columns, $result);
                 }
             }
         }

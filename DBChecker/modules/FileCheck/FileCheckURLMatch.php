@@ -1,8 +1,6 @@
 <?php
 
-namespace DBChecker;
-
-require_once __DIR__.'/FileCheckMatch.php';
+namespace DBChecker\modules\FileCheck;
 
 class FileCheckURLMatch extends FileCheckMatch
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\DataIntegrityCheck;
 
-require_once 'DataIntegrityCheckMatch.php';
+use DBChecker\Config;
 
 /**
  * Compare the checksum of all the data in a table and the value stored in the config file

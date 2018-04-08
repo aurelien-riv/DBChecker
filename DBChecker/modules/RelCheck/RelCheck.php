@@ -1,10 +1,8 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\RelCheck;
 
-require_once 'RelCheckMatch.php';
-require_once 'TableNotFoundMatch.php';
-require_once 'ColumnNotFoundMatch.php';
+use DBChecker\Config;
 
 class RelCheck
 {
@@ -14,13 +12,13 @@ class RelCheck
     public function __construct(Config $config)
     {
         $this->config = $config;
-
-        $this->tables = $this->config->getQueries()->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     public function run()
     {
         $queries = $this->config->getQueries();
+
+        $this->tables = $queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
 
         $fkeys = $queries->getFks()->fetchAll(\PDO::FETCH_OBJ);
         foreach ($fkeys as $fkey)

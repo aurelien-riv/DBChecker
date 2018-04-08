@@ -1,6 +1,6 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\SchemaIntegrityCheck;
 
 class SchemaIntegrityCheckMatch
 {

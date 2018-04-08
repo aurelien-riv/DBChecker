@@ -1,8 +1,8 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\UniqueIntegrityCheck;
 
-class UniqueIntegrityMatch
+class UniqueIntegrityCheckMatch
 {
     private $table;
     private $values;

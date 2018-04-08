@@ -1,8 +1,8 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\MissingKeyDetect;
 
-require_once 'MissingKeyMatch.php';
+use DBChecker\Config;
 
 class MissingKeyDetect
 {
@@ -104,7 +104,7 @@ class MissingKeyDetect
                 {
                     if (preg_match('/'.$pattern.'/', $notKey[1]))
                     {
-                        yield new MissingKeyMatch($notKey[0], $notKey[1]);
+                        yield new MissingKeyDetectMatch($notKey[0], $notKey[1]);
                         break;
                     }
                 }
@@ -115,7 +115,7 @@ class MissingKeyDetect
                 {
                     if (in_array($fragment, $keyFragments))
                     {
-                        yield new MissingKeyMatch($notKey[0], $notKey[1]);
+                        yield new MissingKeyDetectMatch($notKey[0], $notKey[1]);
                         break;
                     }
                 }

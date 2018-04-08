@@ -1,8 +1,8 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\SchemaIntegrityCheck;
 
-require_once 'SchemaIntegrityCheckMatch.php';
+use DBChecker\Config;
 
 class SchemaIntegrityCheck
 {

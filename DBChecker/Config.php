@@ -3,9 +3,14 @@
 namespace DBChecker;
 
 use DBChecker\DBQueries\MySQLQueries;
+use DBChecker\modules\DataIntegrityCheck\DataIntegrityCheckModule;
+use DBChecker\modules\FileCheck\FileCheckModule;
+use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
+use DBChecker\modules\RelCheck\RelCheckModule;
+use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheckModule;
+use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Yaml\Yaml;
-
-require_once('DBQueries/MySQLQueries.php');
 
 class Config
 {
@@ -15,12 +20,27 @@ class Config
     private $engine;
     private $host;
     private $port;
+
     private $filecheck       = [];
     private $dataintegrity   = [];
     private $schemaintegrity = [];
     private $missingkey      = [];
 
     private $pdo = null;
+
+    private $moduleWorkers = [];
+
+    private function getModuleClasses()
+    {
+        return [
+            RelCheckModule::class,
+            UniqueIntegrityCheckModule::class,
+            FileCheckModule::class,
+            MissingKeyDetectModule::class,
+            SchemaIntegrityCheckModule::class,
+            DataIntegrityCheckModule::class
+        ];
+    }
 
     protected function parseYaml($yamlPath)
     {
@@ -34,65 +54,22 @@ class Config
         $this->host     = $dbsettings['host'];
         $this->port     = $dbsettings['port'];
 
-        // FIXME move to the modules themselves
-        if (isset($settings['filecheck']))
+        foreach ($this->getModuleClasses() as $module)
         {
-            $this->filecheck['settings']['enable_remotes'] = false;
-            if (isset($settings['filecheck']['settings']['enable_remotes']))
-            {
-                $this->filecheck['settings']['enable_remotes'] = $settings['filecheck']['settings']['enable_remotes'];
-            }
-            foreach ($settings['filecheck']['mapping'] as $item)
-            {
-                $this->filecheck['mapping'][] = [
-                    'table'  => key($item),
-                    'path'   => $item[key($item)]
-                ];
-            }
-        }
+            /** @var ModuleInterface $moduleInstance */
+            $moduleInstance = new $module($this);
+            $moduleName = $moduleInstance->getName();
+            $tree = $moduleInstance->getConfigTreeBuilder()->buildTree();
 
-        if (isset($settings['dataintegrity']))
-        {
-            foreach ($settings['dataintegrity']['mapping'] as $item)
+            $processor = new Processor();
+            if (isset($settings[$moduleName]))
             {
-                $this->dataintegrity['mapping'][key($item)] = $item[key($item)];
-            }
-        }
+                $moduleSettings = $processor->process($tree, [$moduleName => $settings[$moduleName]]);
 
-        if (isset($settings['schemaintegrity']))
-        {
-            $this->schemaintegrity['settings']['allow_extras'] = false;
-            if (isset($settings['schemaintegrity']['settings']['allow_extras']))
-            {
-                $this->schemaintegrity['settings']['allow_extras'] = $settings['schemaintegrity']['settings']['allow_extras'];
-            }
+                // FIXME should hold their configuration themselves
+                $this->{$moduleName} = $moduleInstance->loadConfig($moduleSettings);
 
-            $this->schemaintegrity['settings']['ignore'] = [];
-            if (isset($settings['schemaintegrity']['settings']['ignore']))
-            {
-                foreach ($settings['schemaintegrity']['settings']['ignore'] as $ignore)
-                {
-                    $this->schemaintegrity['settings']['ignore'][] = $ignore;
-                }
-            }
-
-            foreach ($settings['schemaintegrity']['mapping'] as $item)
-            {
-                $this->schemaintegrity['mapping'][key($item)] = $item[key($item)];
-            }
-        }
-
-        if (isset($settings['missingkey']))
-        {
-            $this->missingkey['threshold'] = 0.3;
-            if (isset($settings['missingkey']['threshold']))
-            {
-                $this->missingkey['threshold'] = $settings['missingkey']['threshold'];
-            }
-
-            if (isset($settings['missingkey']['patterns']))
-            {
-                $this->missingkey['patterns'] = $settings['missingkey']['patterns'];
+                $this->moduleWorkers[] = $moduleInstance->getWorker();
             }
         }
     }
@@ -102,6 +79,14 @@ class Config
         $this->parseYaml($yamlPath);
 
         $this->pdo = new \PDO($this->getDsn(), $this->login, $this->password);
+    }
+
+    /**
+     * @return ModuleWorkerInterface[]
+     */
+    public function getModuleWorkers()
+    {
+        return $this->moduleWorkers;
     }
 
     public function getFilecheck()

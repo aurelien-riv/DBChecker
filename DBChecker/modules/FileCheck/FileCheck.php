@@ -1,13 +1,12 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\FileCheck;
 
+use DBChecker\Config;
 use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\ModuleWorkerInterface;
 
-require_once 'FileCheckMatch.php';
-require_once 'FileCheckURLMatch.php';
-
-class FileCheck
+class FileCheck implements ModuleWorkerInterface
 {
     private $config;
 
@@ -20,11 +19,14 @@ class FileCheck
     {
         $configuration = $this->config->getFilecheck();
         $queries = $this->config->getQueries();
-        foreach ($configuration['mapping'] as $setting)
+        foreach ($configuration['mapping'] as $mapping)
         {
+            $table = key($mapping);
+            $path = $mapping[$table];
+
             $columns = [];
             $innerJoins = [];
-            preg_match_all("/\{(" . AbstractDbQueries::IDENTIFIER ."(?:\." . AbstractDbQueries::IDENTIFIER .")?)\}/", $setting['path'], $matches);
+            preg_match_all("/\{(" . AbstractDbQueries::IDENTIFIER ."(?:\." . AbstractDbQueries::IDENTIFIER .")?)\}/", $path, $matches);
             foreach ($matches[1] as $match)
             {
                 $fragments = mb_split('\.', $match);
@@ -35,28 +37,28 @@ class FileCheck
                 $columns[$match] = null;
             }
 
-            $values = $queries->getDistinctValuesWithJoinColumnsWithoutNulls($setting['table'], array_keys($columns), $innerJoins)
+            $values = $queries->getDistinctValuesWithJoinColumnsWithoutNulls($table, array_keys($columns), $innerJoins)
                               ->fetchAll(\PDO::FETCH_OBJ);
             foreach ($values as $value)
             {
                 $tmpColumns = $columns;
-                $path = preg_replace_callback("/\{(" . AbstractDbQueries::IDENTIFIER ."(?:\." . AbstractDbQueries::IDENTIFIER .")?)\}/", function($match) use ($value, &$tmpColumns) {
+                $tmpPath = preg_replace_callback("/\{(" . AbstractDbQueries::IDENTIFIER ."(?:\." . AbstractDbQueries::IDENTIFIER .")?)\}/", function($match) use ($value, &$tmpColumns) {
                     $tmpColumns[$match[1]] = $value->{$match[1]};
                     return $value->{$match[1]};
-                }, $setting['path']);
+                }, $path);
 
-                if (preg_match('/^https?:\/\//', $path)) // disabled until an option exists to enable it (slows the process down too much when not needed)
+                if (preg_match('/^https?:\/\//', $tmpPath)) // disabled until an option exists to enable it (slows the process down too much when not needed)
                 {
-                    if ($configuration['settings']['enable_remotes'])
+                    if ($configuration['enable_remotes'])
                     {
-                        $urlStatus = $this->testUrl($setting, $columns, $path);
+                        $urlStatus = $this->testUrl($table, $columns, $tmpPath);
                         if ($urlStatus instanceof FileCheckURLMatch)
                             yield $urlStatus;
                     }
                 }
                 else if (! is_file($path))
                 {
-                    yield new FileCheckMatch($setting['table'], $tmpColumns, $path);
+                    yield new FileCheckMatch($table, $tmpColumns, $tmpPath);
                 }
             }
         }
@@ -66,7 +68,7 @@ class FileCheck
     {
         $configuration = $this->config->getFilecheck();
 
-        if ($configuration['settings']['enable_remotes'])
+        if ($configuration['enable_remotes'])
         {
             stream_context_set_default([
                 'http' => [
@@ -83,7 +85,7 @@ class FileCheck
         // TODO restore stream_context
     }
 
-    protected function testUrl($setting, $columns, $path)
+    protected function testUrl($table, $columns, $path)
     {
         $headers = @get_headers($path);
         // if ! status 200
@@ -99,13 +101,13 @@ class FileCheck
                     // if status 4xx or 5xx
                     if (preg_match('/HTTP\/\d\.\d (4|5)\d{2}.*/', $header))
                     {
-                        return new FileCheckURLMatch($setting['table'], $columns, $path, substr($header, 9, 3));
+                        return new FileCheckURLMatch($table, $columns, $path, substr($header, 9, 3));
                     }
                 }
             }
             else
             {
-                return new FileCheckURLMatch($setting['table'], $columns, $path, substr($headers[0], 9, 3));
+                return new FileCheckURLMatch($table, $columns, $path, substr($headers[0], 9, 3));
             }
         }
         return true;

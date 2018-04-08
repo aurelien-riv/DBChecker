@@ -1,16 +1,16 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\DataIntegrityCheck;
 
-class MissingKeyMatch
+class DataIntegrityCheckMatch
 {
     private $table;
-    private $column;
+    private $checksum;
 
-    public function __construct($table, $column)
+    public function __construct($table, $checksum)
     {
         $this->table            = $table;
-        $this->column           = $column;
+        $this->checksum         = $checksum;
     }
 
     public function __toString()
@@ -20,7 +20,7 @@ class MissingKeyMatch
 
     public function getMessage()
     {
-        return "{$this->table}.{$this->column}\n";
+        return "{$this->table} : checksum does not match ({$this->checksum})\n";
     }
 
     #region getters
@@ -28,11 +28,5 @@ class MissingKeyMatch
     {
         return $this->table;
     }
-
-    public function getColumn()
-    {
-        return $this->column;
-    }
-
     #endregion
 }
