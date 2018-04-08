@@ -2,7 +2,9 @@
 
 namespace DBChecker\modules\RelCheck;
 
-class RelCheckMatch
+use DBChecker\AbstractMatch;
+
+class RelCheckMatch extends AbstractMatch
 {
     private $table;
     private $column;
@@ -10,8 +12,9 @@ class RelCheckMatch
     private $referencedColumn;
     private $value;
 
-    public function __construct($table, $column, $referencedTable, $referencedColumn, $value)
+    public function __construct($dbName, $table, $column, $referencedTable, $referencedColumn, $value)
     {
+        parent::__construct($dbName);
         $this->table            = $table;
         $this->column           = $column;
         $this->referencedTable  = $referencedTable;
@@ -26,7 +29,7 @@ class RelCheckMatch
 
     public function getMessage()
     {
-        return "{$this->table}.{$this->column} -> {$this->referencedTable}.{$this->referencedColumn} # {$this->value}\n";
+        return "{$this->dbName} > {$this->table}.{$this->column} -> {$this->referencedTable}.{$this->referencedColumn} # {$this->value}\n";
     }
 
     public function toSQLDelete()

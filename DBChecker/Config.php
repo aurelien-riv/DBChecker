@@ -2,7 +2,6 @@
 
 namespace DBChecker;
 
-use DBChecker\DBQueries\MySQLQueries;
 use DBChecker\modules\DataIntegrityCheck\DataIntegrityCheckModule;
 use DBChecker\modules\FileCheck\FileCheckModule;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
@@ -14,21 +13,17 @@ use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
-    private $db;
-    private $login;
-    private $password;
-    private $engine;
-    private $host;
-    private $port;
-
-    private $filecheck       = [];
-    private $dataintegrity   = [];
-    private $schemaintegrity = [];
-    private $missingkey      = [];
-
-    private $pdo = null;
+    private $filecheck            = [];
+    private $dataintegritycheck   = [];
+    private $schemaintegritycheck = [];
+    private $missingkeydetect     = [];
 
     private $moduleWorkers = [];
+
+    /**
+     * @var DatabasesModule $databases
+     */
+    private $databases;
 
     private function getModuleClasses()
     {
@@ -42,43 +37,45 @@ class Config
         ];
     }
 
+    protected function loadModule(BaseModuleInterface $module, $settings)
+    {
+        $moduleName = $module->getName();
+        $tree = $module->getConfigTreeBuilder()->buildTree();
+
+        $processor = new Processor();
+        if (array_key_exists($moduleName, $settings))
+        {
+            $moduleSettings = $processor->process($tree, [$moduleName => $settings[$moduleName]]);
+
+            if ($module instanceof ModuleInterface)
+            {
+                // FIXME should hold their configuration themselves
+                $this->{$moduleName} = $module->loadConfig($moduleSettings);
+                $this->moduleWorkers[] = $module->getWorker();
+            }
+            else
+            {
+                $module->loadConfig($moduleSettings);
+            }
+        }
+    }
+
     protected function parseYaml($yamlPath)
     {
         $settings = Yaml::parseFile($yamlPath);
 
-        $dbsettings     = $settings['database'];
-        $this->db       = $dbsettings['db'];
-        $this->login    = $dbsettings['login'];
-        $this->password = $dbsettings['password'];
-        $this->engine   = $dbsettings['engine'];
-        $this->host     = $dbsettings['host'];
-        $this->port     = $dbsettings['port'];
+        $this->databases = new DatabasesModule();
+        $this->loadModule($this->databases, $settings);
 
         foreach ($this->getModuleClasses() as $module)
         {
-            /** @var ModuleInterface $moduleInstance */
-            $moduleInstance = new $module($this);
-            $moduleName = $moduleInstance->getName();
-            $tree = $moduleInstance->getConfigTreeBuilder()->buildTree();
-
-            $processor = new Processor();
-            if (isset($settings[$moduleName]))
-            {
-                $moduleSettings = $processor->process($tree, [$moduleName => $settings[$moduleName]]);
-
-                // FIXME should hold their configuration themselves
-                $this->{$moduleName} = $moduleInstance->loadConfig($moduleSettings);
-
-                $this->moduleWorkers[] = $moduleInstance->getWorker();
-            }
+            $this->loadModule(new $module($this), $settings);
         }
     }
 
     public function __construct($yamlPath)
     {
         $this->parseYaml($yamlPath);
-
-        $this->pdo = new \PDO($this->getDsn(), $this->login, $this->password);
     }
 
     /**
@@ -89,45 +86,44 @@ class Config
         return $this->moduleWorkers;
     }
 
+    public function getQueries()
+    {
+        return $this->databases->getConnections();
+    }
+
+    /**
+     * @deprecated
+     * @return array
+     */
     public function getFilecheck()
     {
         return $this->filecheck;
     }
 
+    /**
+     * @deprecated
+     * @return array
+     */
     public function getDataintegrity()
     {
-        return $this->dataintegrity;
-    }
-
-    public function getSchemaIntegrity()
-    {
-        return $this->schemaintegrity;
-    }
-
-    public function getMissingKey()
-    {
-        return $this->missingkey;
-    }
-
-    public function getDsn()
-    {
-        return "{$this->engine}:dbname={$this->db};host={$this->host};port={$this->port}";
+        return $this->dataintegritycheck;
     }
 
     /**
-     * @return null|\PDO
+     * @deprecated
+     * @return array
      */
-    public function getPdo()
+    public function getSchemaIntegrity()
     {
-        return $this->pdo;
+        return $this->schemaintegritycheck;
     }
 
-    public function getQueries()
+    /**
+     * @deprecated
+     * @return array
+     */
+    public function getMissingKey()
     {
-        switch ($this->engine)
-        {
-            case 'mysql': return new MySQLQueries($this->pdo);
-            default: throw new \InvalidArgumentException("Unsupported engine {$this->engine}");
-        }
+        return $this->missingkeydetect;
     }
 }

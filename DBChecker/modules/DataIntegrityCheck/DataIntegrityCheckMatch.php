@@ -2,13 +2,16 @@
 
 namespace DBChecker\modules\DataIntegrityCheck;
 
-class DataIntegrityCheckMatch
+use DBChecker\AbstractMatch;
+
+class DataIntegrityCheckMatch extends AbstractMatch
 {
     private $table;
     private $checksum;
 
-    public function __construct($table, $checksum)
+    public function __construct($dbName, $table, $checksum)
     {
+        parent::__construct($dbName);
         $this->table            = $table;
         $this->checksum         = $checksum;
     }
@@ -20,7 +23,7 @@ class DataIntegrityCheckMatch
 
     public function getMessage()
     {
-        return "{$this->table} : checksum does not match ({$this->checksum})\n";
+        return "{$this->dbName} > {$this->table} : checksum does not match ({$this->checksum})\n";
     }
 
     #region getters

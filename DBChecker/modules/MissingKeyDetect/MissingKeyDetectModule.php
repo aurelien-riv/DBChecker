@@ -23,7 +23,17 @@ class MissingKeyDetectModule implements ModuleInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $treeBuilder->root($this->getName());
+        $treeBuilder->root($this->getName())
+            ->children()
+                ->arrayNode('patterns')
+                    ->scalarPrototype()
+                    ->end()
+                ->end()
+                ->integerNode('threshold')
+                    ->defaultValue(0.3)
+                ->end()
+            ->end();
+
         return $treeBuilder;
     }
 

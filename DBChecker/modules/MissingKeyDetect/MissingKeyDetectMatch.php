@@ -2,13 +2,16 @@
 
 namespace DBChecker\modules\MissingKeyDetect;
 
-class MissingKeyDetectMatch
+use DBChecker\AbstractMatch;
+
+class MissingKeyDetectMatch extends AbstractMatch
 {
     private $table;
     private $column;
 
-    public function __construct($table, $column)
+    public function __construct($dbName, $table, $column)
     {
+        parent::__construct($dbName);
         $this->table            = $table;
         $this->column           = $column;
     }
@@ -20,7 +23,7 @@ class MissingKeyDetectMatch
 
     public function getMessage()
     {
-        return "{$this->table}.{$this->column}\n";
+        return "{$this->dbName} > {$this->table}.{$this->column}\n";
     }
 
     #region getters

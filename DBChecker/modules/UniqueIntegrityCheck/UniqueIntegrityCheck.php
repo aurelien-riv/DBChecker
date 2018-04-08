@@ -3,6 +3,7 @@
 namespace DBChecker\modules\UniqueIntegrityCheck;
 
 use DBChecker\Config;
+use DBChecker\DBQueries\AbstractDbQueries;
 
 class UniqueIntegrityCheck
 {
@@ -13,20 +14,18 @@ class UniqueIntegrityCheck
         $this->config = $config;
     }
 
-    public function run()
+    public function run(AbstractDbQueries $dbQueries)
     {
-        $queries = $this->config->getQueries();
-
-        $tables = $queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
+        $tables = $dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
         foreach ($tables as $table)
         {
-            $indexColumns = $queries->getUniqueIndexes($table)->fetchAll(\PDO::FETCH_COLUMN);
+            $indexColumns = $dbQueries->getUniqueIndexes($table)->fetchAll(\PDO::FETCH_COLUMN);
             foreach ($indexColumns as $columns)
             {
-                $resultset = $queries->getDuplicateForColumnsWithCount($table, $columns)->fetchAll(\PDO::FETCH_OBJ);
+                $resultset = $dbQueries->getDuplicateForColumnsWithCount($table, $columns)->fetchAll(\PDO::FETCH_OBJ);
                 foreach ($resultset as $result)
                 {
-                    yield new UniqueIntegrityCheckMatch($table, $columns, $result);
+                    yield new UniqueIntegrityCheckMatch($dbQueries->getName(), $table, $columns, $result);
                 }
             }
         }

@@ -3,6 +3,7 @@
 namespace DBChecker\modules\RelCheck;
 
 use DBChecker\Config;
+use DBChecker\DBQueries\AbstractDbQueries;
 
 class RelCheck
 {
@@ -14,13 +15,11 @@ class RelCheck
         $this->config = $config;
     }
 
-    public function run()
+    public function run(AbstractDbQueries $dbQueries)
     {
-        $queries = $this->config->getQueries();
+        $this->tables = $dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
 
-        $this->tables = $queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
-
-        $fkeys = $queries->getFks()->fetchAll(\PDO::FETCH_OBJ);
+        $fkeys = $dbQueries->getFks()->fetchAll(\PDO::FETCH_OBJ);
         foreach ($fkeys as $fkey)
         {
             $schemaError = false;
@@ -30,12 +29,12 @@ class RelCheck
             $col  = $fkey->COLUMN_NAME;
             $rcol = $fkey->REFERENCED_COLUMN_NAME;
 
-            foreach ($this->checkSchema($tbl, $col) as $error)
+            foreach ($this->checkSchema($dbQueries, $tbl, $col) as $error)
             {
                 $schemaError = true;
                 yield $error;
             }
-            foreach ($this->checkSchema($rtbl, $rcol) as $error)
+            foreach ($this->checkSchema($dbQueries, $rtbl, $rcol) as $error)
             {
                 $schemaError = true;
                 yield $error;
@@ -44,13 +43,13 @@ class RelCheck
             if ($schemaError)
                 continue;
 
-            $values = $queries->getDistinctValuesWithoutNulls($tbl, $col)->fetchAll(\PDO::FETCH_COLUMN);
+            $values = $dbQueries->getDistinctValuesWithoutNulls($tbl, $col)->fetchAll(\PDO::FETCH_COLUMN);
             foreach ($values as $value)
             {
-                $valueExists = $queries->getValue($rtbl, $rcol, $value)->fetchAll();
+                $valueExists = $dbQueries->getValue($rtbl, $rcol, $value)->fetchAll();
                 if (empty($valueExists))
                 {
-                    yield new RelCheckMatch($tbl, $col, $rtbl, $rcol, $value);
+                    yield new RelCheckMatch($dbQueries->getName(), $tbl, $col, $rtbl, $rcol, $value);
                 }
             }
         }
@@ -62,17 +61,17 @@ class RelCheck
      * @param string $col The name of the column that is supposed to exist in the table $tbl
      * @return \Generator
      */
-    public function checkSchema($tbl, $col)
+    public function checkSchema(AbstractDbQueries $dbQueries, $tbl, $col)
     {
         if (! in_array($tbl, $this->tables))
         {
-            yield new TableNotFoundMatch($tbl);
+            yield new TableNotFoundMatch($dbQueries->getName(), $tbl);
         }
         else
         {
-            $columns = $this->config->getQueries()->getColumnNamesInTable($tbl)->fetchAll(\PDO::FETCH_COLUMN);
+            $columns = $dbQueries->getColumnNamesInTable($tbl)->fetchAll(\PDO::FETCH_COLUMN);
             if (! in_array($col, $columns))
-                yield new ColumnNotFoundMatch($tbl, $col);
+                yield new ColumnNotFoundMatch($dbQueries->getName(), $tbl, $col);
         }
     }
 }

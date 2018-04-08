@@ -3,6 +3,7 @@
 namespace DBChecker\modules\MissingKeyDetect;
 
 use DBChecker\Config;
+use DBChecker\DBQueries\AbstractDbQueries;
 
 class MissingKeyDetect
 {
@@ -13,13 +14,12 @@ class MissingKeyDetect
         $this->config = $config;
     }
 
-    protected function initAlgorithm(&$notKeys, &$keys)
+    protected function initAlgorithm(AbstractDbQueries $dbQueries, &$notKeys, &$keys)
     {
-        $queries = $this->config->getQueries();
-        $columnNames = $queries->getColumnNames()->fetchAll(\PDO::FETCH_OBJ);
+        $columnNames = $dbQueries->getColumnNames()->fetchAll(\PDO::FETCH_OBJ);
         foreach ($columnNames as $columnName)
         {
-            $pks = $queries->getPks($columnName->TABLE_NAME)->fetchAll(\PDO::FETCH_OBJ);
+            $pks = $dbQueries->getPks($columnName->TABLE_NAME)->fetchAll(\PDO::FETCH_OBJ);
             foreach ($pks as $pk)
             {
                 if ($pk->Column_name === $columnName->COLUMN_NAME)
@@ -29,7 +29,7 @@ class MissingKeyDetect
                 }
             }
 
-            $isFk = $queries->getDistantTableAndColumnFromTableAndColumnFK($columnName->TABLE_NAME, $columnName->COLUMN_NAME)
+            $isFk = $dbQueries->getDistantTableAndColumnFromTableAndColumnFK($columnName->TABLE_NAME, $columnName->COLUMN_NAME)
                             ->fetch(\PDO::FETCH_OBJ) !== false;
             if ($isFk)
             {
@@ -88,34 +88,35 @@ class MissingKeyDetect
         return $matches;
     }
 
-    public function run()
+    public function run(AbstractDbQueries $dbQueries)
     {
-        $this->initAlgorithm($notKeys, $keys);
+        $this->initAlgorithm($dbQueries, $notKeys, $keys);
         $settings = $this->config->getMissingKey();
 
-        if (! isset($settings['patterns']))
-            $keyFragments = $this->getFrequentIdentifiersFragments($keys);
-
-        foreach ($notKeys as $notKey)
+        if (isset($settings['patterns']))
         {
-            if (isset($settings['patterns']))
+            foreach ($notKeys as $notKey)
             {
                 foreach ($settings['patterns'] as $pattern)
                 {
-                    if (preg_match('/'.$pattern.'/', $notKey[1]))
+                    if (preg_match('/' . $pattern . '/', $notKey[1]))
                     {
-                        yield new MissingKeyDetectMatch($notKey[0], $notKey[1]);
+                        yield new MissingKeyDetectMatch($dbQueries->getName(), $notKey[0], $notKey[1]);
                         break;
                     }
                 }
             }
-            else
+        }
+        else
+        {
+            $keyFragments = $this->getFrequentIdentifiersFragments($keys);
+            foreach ($notKeys as $notKey)
             {
                 foreach ($this->split($notKey[1]) as $fragment)
                 {
                     if (in_array($fragment, $keyFragments))
                     {
-                        yield new MissingKeyDetectMatch($notKey[0], $notKey[1]);
+                        yield new MissingKeyDetectMatch($dbQueries->getName(), $notKey[0], $notKey[1]);
                         break;
                     }
                 }

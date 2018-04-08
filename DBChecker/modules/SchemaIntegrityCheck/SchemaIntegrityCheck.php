@@ -3,6 +3,7 @@
 namespace DBChecker\modules\SchemaIntegrityCheck;
 
 use DBChecker\Config;
+use DBChecker\DBQueries\AbstractDbQueries;
 
 class SchemaIntegrityCheck
 {
@@ -13,23 +14,22 @@ class SchemaIntegrityCheck
         $this->config = $config;
     }
 
-    public function run()
+    public function run(AbstractDbQueries $dbQueries)
     {
         if (empty($this->config->getSchemaIntegrity()))
             return;
 
-        $queries = $this->config->getQueries();
         $settings = $this->config->getSchemaIntegrity();
         foreach ($settings['mapping'] as $table => $expectedChecksum)
         {
-            $checksum = $queries->getTableSchemaSha1sum($table);
+            $checksum = $dbQueries->getTableSchemaSha1sum($table);
             if ($checksum !== $expectedChecksum)
-                yield new SchemaIntegrityCheckMatch($table, $checksum);
+                yield new SchemaIntegrityCheckMatch($dbQueries->getName(), $table, $checksum);
         }
 
         if (! $settings['settings']['allow_extras'])
         {
-            foreach ($queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
+            foreach ($dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
             {
                 foreach ($settings['settings']['ignore'] as $ignore)
                 {
@@ -37,23 +37,22 @@ class SchemaIntegrityCheck
                         continue;
                 }
                 if (! isset($settings['mapping'][$table]))
-                    yield new SchemaIntegrityCheckMatch($table, 'unexpected table');
+                    yield new SchemaIntegrityCheckMatch($dbQueries->getName(), $table, 'unexpected table');
             }
         }
     }
 
-    public function generateConfig()
+    public function generateConfig(AbstractDbQueries $dbQueries)
     {
-        $queries = $this->config->getQueries();
         $config = $this->config->getDataintegrity();
-        foreach ($queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
+        foreach ($dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
         {
             if (isset($config['ignore']))
             {
                 if (preg_match('/'.$config['ignore'].'/', $table))
                     continue;
             }
-            $checksum = $queries->getTableSchemaSha1sum($table);
+            $checksum = $dbQueries->getTableSchemaSha1sum($table);
             if ($checksum)
                 echo "$table = $checksum\n";
         }

@@ -2,6 +2,7 @@
 
 namespace DBChecker\modules\FileCheck;
 
+use DBChecker\AbstractMatch;
 use DBChecker\Config;
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleWorkerInterface;
@@ -15,10 +16,9 @@ class FileCheck implements ModuleWorkerInterface
         $this->config = $config;
     }
 
-    protected function doRun()
+    protected function doRun(AbstractDbQueries $dbQueries)
     {
         $configuration = $this->config->getFilecheck();
-        $queries = $this->config->getQueries();
         foreach ($configuration['mapping'] as $mapping)
         {
             $table = key($mapping);
@@ -37,7 +37,7 @@ class FileCheck implements ModuleWorkerInterface
                 $columns[$match] = null;
             }
 
-            $values = $queries->getDistinctValuesWithJoinColumnsWithoutNulls($table, array_keys($columns), $innerJoins)
+            $values = $dbQueries->getDistinctValuesWithJoinColumnsWithoutNulls($table, array_keys($columns), $innerJoins)
                               ->fetchAll(\PDO::FETCH_OBJ);
             foreach ($values as $value)
             {
@@ -51,20 +51,20 @@ class FileCheck implements ModuleWorkerInterface
                 {
                     if ($configuration['enable_remotes'])
                     {
-                        $urlStatus = $this->testUrl($table, $columns, $tmpPath);
+                        $urlStatus = $this->testUrl($dbQueries, $table, $columns, $tmpPath);
                         if ($urlStatus instanceof FileCheckURLMatch)
                             yield $urlStatus;
                     }
                 }
                 else if (! is_file($path))
                 {
-                    yield new FileCheckMatch($table, $tmpColumns, $tmpPath);
+                    yield new FileCheckMatch($dbQueries->getName(), $table, $tmpColumns, $tmpPath);
                 }
             }
         }
     }
 
-    public function run()
+    public function run(AbstractDbQueries $dbQueries)
     {
         $configuration = $this->config->getFilecheck();
 
@@ -77,7 +77,7 @@ class FileCheck implements ModuleWorkerInterface
             ]);
         }
 
-        foreach ($this->doRun() as $msg)
+        foreach ($this->doRun($dbQueries) as $msg)
         {
             yield $msg;
         }
@@ -85,7 +85,7 @@ class FileCheck implements ModuleWorkerInterface
         // TODO restore stream_context
     }
 
-    protected function testUrl($table, $columns, $path)
+    protected function testUrl(AbstractDbQueries $dbQueries, $table, $columns, $path)
     {
         $headers = @get_headers($path);
         // if ! status 200
@@ -101,13 +101,13 @@ class FileCheck implements ModuleWorkerInterface
                     // if status 4xx or 5xx
                     if (preg_match('/HTTP\/\d\.\d (4|5)\d{2}.*/', $header))
                     {
-                        return new FileCheckURLMatch($table, $columns, $path, substr($header, 9, 3));
+                        return new FileCheckURLMatch($dbQueries->getName(), $table, $columns, $path, substr($header, 9, 3));
                     }
                 }
             }
             else
             {
-                return new FileCheckURLMatch($table, $columns, $path, substr($headers[0], 9, 3));
+                return new FileCheckURLMatch($dbQueries->getName(), $table, $columns, $path, substr($headers[0], 9, 3));
             }
         }
         return true;

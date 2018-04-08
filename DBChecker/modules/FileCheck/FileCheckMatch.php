@@ -2,14 +2,17 @@
 
 namespace DBChecker\modules\FileCheck;
 
-class FileCheckMatch
+use DBChecker\AbstractMatch;
+
+class FileCheckMatch extends AbstractMatch
 {
     protected $table;
     protected $columns;
     protected $path;
 
-    public function __construct($table, $columns, $path)
+    public function __construct($dbName, $table, $columns, $path)
     {
+        parent::__construct($dbName);
         $this->table   = $table;
         $this->columns = $columns;
         $this->path    = $path;
@@ -28,7 +31,7 @@ class FileCheckMatch
             $cols .= "$column=$value, ";
         }
         $cols = rtrim($cols, ', ');
-        return "{$this->table}.{{$cols}} : {$this->path} : no such file or directory\n";
+        return "{$this->dbName} > {$this->table}.{{$cols}} : {$this->path} : no such file or directory\n";
     }
 
     public function toSQLDelete()

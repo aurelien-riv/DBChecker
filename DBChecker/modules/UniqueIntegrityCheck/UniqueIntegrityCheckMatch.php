@@ -2,15 +2,18 @@
 
 namespace DBChecker\modules\UniqueIntegrityCheck;
 
-class UniqueIntegrityCheckMatch
+use DBChecker\AbstractMatch;
+
+class UniqueIntegrityCheckMatch extends AbstractMatch
 {
     private $table;
     private $values;
     private $count;
 
-    public function __construct($table, $columns, $results)
+    public function __construct($dbName, $table, $columns, $results)
     {
-        $this->table   = $table;
+        parent::__construct($dbName);
+        $this->table = $table;
         foreach (mb_split(',', $columns) as $column)
         {
             $this->values[$column] = $results->{$column};
@@ -35,7 +38,7 @@ class UniqueIntegrityCheckMatch
             $data .= "$column:$value, ";
         }
         $data = rtrim($data, ", ");
-        return "{$this->table} {{$data}} (count:{$this->count})\n";
+        return "$this->dbName} > {$this->table} {{$data}} (count:{$this->count})\n";
     }
 
     #region getters

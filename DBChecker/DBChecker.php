@@ -13,11 +13,14 @@ class DBChecker
 
     public function run()
     {
-        foreach ($this->config->getModuleWorkers() as $moduleWorker)
+        foreach ($this->config->getQueries() as $queries)
         {
-            foreach ($moduleWorker->run() as $msg)
+            foreach ($this->config->getModuleWorkers() as $moduleWorker)
             {
-                yield $msg;
+                foreach ($moduleWorker->run($queries) as $msg)
+                {
+                    yield $msg;
+                }
             }
         }
     }

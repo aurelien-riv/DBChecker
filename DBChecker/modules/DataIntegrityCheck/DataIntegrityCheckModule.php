@@ -17,7 +17,7 @@ class DataIntegrityCheckModule implements ModuleInterface
 
     public function getName()
     {
-        return 'datainregrity';
+        return 'datainregritycheck';
     }
 
     public function getConfigTreeBuilder()

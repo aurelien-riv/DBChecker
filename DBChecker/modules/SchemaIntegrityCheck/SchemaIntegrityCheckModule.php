@@ -17,7 +17,7 @@ class SchemaIntegrityCheckModule implements ModuleInterface
 
     public function getName()
     {
-        return 'schemaintegrity';
+        return 'schemaintegritycheck';
     }
 
     public function getConfigTreeBuilder()

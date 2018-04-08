@@ -34,7 +34,7 @@ class FileCheckModule implements ModuleInterface
                 ->arrayNode('mapping')
                     ->isRequired()
                     ->cannotBeEmpty()
-                    ->prototype('array')
+                    ->arrayPrototype()
                         ->useAttributeAsKey('key')
                         ->prototype('scalar')->end()
                     ->end()

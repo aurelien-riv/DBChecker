@@ -7,10 +7,17 @@ abstract class AbstractDbQueries
     const IDENTIFIER = '[a-zA-Z_][a-zA-Z0-9_]*';
 
     protected $pdo;
+    protected $name;
 
-    public function __construct(\PDO $pdo)
+    public function __construct(\PDO $pdo, $name)
     {
         $this->pdo = $pdo;
+        $this->name = $name;
+    }
+
+    public function getName()
+    {
+        return $this->name;
     }
 
     public abstract function getTableNames();
