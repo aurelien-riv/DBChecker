@@ -10,11 +10,6 @@ class SchemaIntegrityCheckModule implements ModuleInterface
 {
     protected $config;
 
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
-
     public function getName()
     {
         return 'schemaintegritycheck';
