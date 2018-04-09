@@ -35,6 +35,11 @@ abstract class AbstractDbQueries
     public abstract function getColumnNamesWithTableName();
 
     /**
+     * @param int $octetLength
+     * @return bool|\PDOStatement
+     */
+    public abstract function getTableNamesFilterByColumnMinOctetLength(int $octetLength);
+    /**
      * @param string $table
      * @return bool|\PDOStatement
      */
@@ -103,6 +108,7 @@ abstract class AbstractDbQueries
      */
     public abstract function getConcatenatedColumnNames($table);
 
+    #region Checksums
     /**
      * @param  string $table The table name
      * @return string The Sha1 sum of the concatenation of the data from all the columns and then all the rows.
@@ -115,4 +121,17 @@ abstract class AbstractDbQueries
      * @return string
      */
     public abstract function getTableSchemaSha1sum($table);
+    #endregion
+
+    #region Compression
+    public function supportsTablespaceCompression() : bool
+    {
+        return false;
+    }
+
+    public function isTableCompressed(string $table) : bool
+    {
+        return false;
+    }
+    #endregion
 }

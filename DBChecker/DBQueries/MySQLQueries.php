@@ -25,6 +25,18 @@ class MySQLQueries extends AbstractDbQueries
         return $this->pdo->query("SHOW COLUMNS FROM $table");
     }
 
+    public function getTableNamesFilterByColumnMinOctetLength(int $octetLength)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT DISTINCT TABLE_NAME 
+            FROM information_schema.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() AND CHARACTER_OCTET_LENGTH > :octetLength;
+        ");
+        $stmt->bindParam(':octetLength', $octetLength, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt;
+    }
+
     public function getPKs($table)
     {
         return $this->pdo->query("SHOW INDEX FROM $table WHERE Key_name = 'PRIMARY'");
@@ -57,6 +69,7 @@ class MySQLQueries extends AbstractDbQueries
         return $stmt;
     }
 
+    #region UniqueIndex
     protected function getUniqueIndexesV1($table)
     {
         $stmt = $this->pdo->prepare("
@@ -98,6 +111,7 @@ class MySQLQueries extends AbstractDbQueries
         }
         return $stmt;
     }
+    #endregion
 
     public function getDuplicateForColumnsWithCount($table, $columns)
     {
@@ -203,5 +217,24 @@ class MySQLQueries extends AbstractDbQueries
     {
         $columns = $this->getConcatenatedColumnNames($table);
         return hash('sha1', $columns);
+    }
+
+    public function supportsTablespaceCompression() : bool
+    {
+        return true; // FIXME depends on the version of MySQL/MariaDB
+    }
+
+    public function isTableCompressed(string $table) : bool
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT ROW_FORMAT 
+            FROM information_schema.TABLES 
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table;
+        ");
+        $stmt->bindParam(':table', $table, \PDO::PARAM_STR);
+        $stmt->execute();
+        $result = $stmt->fetch(\PDO::FETCH_OBJ);
+
+        return ($result->ROW_FORMAT === 'Compressed');
     }
 }

@@ -4,6 +4,7 @@ namespace DBChecker;
 
 use DBChecker\modules\DataIntegrityCheck\DataIntegrityCheckModule;
 use DBChecker\modules\FileCheck\FileCheckModule;
+use DBChecker\modules\MissingCompressionDetect\MissingCompressionDetectModule;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
 use DBChecker\modules\RelCheck\RelCheckModule;
 use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheckModule;
@@ -41,7 +42,8 @@ class Config
             FileCheckModule::class,
             MissingKeyDetectModule::class,
             SchemaIntegrityCheckModule::class,
-            DataIntegrityCheckModule::class
+            DataIntegrityCheckModule::class,
+            MissingCompressionDetectModule::class
         ];
     }
 
