@@ -21,7 +21,7 @@ class FileCheckModule implements ModuleInterface
         $treeBuilder->root($this->getName())
             ->addDefaultsIfNotSet()
             ->children()
-                ->scalarNode('enable_remotes')
+                ->booleanNode('enable_remotes')
                     ->defaultFalse()
                     ->info("If true, http and https URL will be fetched to detect 4xx and 5xx errors")
                 ->end()
