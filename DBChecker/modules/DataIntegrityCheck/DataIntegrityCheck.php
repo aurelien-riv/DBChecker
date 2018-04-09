@@ -4,11 +4,12 @@ namespace DBChecker\modules\DataIntegrityCheck;
 
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleInterface;
+use DBChecker\ModuleWorkerInterface;
 
 /**
  * Compare the checksum of all the data in a table and the value stored in the config file
  */
-class DataIntegrityCheck
+class DataIntegrityCheck implements ModuleWorkerInterface
 {
     private $config;
 

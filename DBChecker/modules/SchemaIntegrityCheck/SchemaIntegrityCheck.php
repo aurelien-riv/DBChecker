@@ -4,8 +4,9 @@ namespace DBChecker\modules\SchemaIntegrityCheck;
 
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleInterface;
+use DBChecker\ModuleWorkerInterface;
 
-class SchemaIntegrityCheck
+class SchemaIntegrityCheck implements ModuleWorkerInterface
 {
     private $config;
 

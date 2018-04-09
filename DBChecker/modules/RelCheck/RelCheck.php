@@ -3,8 +3,9 @@
 namespace DBChecker\modules\RelCheck;
 
 use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\ModuleWorkerInterface;
 
-class RelCheck
+class RelCheck implements ModuleWorkerInterface
 {
     private $tables;
 

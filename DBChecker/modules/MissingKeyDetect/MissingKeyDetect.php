@@ -4,8 +4,9 @@ namespace DBChecker\modules\MissingKeyDetect;
 
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleInterface;
+use DBChecker\ModuleWorkerInterface;
 
-class MissingKeyDetect
+class MissingKeyDetect implements ModuleWorkerInterface
 {
     private $config;
 
@@ -103,7 +104,7 @@ class MissingKeyDetect
         }
     }
 
-    protected function runWithAutdetect(AbstractDbQueries $dbQueries, $notKeys, $keys)
+    protected function runWithAutodetect(AbstractDbQueries $dbQueries, $notKeys, $keys)
     {
         $keyFragments = $this->getFrequentIdentifiersFragments($keys);
         foreach ($notKeys as $notKey)
@@ -118,6 +119,7 @@ class MissingKeyDetect
             }
         }
     }
+
     public function run(AbstractDbQueries $dbQueries)
     {
         $this->initAlgorithm($dbQueries, $notKeys, $keys);
@@ -131,7 +133,7 @@ class MissingKeyDetect
         }
         else
         {
-            foreach ($this->runWithAutdetect($dbQueries, $notKeys, $keys) as $item)
+            foreach ($this->runWithAutodetect($dbQueries, $notKeys, $keys) as $item)
             {
                 yield $item;
             }

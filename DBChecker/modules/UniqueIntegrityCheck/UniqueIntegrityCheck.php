@@ -3,8 +3,9 @@
 namespace DBChecker\modules\UniqueIntegrityCheck;
 
 use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\ModuleWorkerInterface;
 
-class UniqueIntegrityCheck
+class UniqueIntegrityCheck implements ModuleWorkerInterface
 {
     public function run(AbstractDbQueries $dbQueries)
     {

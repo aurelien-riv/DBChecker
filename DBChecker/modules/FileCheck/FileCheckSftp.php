@@ -29,7 +29,7 @@ class FileCheckSftp
             throw new \Exception("Cannot connect to the server");
     }
 
-    function file_exists($path)
+    public function file_exists($path)
     {
         return $this->sftp->file_exists($path);
     }
