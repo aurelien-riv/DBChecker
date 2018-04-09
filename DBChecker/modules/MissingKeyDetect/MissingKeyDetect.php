@@ -88,37 +88,52 @@ class MissingKeyDetect
         return $matches;
     }
 
+    protected function runWithPatterns(AbstractDbQueries $dbQueries, $notKeys)
+    {
+        foreach ($notKeys as $notKey)
+        {
+            foreach ($this->config['patterns'] as $pattern)
+            {
+                if (preg_match('/' . $pattern . '/', $notKey[1]))
+                {
+                    yield new MissingKeyDetectMatch($dbQueries->getName(), $notKey[0], $notKey[1]);
+                    break;
+                }
+            }
+        }
+    }
+
+    protected function runWithAutdetect(AbstractDbQueries $dbQueries, $notKeys, $keys)
+    {
+        $keyFragments = $this->getFrequentIdentifiersFragments($keys);
+        foreach ($notKeys as $notKey)
+        {
+            foreach ($this->split($notKey[1]) as $fragment)
+            {
+                if (in_array($fragment, $keyFragments))
+                {
+                    yield new MissingKeyDetectMatch($dbQueries->getName(), $notKey[0], $notKey[1]);
+                    break;
+                }
+            }
+        }
+    }
     public function run(AbstractDbQueries $dbQueries)
     {
         $this->initAlgorithm($dbQueries, $notKeys, $keys);
 
         if (! empty($this->config['patterns']))
         {
-            foreach ($notKeys as $notKey)
+            foreach ($this->runWithPatterns($dbQueries, $notKeys) as $item)
             {
-                foreach ($this->config['patterns'] as $pattern)
-                {
-                    if (preg_match('/' . $pattern . '/', $notKey[1]))
-                    {
-                        yield new MissingKeyDetectMatch($dbQueries->getName(), $notKey[0], $notKey[1]);
-                        break;
-                    }
-                }
+                yield $item;
             }
         }
         else
         {
-            $keyFragments = $this->getFrequentIdentifiersFragments($keys);
-            foreach ($notKeys as $notKey)
+            foreach ($this->runWithAutdetect($dbQueries, $notKeys, $keys) as $item)
             {
-                foreach ($this->split($notKey[1]) as $fragment)
-                {
-                    if (in_array($fragment, $keyFragments))
-                    {
-                        yield new MissingKeyDetectMatch($dbQueries->getName(), $notKey[0], $notKey[1]);
-                        break;
-                    }
-                }
+                yield $item;
             }
         }
     }

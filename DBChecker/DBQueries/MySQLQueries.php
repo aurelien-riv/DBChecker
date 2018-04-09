@@ -167,7 +167,7 @@ class MySQLQueries extends AbstractDbQueries
 
     public function getValue($table, $column, $value)
     {
-        $stmt = $this->pdo->prepare("SELECT DISTINCT $column FROM $table WHERE $column = :value;");
+        $stmt = $this->pdo->prepare("SELECT DISTINCT $column FROM $table WHERE $column = :value LIMIT 1;");
         $stmt->bindParam(':value', $value, \PDO::PARAM_STR);
         $stmt->execute();
         return $stmt;

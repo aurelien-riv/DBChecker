@@ -4,6 +4,9 @@ namespace DBChecker\DBQueries;
 
 abstract class AbstractDbQueries
 {
+    /**
+     * Regex that matches a valid column name
+     */
     const IDENTIFIER = '[a-zA-Z_][a-zA-Z0-9_]*';
 
     protected $pdo;
@@ -20,16 +23,37 @@ abstract class AbstractDbQueries
         return $this->name;
     }
 
+    /**
+     * @return bool|\PDOStatement
+     */
     public abstract function getTableNames();
 
+    /**
+     * @return bool|\PDOStatement
+     */
     public abstract function getColumnNames();
 
+    /**
+     * @param string $table
+     * @return bool|\PDOStatement
+     */
     public abstract function getColumnNamesInTable($table);
 
+    /**
+     * @param string $table
+     * @return bool|\PDOStatement
+     */
     public abstract function getPKs($table);
 
+    /**
+     * @return bool|\PDOStatement
+     */
     public abstract function getFks();
 
+    /**
+     * @param string $table
+     * @return bool|\PDOStatement
+     */
     public abstract function getUniqueIndexes($table);
 
     /**
@@ -64,6 +88,12 @@ abstract class AbstractDbQueries
      */
     public abstract function getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoinColumns);
 
+    /**
+     * @param string $table
+     * @param string $column
+     * @param $value
+     * @return bool|\PDOStatement
+     */
     public abstract function getValue($table, $column, $value);
 
     /**
@@ -79,5 +109,9 @@ abstract class AbstractDbQueries
      */
     public abstract function getTableDataSha1sum($table);
 
+    /**
+     * @param $table
+     * @return string
+     */
     public abstract function getTableSchemaSha1sum($table);
 }

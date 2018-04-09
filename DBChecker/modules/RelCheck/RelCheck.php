@@ -39,7 +39,7 @@ class RelCheck
             $values = $dbQueries->getDistinctValuesWithoutNulls($tbl, $col)->fetchAll(\PDO::FETCH_COLUMN);
             foreach ($values as $value)
             {
-                $valueExists = $dbQueries->getValue($rtbl, $rcol, $value)->fetchAll();
+                $valueExists = $dbQueries->getValue($rtbl, $rcol, $value)->fetch();
                 if (empty($valueExists))
                 {
                     yield new RelCheckMatch($dbQueries->getName(), $tbl, $col, $rtbl, $rcol, $value);
