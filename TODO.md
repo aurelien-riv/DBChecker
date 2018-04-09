@@ -11,5 +11,5 @@
 - Make getDistinctValuesWithJoinColumnsWithoutNulls support composite FK
 
 ## FileCheck ##
-- Perform through SSH
+- Perform HTTP/HTTPS through SSH
 - FTP Support

@@ -2,14 +2,20 @@
 
 namespace DBChecker\modules\FileCheck;
 
-use DBChecker\AbstractMatch;
 use DBChecker\Config;
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleWorkerInterface;
+use phpseclib\Crypt\RSA;
+use phpseclib\Net\SFTP;
 
 class FileCheck implements ModuleWorkerInterface
 {
     private $config;
+
+    /**
+     * @var SFTP|null $sftp
+     */
+    private $sftp;
 
     public function __construct(Config $config)
     {
@@ -47,19 +53,9 @@ class FileCheck implements ModuleWorkerInterface
                     return $value->{$match[1]};
                 }, $path);
 
-                if (preg_match('/^https?:\/\//', $tmpPath)) // disabled until an option exists to enable it (slows the process down too much when not needed)
-                {
-                    if ($configuration['enable_remotes'])
-                    {
-                        $urlStatus = $this->testUrl($dbQueries, $table, $columns, $tmpPath);
-                        if ($urlStatus instanceof FileCheckURLMatch)
-                            yield $urlStatus;
-                    }
-                }
-                else if (! is_file($path))
-                {
-                    yield new FileCheckMatch($dbQueries->getName(), $table, $tmpColumns, $tmpPath);
-                }
+                $error = $this->testFile($dbQueries, $table, $tmpColumns, $tmpPath);
+                if ($error)
+                    yield $error;
             }
         }
     }
@@ -77,12 +73,87 @@ class FileCheck implements ModuleWorkerInterface
             ]);
         }
 
+        $this->initSFTP();
+
         foreach ($this->doRun($dbQueries) as $msg)
         {
             yield $msg;
         }
 
         // TODO restore stream_context
+    }
+
+    protected function promptPassword($message)
+    {
+        printf("$message: ");
+        system('stty -echo');
+        $password = trim(fgets(STDIN));
+        system('stty echo');
+        echo '';
+        return $password;
+    }
+
+    protected function initSFTP()
+    {
+        $configuration = $this->config->getFilecheck();
+        if (! empty($configuration['ssh'])) // FIXME connect once, not for each file
+        {
+            $sshConfig = $configuration['ssh'];
+
+            $sftp = new SFTP($sshConfig['host'], $sshConfig['port']);
+            if ($sshConfig['pkey_file'])
+            {
+                $key = new RSA();
+                if (! empty($sshConfig['pkey_passphrase']))
+                {
+                    $passPhrase = $sshConfig['pkey_passphrase'];
+                    if ($passPhrase === 'prompt')
+                    {
+                        $passPhrase = $this->promptPassword("Private key passphrase");
+                    }
+                    $key->setPassword($passPhrase);
+                }
+                $key->loadKey(file_get_contents($sshConfig['pkey_file']));
+
+                if (! $sftp->login($sshConfig['user'], $key))
+                    throw new \Exception("Cannot connect to the server");
+            }
+            else if ($sshConfig['password'])
+            {
+                if (! $sftp->login($sshConfig['user'], $sshConfig['password']))
+                    throw new \Exception("Cannot connect to the server");
+            }
+            else
+            {
+                throw new \Exception("No pkey_file provided");
+            }
+
+            $this->sftp = $sftp;
+        }
+    }
+
+    protected function testFile(AbstractDbQueries $dbQueries, $table, $columns, $path)
+    {
+        if (preg_match('/^https?:\/\//', $path)) // disabled until an option exists to enable it (slows the process down too much when not needed)
+        {
+            $configuration = $this->config->getFilecheck();
+            if ($configuration['enable_remotes'])
+            {
+                $urlStatus = $this->testUrl($dbQueries, $table, $columns, $path);
+                if ($urlStatus instanceof FileCheckURLMatch)
+                    return $urlStatus;
+            }
+        }
+        else if ($this->sftp)
+        {
+            if (! $this->sftp->file_exists($path))
+                return new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
+        }
+        else if (! is_file($path))
+        {
+            return new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
+        }
+        return null;
     }
 
     protected function testUrl(AbstractDbQueries $dbQueries, $table, $columns, $path)
