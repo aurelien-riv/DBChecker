@@ -1,10 +1,27 @@
 <?php
 
-require_once('DBChecker/DBChecker.php');
+require_once('DBChecker/vendor/autoload.php');
 
-$dbChecker = new \DBChecker\DBChecker();
+use DBChecker\modules\FileCheck\FileCheckMatch;
+use DBChecker\modules\RelCheck\RelCheckMatch;
+
+$dbChecker = new \DBChecker\DBChecker($argv[1]);
 
 foreach ($dbChecker->run() as $error)
 {
-    echo $error;
+    if ($error instanceof RelCheckMatch || $error instanceof FileCheckMatch)
+    {
+        try
+        {
+            echo $error->toSQLDelete();
+        }
+        catch(InvalidArgumentException $e)
+        {
+            echo get_class($error).' '.$error;
+        }
+    }
+    else
+    {
+        echo get_class($error).' '.$error;
+    }
 }

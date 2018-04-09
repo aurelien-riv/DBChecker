@@ -1,2 +1,3 @@
 /.idea
-/DBChecker/config.ini
+/config.yaml
+/DBChecker/vendor/

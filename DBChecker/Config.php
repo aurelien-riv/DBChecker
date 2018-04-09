@@ -2,51 +2,82 @@
 
 namespace DBChecker;
 
-use DBChecker\DBQueries\MySQLQueries;
-
-require_once('DBQueries/MySQLQueries.php');
+use DBChecker\modules\DataIntegrityCheck\DataIntegrityCheckModule;
+use DBChecker\modules\FileCheck\FileCheckModule;
+use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
+use DBChecker\modules\RelCheck\RelCheckModule;
+use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheckModule;
+use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
+use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
-    private $db       = '';
-    private $login    = '';
-    private $password = '';
-    private $engine   = '';
-    private $host     = '';
-    private $port     = '';
+    private $moduleWorkers = [];
 
-    private $pdo = null;
+    /**
+     * @var DatabasesModule $databases
+     */
+    private $databases;
 
-    public function __construct()
+    public function __construct($yamlPath)
     {
-        $settings = parse_ini_file(__DIR__.DIRECTORY_SEPARATOR."config.ini", true);
-        $dbsettings = $settings['database'];
-
-        $this->db       = $dbsettings['db'];
-        $this->login    = $dbsettings['login'];
-        $this->password = $dbsettings['password'];
-        $this->engine   = $dbsettings['engine'];
-        $this->host     = $dbsettings['host'];
-        $this->port     = $dbsettings['port'];
-
-        $this->pdo = new \PDO($this->getDsn(), $this->login, $this->password);
+        $this->parseYaml($yamlPath);
     }
 
-    public function getDsn() : string
+    private function getModuleClasses()
     {
-        return "{$this->engine}:dbname={$this->db};host={$this->host};port={$this->port}";
+        return [
+            RelCheckModule::class,
+            UniqueIntegrityCheckModule::class,
+            FileCheckModule::class,
+            MissingKeyDetectModule::class,
+            SchemaIntegrityCheckModule::class,
+            DataIntegrityCheckModule::class
+        ];
     }
-    public function getPdo() : \PDO
+
+    protected function loadModule(BaseModuleInterface $module, $settings)
     {
-        return $this->pdo;
+        $moduleName = $module->getName();
+
+        if (array_key_exists($moduleName, $settings))
+        {
+            $processor      = new Processor();
+            $tree           = $module->getConfigTreeBuilder()->buildTree();
+            $moduleSettings = $processor->process($tree, [$moduleName => $settings[$moduleName]]);
+
+            $module->loadConfig($moduleSettings);
+            if ($module instanceof ModuleInterface)
+            {
+                $this->moduleWorkers[] = $module->getWorker();
+            }
+        }
+    }
+
+    protected function parseYaml($yamlPath)
+    {
+        $settings = Yaml::parseFile($yamlPath);
+
+        $this->databases = new DatabasesModule();
+        $this->loadModule($this->databases, $settings);
+
+        foreach ($this->getModuleClasses() as $module)
+        {
+            $this->loadModule(new $module($this), $settings);
+        }
+    }
+
+    /**
+     * @return ModuleWorkerInterface[]
+     */
+    public function getModuleWorkers()
+    {
+        return $this->moduleWorkers;
     }
 
     public function getQueries()
     {
-        switch ($this->engine)
-        {
-            case 'mysql': return new MySQLQueries($this->pdo, $this->db);
-            default: throw new \InvalidArgumentException("Unsupported engine {$this->engine}");
-        }
+        return $this->databases->getConnections();
     }
 }
