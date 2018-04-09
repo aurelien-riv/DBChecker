@@ -4,7 +4,17 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/d8f1fb2026c68fde6b91/maintainability)](https://codeclimate.com/github/aurelien-riv/DBChecker/maintainability)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/?branch=master)
 [![Build Status](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/badges/build.png?b=master)](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/build-status/master)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/c9fdb74e-2750-48e3-b011-5c6d73b7392c/mini.png)](https://insight.sensiolabs.com/projects/c9fdb74e-2750-48e3-b011-5c6d73b7392c)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/80e9a112-5fa1-4326-8583-1c703ecde499/mini.png)](https://insight.sensiolabs.com/projects/80e9a112-5fa1-4326-8583-1c703ecde499)
+
+[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=sqale_rating)](https://sonarcloud.io/component_measures?id=DBChecker&metric=sqale_rating)
+[![Reliability](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=reliability_rating)](https://sonarcloud.io/component_measures?id=DBChecker&metric=reliability_rating)
+[![Security](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=security_rating)](https://sonarcloud.io/component_measures?id=DBChecker&metric=security_rating)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=vulnerabilities)](https://sonarcloud.io/component_measures?id=DBChecker&metric=vulnerabilities)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=bugs)](https://sonarcloud.io/project/issues?id=DBChecker&resolved=false&types=BUG)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=sqale_index)](https://sonarcloud.io/project/issues?facetMode=effort&id=DBChecker&resolved=false&types=CODE_SMELL)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=code_smells)](https://sonarcloud.io/project/issues?id=DBChecker&resolved=false&types=CODE_SMELL)
+[![Lines of code)(https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=ncloc)](https://sonarcloud.io/component_measures?id=DBChecker&metric=ncloc)
+[![Duplications](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=duplicated_lines_density)](https://sonarcloud.io/component_measures?id=DBChecker&metric=duplicated_lines_density)
 
 # Usage #
 - Copy config.template.yaml to config.yaml (or something else, who cares?)
