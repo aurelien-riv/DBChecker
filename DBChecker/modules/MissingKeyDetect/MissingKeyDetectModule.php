@@ -29,8 +29,10 @@ class MissingKeyDetectModule implements ModuleInterface
                     ->scalarPrototype()
                     ->end()
                 ->end()
-                ->integerNode('threshold')
-                    ->defaultValue(0.3)
+                ->floatNode('threshold')
+                    ->defaultValue(30)
+                    ->min(0)
+                    ->max(100)
                 ->end()
             ->end();
 

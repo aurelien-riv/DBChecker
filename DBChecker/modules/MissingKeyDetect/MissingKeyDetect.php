@@ -60,7 +60,7 @@ class MissingKeyDetect
         $count = count($fragments);
         $threshold = $this->config->getMissingKey()['threshold'];
         $fragments = array_filter($fragments, function($item) use ($count, $threshold) {
-            return ($item > ($count * $threshold));
+            return ($item > ($count * $threshold / 100));
         });
 
         return array_keys($fragments);
@@ -93,7 +93,7 @@ class MissingKeyDetect
         $this->initAlgorithm($dbQueries, $notKeys, $keys);
         $settings = $this->config->getMissingKey();
 
-        if (isset($settings['patterns']))
+        if (! empty($settings['patterns']))
         {
             foreach ($notKeys as $notKey)
             {

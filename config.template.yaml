@@ -14,7 +14,7 @@ uniqueintegritycheck:
 filecheck:
   enable_remotes: false
   mapping:
-    - tbl_simulation_document: "/var/www/octroi.mylizmer.com/web/uploads/simulationDocuments/LOA/{simulation_id}/{type_document_id.document_type_libelle_court}/{document}"
+    - tbl_simulation_document: "/var/www/mywebsite/web/uploads/simulationDocuments/LOA/{simulation_id}/{type_document_id.document_type_libelle_court}/{document}"
 
 dataintegrity:
   mapping:
