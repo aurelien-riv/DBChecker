@@ -22,7 +22,15 @@ class Config
 
     public function __construct($yamlPath)
     {
-        $this->parseYaml($yamlPath);
+        $settings = Yaml::parseFile($yamlPath);
+
+        $this->databases = new DatabasesModule();
+        $this->loadModule($this->databases, $settings);
+
+        foreach ($this->getModuleClasses() as $module)
+        {
+            $this->loadModule(new $module($this), $settings);
+        }
     }
 
     private function getModuleClasses()
@@ -52,19 +60,6 @@ class Config
             {
                 $this->moduleWorkers[] = $module->getWorker();
             }
-        }
-    }
-
-    protected function parseYaml($yamlPath)
-    {
-        $settings = Yaml::parseFile($yamlPath);
-
-        $this->databases = new DatabasesModule();
-        $this->loadModule($this->databases, $settings);
-
-        foreach ($this->getModuleClasses() as $module)
-        {
-            $this->loadModule(new $module($this), $settings);
         }
     }
 

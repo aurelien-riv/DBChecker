@@ -53,8 +53,9 @@ class RelCheck implements ModuleWorkerInterface
 
     /**
      * Checks whether the table $tbl exists and contains the column $col
-     * @param string $tbl The name of the column that is supposed to exist in the database
-     * @param string $col The name of the column that is supposed to exist in the table $tbl
+     * @param AbstractDbQueries $dbQueries
+     * @param string            $tbl The name of the column that is supposed to exist in the database
+     * @param string            $col The name of the column that is supposed to exist in the table $tbl
      * @return \Generator
      */
     public function checkSchema(AbstractDbQueries $dbQueries, $tbl, $col)
@@ -62,14 +63,13 @@ class RelCheck implements ModuleWorkerInterface
         if (! in_array($tbl, $this->tables))
         {
             yield new TableNotFoundMatch($dbQueries->getName(), $tbl);
+            return;
         }
-        else
+
+        $columns = $dbQueries->getColumnNamesInTable($tbl)->fetchAll(\PDO::FETCH_COLUMN);
+        if (! in_array($col, $columns))
         {
-            $columns = $dbQueries->getColumnNamesInTable($tbl)->fetchAll(\PDO::FETCH_COLUMN);
-            if (! in_array($col, $columns))
-            {
-                yield new ColumnNotFoundMatch($dbQueries->getName(), $tbl, $col);
-            }
+            yield new ColumnNotFoundMatch($dbQueries->getName(), $tbl, $col);
         }
     }
 }
