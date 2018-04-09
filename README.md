@@ -13,7 +13,7 @@
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=bugs)](https://sonarcloud.io/project/issues?id=DBChecker&resolved=false&types=BUG)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=sqale_index)](https://sonarcloud.io/project/issues?facetMode=effort&id=DBChecker&resolved=false&types=CODE_SMELL)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=code_smells)](https://sonarcloud.io/project/issues?id=DBChecker&resolved=false&types=CODE_SMELL)
-[![Lines of code)(https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=ncloc)](https://sonarcloud.io/component_measures?id=DBChecker&metric=ncloc)
+[![Lines of code](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=ncloc)](https://sonarcloud.io/component_measures?id=DBChecker&metric=ncloc)
 [![Duplications](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=duplicated_lines_density)](https://sonarcloud.io/component_measures?id=DBChecker&metric=duplicated_lines_density)
 
 # Usage #
