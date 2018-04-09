@@ -9,7 +9,7 @@ class MySQLQueries extends AbstractDbQueries
         return $this->pdo->query("SHOW TABLES;");
     }
 
-    public function getColumnNames()
+    public function getColumnNamesWithTableName()
     {
         $stmt = $this->pdo->prepare("
             SELECT TABLE_NAME, COLUMN_NAME

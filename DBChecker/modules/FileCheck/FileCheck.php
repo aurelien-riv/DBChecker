@@ -84,19 +84,13 @@ class FileCheck implements ModuleWorkerInterface
             {
                 $tmpColumns = $columns;
                 $tmpPath = $this->replaceVariablesFromPath($path, $value, $tmpColumns);
-
-                $error = $this->testFile($dbQueries, $table, $tmpColumns, $tmpPath);
-                if ($error instanceof AbstractMatch)
-                {
-                    yield $error;
-                }
+                yield from $this->testFile($dbQueries, $table, $tmpColumns, $tmpPath);
             }
         }
     }
 
     protected function testFile(AbstractDbQueries $dbQueries, $table, $columns, $path)
     {
-        $match = true;
         if (preg_match('/^https?:\/\//', $path))
         {
             if ($this->http)
@@ -104,7 +98,7 @@ class FileCheck implements ModuleWorkerInterface
                 $status = $this->http->testUrl($path);
                 if ($status !== true)
                 {
-                    $match = new FileCheckURLMatch($dbQueries->getName(), $table, $columns, $path, $status);
+                    yield new FileCheckURLMatch($dbQueries->getName(), $table, $columns, $path, $status);
                 }
             }
         }
@@ -112,14 +106,13 @@ class FileCheck implements ModuleWorkerInterface
         {
             if (! $this->sftp->file_exists($path))
             {
-                $match = new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
+                yield new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
             }
         }
         else if (! is_file($path))
         {
-            $match = new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
+            yield new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
         }
-        return $match;
     }
 
 

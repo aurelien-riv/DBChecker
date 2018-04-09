@@ -15,30 +15,38 @@ class MissingKeyDetect implements ModuleWorkerInterface
         $this->config = $module->getConfig();
     }
 
+    protected function isPk(AbstractDbQueries $dbQueries, \stdClass $column)
+    {
+        $pks = $dbQueries->getPks($column->TABLE_NAME)->fetchAll(\PDO::FETCH_OBJ);
+        foreach ($pks as $pk)
+        {
+            if ($pk->Column_name === $column->COLUMN_NAME)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function isFk(AbstractDbQueries $dbQueries, \stdClass $column)
+    {
+        return $dbQueries
+                   ->getDistantTableAndColumnFromTableAndColumnFK($column->TABLE_NAME, $column->COLUMN_NAME)
+                   ->fetch(\PDO::FETCH_OBJ) !== false;
+    }
+
     protected function initAlgorithm(AbstractDbQueries $dbQueries, &$notKeys, &$keys)
     {
-        $columnNames = $dbQueries->getColumnNames()->fetchAll(\PDO::FETCH_OBJ);
-        foreach ($columnNames as $columnName)
+        $columns = $dbQueries->getColumnNamesWithTableName()->fetchAll(\PDO::FETCH_OBJ);
+        foreach ($columns as $column)
         {
-            $pks = $dbQueries->getPks($columnName->TABLE_NAME)->fetchAll(\PDO::FETCH_OBJ);
-            foreach ($pks as $pk)
+            if ($this->isPk($dbQueries, $column) || $this->isFk($dbQueries,  $column))
             {
-                if ($pk->Column_name === $columnName->COLUMN_NAME)
-                {
-                    $keys[] = $columnName->COLUMN_NAME;
-                    continue;
-                }
-            }
-
-            $isFk = $dbQueries->getDistantTableAndColumnFromTableAndColumnFK($columnName->TABLE_NAME, $columnName->COLUMN_NAME)
-                            ->fetch(\PDO::FETCH_OBJ) !== false;
-            if ($isFk)
-            {
-                $keys[] = $columnName->COLUMN_NAME;
+                $keys[] = $column->COLUMN_NAME;
                 continue;
             }
 
-            $notKeys[] = [$columnName->TABLE_NAME, $columnName->COLUMN_NAME];
+            $notKeys[] = [$column->TABLE_NAME, $column->COLUMN_NAME];
         }
     }
 
@@ -126,17 +134,11 @@ class MissingKeyDetect implements ModuleWorkerInterface
 
         if (! empty($this->config['patterns']))
         {
-            foreach ($this->runWithPatterns($dbQueries, $notKeys) as $item)
-            {
-                yield $item;
-            }
+            yield from $this->runWithPatterns($dbQueries, $notKeys);
         }
         else
         {
-            foreach ($this->runWithAutodetect($dbQueries, $notKeys, $keys) as $item)
-            {
-                yield $item;
-            }
+            yield from $this->runWithAutodetect($dbQueries, $notKeys, $keys);
         }
     }
 }

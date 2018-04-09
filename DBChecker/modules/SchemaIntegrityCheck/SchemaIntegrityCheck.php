@@ -28,10 +28,7 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
 
         if (! $this->config['allow_extras'])
         {
-            foreach ($this->checkForExtraTables($dbQueries) as $item)
-            {
-                yield $item;
-            }
+            yield from $this->checkForExtraTables($dbQueries);
         }
     }
 

@@ -30,8 +30,9 @@ abstract class AbstractDbQueries
 
     /**
      * @return bool|\PDOStatement
+     * Get all the {TABLE_NAME, COLUMN_NAME} from the database
      */
-    public abstract function getColumnNames();
+    public abstract function getColumnNamesWithTableName();
 
     /**
      * @param string $table

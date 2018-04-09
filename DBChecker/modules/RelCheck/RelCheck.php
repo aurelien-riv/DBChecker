@@ -16,37 +16,39 @@ class RelCheck implements ModuleWorkerInterface
         $fkeys = $dbQueries->getFks()->fetchAll(\PDO::FETCH_OBJ);
         foreach ($fkeys as $fkey)
         {
-            $schemaError = false;
+            $tbl         = $fkey->TABLE_NAME;
+            $rtbl        = $fkey->REFERENCED_TABLE_NAME;
+            $col         = $fkey->COLUMN_NAME;
+            $rcol        = $fkey->REFERENCED_COLUMN_NAME;
 
-            $tbl  = $fkey->TABLE_NAME;
-            $rtbl = $fkey->REFERENCED_TABLE_NAME;
-            $col  = $fkey->COLUMN_NAME;
-            $rcol = $fkey->REFERENCED_COLUMN_NAME;
-
-            foreach ($this->checkSchema($dbQueries, $tbl, $col) as $error)
+            $errors = $this->checkSourceAndReferencedColumns($dbQueries, $tbl, $col, $rtbl, $rcol);
+            if ($errors->current())
             {
-                $schemaError = true;
-                yield $error;
-            }
-            foreach ($this->checkSchema($dbQueries, $rtbl, $rcol) as $error)
-            {
-                $schemaError = true;
-                yield $error;
-            }
-
-            if ($schemaError)
+                yield from $errors;
                 continue;
+            }
 
-            $values = $dbQueries->getDistinctValuesWithoutNulls($tbl, $col)->fetchAll(\PDO::FETCH_COLUMN);
-            foreach ($values as $value)
+            yield from $this->checkRelations($dbQueries, $tbl, $col, $rtbl, $rcol);
+        }
+    }
+
+    protected function checkRelations(AbstractDbQueries $dbQueries, $tbl, $col, $rtbl, $rcol)
+    {
+        $values = $dbQueries->getDistinctValuesWithoutNulls($tbl, $col)->fetchAll(\PDO::FETCH_COLUMN);
+        foreach ($values as $value)
+        {
+            $valueExists = $dbQueries->getValue($rtbl, $rcol, $value)->fetch();
+            if (empty($valueExists))
             {
-                $valueExists = $dbQueries->getValue($rtbl, $rcol, $value)->fetch();
-                if (empty($valueExists))
-                {
-                    yield new RelCheckMatch($dbQueries->getName(), $tbl, $col, $rtbl, $rcol, $value);
-                }
+                yield new RelCheckMatch($dbQueries->getName(), $tbl, $col, $rtbl, $rcol, $value);
             }
         }
+    }
+
+    public function checkSourceAndReferencedColumns(AbstractDbQueries $dbQueries, $tbl, $col, $rtbl, $rcol)
+    {
+        yield from $this->checkSchema($dbQueries, $tbl,  $col);
+        yield from $this->checkSchema($dbQueries, $rtbl, $rcol);
     }
 
     /**
@@ -65,7 +67,9 @@ class RelCheck implements ModuleWorkerInterface
         {
             $columns = $dbQueries->getColumnNamesInTable($tbl)->fetchAll(\PDO::FETCH_COLUMN);
             if (! in_array($col, $columns))
+            {
                 yield new ColumnNotFoundMatch($dbQueries->getName(), $tbl, $col);
+            }
         }
     }
 }
