@@ -2,8 +2,8 @@
 
 namespace DBChecker\modules\DataIntegrityCheck;
 
-use DBChecker\Config;
 use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\ModuleInterface;
 
 /**
  * Compare the checksum of all the data in a table and the value stored in the config file
@@ -12,52 +12,50 @@ class DataIntegrityCheck
 {
     private $config;
 
-    public function __construct(Config $config)
+    public function __construct(ModuleInterface $module)
     {
-        $this->config = $config;
+        $this->config = $module->getConfig();
     }
 
     public function run(AbstractDbQueries $dbQueries)
     {
-        $settings = $this->config->getDataintegrity();
-        if (isset($settings['mapping']))
+        foreach ($this->config['mapping'] as $table => $expectedChecksum)
         {
-            foreach ($settings['mapping'] as $table => $expectedChecksum)
-            {
-                $checksum = $dbQueries->getTableDataSha1sum($table);
-                if ($checksum !== $expectedChecksum)
-                    yield new DataIntegrityCheckMatch($dbQueries->getName(), $table, $checksum);
-            }
+            $checksum = $dbQueries->getTableDataSha1sum($table);
+            if ($checksum !== $expectedChecksum)
+                yield new DataIntegrityCheckMatch($dbQueries->getName(), $table, $checksum);
         }
     }
 
     /**
      * @param AbstractDbQueries $dbQueries
      * Proposes a new set of checksums for the configuration file
-     * FIXME adapt to yaml yet
      */
     public function updateConfig(AbstractDbQueries $dbQueries)
     {
-        foreach ($this->config->getDataintegrity() as $table => $_unused_expectedChecksum)
+        echo "datainregritycheck";
+        echo "  mapping:";
+        foreach ($this->config['mapping'] as $table => $_unused_expectedChecksum)
         {
             $checksum = $dbQueries->getTableDataSha1sum($table);
             if ($checksum)
-                echo "$table = $checksum\n";
+                echo "    - $table: $checksum\n";
         }
     }
 
     /**
      * @param AbstractDbQueries $dbQueries
      * Generate a set of checksums for the configuration file
-     * FIXME adapt to yaml yet
      */
     public function generateConfig(AbstractDbQueries $dbQueries)
     {
+        echo "datainregritycheck";
+        echo "  mapping:";
         foreach ($dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
         {
             $checksum = $dbQueries->getTableDataSha1sum($table);
             if ($checksum)
-                echo "$table = $checksum\n";
+                echo "    - $table: $checksum\n";
         }
     }
 }

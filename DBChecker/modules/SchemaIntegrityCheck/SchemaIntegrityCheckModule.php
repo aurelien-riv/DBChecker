@@ -29,11 +29,16 @@ class SchemaIntegrityCheckModule implements ModuleInterface
 
     public function loadConfig(array $config)
     {
-        return $config;
+        $this->config = $config;
+    }
+
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     public function getWorker()
     {
-        return new SchemaIntegrityCheck($this->config);
+        return new SchemaIntegrityCheck($this);
     }
 }

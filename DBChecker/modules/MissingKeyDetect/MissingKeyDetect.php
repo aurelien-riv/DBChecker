@@ -2,16 +2,16 @@
 
 namespace DBChecker\modules\MissingKeyDetect;
 
-use DBChecker\Config;
 use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\ModuleInterface;
 
 class MissingKeyDetect
 {
     private $config;
 
-    public function __construct(Config $config)
+    public function __construct(ModuleInterface $module)
     {
-        $this->config = $config;
+        $this->config = $module->getConfig();
     }
 
     protected function initAlgorithm(AbstractDbQueries $dbQueries, &$notKeys, &$keys)
@@ -58,7 +58,7 @@ class MissingKeyDetect
         $fragments = array_count_values($this->getIdentifiersFragments($identifiers));
 
         $count = count($fragments);
-        $threshold = $this->config->getMissingKey()['threshold'];
+        $threshold = $this->config['threshold'];
         $fragments = array_filter($fragments, function($item) use ($count, $threshold) {
             return ($item > ($count * $threshold / 100));
         });
@@ -91,13 +91,12 @@ class MissingKeyDetect
     public function run(AbstractDbQueries $dbQueries)
     {
         $this->initAlgorithm($dbQueries, $notKeys, $keys);
-        $settings = $this->config->getMissingKey();
 
-        if (! empty($settings['patterns']))
+        if (! empty($this->config['patterns']))
         {
             foreach ($notKeys as $notKey)
             {
-                foreach ($settings['patterns'] as $pattern)
+                foreach ($this->config['patterns'] as $pattern)
                 {
                     if (preg_match('/' . $pattern . '/', $notKey[1]))
                     {

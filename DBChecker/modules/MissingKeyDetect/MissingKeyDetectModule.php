@@ -10,11 +10,6 @@ class MissingKeyDetectModule implements ModuleInterface
 {
     protected $config;
 
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
-
     public function getName()
     {
         return 'missingkeydetect';
@@ -41,11 +36,16 @@ class MissingKeyDetectModule implements ModuleInterface
 
     public function loadConfig(array $config)
     {
-        return $config;
+        $this->config = $config;
+    }
+
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     public function getWorker()
     {
-        return new MissingKeyDetect($this->config);
+        return new MissingKeyDetect($this);
     }
 }

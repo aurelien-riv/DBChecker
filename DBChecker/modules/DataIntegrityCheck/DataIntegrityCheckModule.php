@@ -10,11 +10,6 @@ class DataIntegrityCheckModule implements ModuleInterface
 {
     protected $config;
 
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
-
     public function getName()
     {
         return 'datainregritycheck';
@@ -29,11 +24,16 @@ class DataIntegrityCheckModule implements ModuleInterface
 
     public function loadConfig(array $config)
     {
-        return $config;
+        $this->config = $config;
+    }
+
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     public function getWorker()
     {
-        return new DataIntegrityCheck($this->config);
+        return new DataIntegrityCheck($this);
     }
 }

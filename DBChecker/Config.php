@@ -13,17 +13,17 @@ use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
-    private $filecheck            = [];
-    private $dataintegritycheck   = [];
-    private $schemaintegritycheck = [];
-    private $missingkeydetect     = [];
-
     private $moduleWorkers = [];
 
     /**
      * @var DatabasesModule $databases
      */
     private $databases;
+
+    public function __construct($yamlPath)
+    {
+        $this->parseYaml($yamlPath);
+    }
 
     private function getModuleClasses()
     {
@@ -40,22 +40,17 @@ class Config
     protected function loadModule(BaseModuleInterface $module, $settings)
     {
         $moduleName = $module->getName();
-        $tree = $module->getConfigTreeBuilder()->buildTree();
 
-        $processor = new Processor();
         if (array_key_exists($moduleName, $settings))
         {
+            $processor      = new Processor();
+            $tree           = $module->getConfigTreeBuilder()->buildTree();
             $moduleSettings = $processor->process($tree, [$moduleName => $settings[$moduleName]]);
 
+            $module->loadConfig($moduleSettings);
             if ($module instanceof ModuleInterface)
             {
-                // FIXME should hold their configuration themselves
-                $this->{$moduleName} = $module->loadConfig($moduleSettings);
                 $this->moduleWorkers[] = $module->getWorker();
-            }
-            else
-            {
-                $module->loadConfig($moduleSettings);
             }
         }
     }
@@ -73,11 +68,6 @@ class Config
         }
     }
 
-    public function __construct($yamlPath)
-    {
-        $this->parseYaml($yamlPath);
-    }
-
     /**
      * @return ModuleWorkerInterface[]
      */
@@ -89,41 +79,5 @@ class Config
     public function getQueries()
     {
         return $this->databases->getConnections();
-    }
-
-    /**
-     * @deprecated
-     * @return array
-     */
-    public function getFilecheck()
-    {
-        return $this->filecheck;
-    }
-
-    /**
-     * @deprecated
-     * @return array
-     */
-    public function getDataintegrity()
-    {
-        return $this->dataintegritycheck;
-    }
-
-    /**
-     * @deprecated
-     * @return array
-     */
-    public function getSchemaIntegrity()
-    {
-        return $this->schemaintegritycheck;
-    }
-
-    /**
-     * @deprecated
-     * @return array
-     */
-    public function getMissingKey()
-    {
-        return $this->missingkeydetect;
     }
 }

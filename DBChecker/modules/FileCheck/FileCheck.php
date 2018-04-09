@@ -2,30 +2,47 @@
 
 namespace DBChecker\modules\FileCheck;
 
+use DBChecker\AbstractMatch;
 use DBChecker\Config;
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleWorkerInterface;
-use phpseclib\Crypt\RSA;
-use phpseclib\Net\SFTP;
 
 class FileCheck implements ModuleWorkerInterface
 {
     private $config;
 
     /**
-     * @var SFTP|null $sftp
+     * @var FileCheckSftp $sftp
      */
     private $sftp;
+    /**
+     * @var FileCheckHttp $http
+     */
+    private $http;
 
-    public function __construct(Config $config)
+    /**
+     * FileCheck constructor.
+     * @param FileCheckModule $module
+     * @throws \Exception
+     */
+    public function __construct(FileCheckModule $module)
     {
-        $this->config = $config;
+        $this->config = $module->getConfig();
+
+        if ($this->config['enable_remotes'])
+        {
+            $this->http = new FileCheckHttp();
+        }
+
+        if (! empty($this->config['ssh']))
+        {
+            $this->sftp = new FileCheckSftp($this->config['ssh']);
+        }
     }
 
-    protected function doRun(AbstractDbQueries $dbQueries)
+    public function run(AbstractDbQueries $dbQueries)
     {
-        $configuration = $this->config->getFilecheck();
-        foreach ($configuration['mapping'] as $mapping)
+        foreach ($this->config['mapping'] as $mapping)
         {
             $table = key($mapping);
             $path = $mapping[$table];
@@ -54,133 +71,39 @@ class FileCheck implements ModuleWorkerInterface
                 }, $path);
 
                 $error = $this->testFile($dbQueries, $table, $tmpColumns, $tmpPath);
-                if ($error)
+                if ($error instanceof AbstractMatch)
                     yield $error;
             }
         }
     }
 
-    public function run(AbstractDbQueries $dbQueries)
-    {
-        $configuration = $this->config->getFilecheck();
-
-        if ($configuration['enable_remotes'])
-        {
-            stream_context_set_default([
-                'http' => [
-                    'method' => 'HEAD'
-                ]
-            ]);
-        }
-
-        $this->initSFTP();
-
-        foreach ($this->doRun($dbQueries) as $msg)
-        {
-            yield $msg;
-        }
-
-        // TODO restore stream_context
-    }
-
-    protected function promptPassword($message)
-    {
-        printf("$message: ");
-        system('stty -echo');
-        $password = trim(fgets(STDIN));
-        system('stty echo');
-        echo '';
-        return $password;
-    }
-
-    protected function initSFTP()
-    {
-        $configuration = $this->config->getFilecheck();
-        if (! empty($configuration['ssh'])) // FIXME connect once, not for each file
-        {
-            $sshConfig = $configuration['ssh'];
-
-            $sftp = new SFTP($sshConfig['host'], $sshConfig['port']);
-            if ($sshConfig['pkey_file'])
-            {
-                $key = new RSA();
-                if (! empty($sshConfig['pkey_passphrase']))
-                {
-                    $passPhrase = $sshConfig['pkey_passphrase'];
-                    if ($passPhrase === 'prompt')
-                    {
-                        $passPhrase = $this->promptPassword("Private key passphrase");
-                    }
-                    $key->setPassword($passPhrase);
-                }
-                $key->loadKey(file_get_contents($sshConfig['pkey_file']));
-
-                if (! $sftp->login($sshConfig['user'], $key))
-                    throw new \Exception("Cannot connect to the server");
-            }
-            else if ($sshConfig['password'])
-            {
-                if (! $sftp->login($sshConfig['user'], $sshConfig['password']))
-                    throw new \Exception("Cannot connect to the server");
-            }
-            else
-            {
-                throw new \Exception("No pkey_file provided");
-            }
-
-            $this->sftp = $sftp;
-        }
-    }
-
     protected function testFile(AbstractDbQueries $dbQueries, $table, $columns, $path)
     {
-        if (preg_match('/^https?:\/\//', $path)) // disabled until an option exists to enable it (slows the process down too much when not needed)
+        $match = true;
+        if (preg_match('/^https?:\/\//', $path))
         {
-            $configuration = $this->config->getFilecheck();
-            if ($configuration['enable_remotes'])
+            if ($this->http)
             {
-                $urlStatus = $this->testUrl($dbQueries, $table, $columns, $path);
-                if ($urlStatus instanceof FileCheckURLMatch)
-                    return $urlStatus;
+                $status = $this->http->testUrl($path);
+                if ($status !== true)
+                {
+                    $match = new FileCheckURLMatch($dbQueries->getName(), $table, $columns, $path, $status);
+                }
             }
         }
         else if ($this->sftp)
         {
             if (! $this->sftp->file_exists($path))
-                return new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
+            {
+                $match = new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
+            }
         }
         else if (! is_file($path))
         {
-            return new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
+            $match = new FileCheckMatch($dbQueries->getName(), $table, $columns, $path);
         }
-        return null;
+        return $match;
     }
 
-    protected function testUrl(AbstractDbQueries $dbQueries, $table, $columns, $path)
-    {
-        $headers = @get_headers($path);
-        // if ! status 200
-        if (! preg_match('/HTTP\/\d\.\d 2\d{2}.*/', $headers[0]))
-        {
-            // if is redirect
-            if (preg_match('/HTTP\/\d\.\d 3\d{2}.*/', $headers[0]))
-            {
-                array_shift($headers);
-                // browse the headers to get the status before the redirects
-                foreach ($headers as $header)
-                {
-                    // if status 4xx or 5xx
-                    if (preg_match('/HTTP\/\d\.\d (4|5)\d{2}.*/', $header))
-                    {
-                        return new FileCheckURLMatch($dbQueries->getName(), $table, $columns, $path, substr($header, 9, 3));
-                    }
-                }
-            }
-            else
-            {
-                return new FileCheckURLMatch($dbQueries->getName(), $table, $columns, $path, substr($headers[0], 9, 3));
-            }
-        }
-        return true;
-    }
+
 }

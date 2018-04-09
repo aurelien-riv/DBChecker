@@ -8,13 +8,6 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class UniqueIntegrityCheckModule implements ModuleInterface
 {
-    protected $config;
-
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
-
     public function getName()
     {
         return 'dataintegritycheck';
@@ -29,11 +22,15 @@ class UniqueIntegrityCheckModule implements ModuleInterface
 
     public function loadConfig(array $config)
     {
-        return $config;
+    }
+
+    public function getConfig()
+    {
+        return [];
     }
 
     public function getWorker()
     {
-        return new UniqueIntegrityCheck($this->config);
+        return new UniqueIntegrityCheck();
     }
 }

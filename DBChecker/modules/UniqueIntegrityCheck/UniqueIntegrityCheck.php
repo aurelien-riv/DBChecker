@@ -2,18 +2,10 @@
 
 namespace DBChecker\modules\UniqueIntegrityCheck;
 
-use DBChecker\Config;
 use DBChecker\DBQueries\AbstractDbQueries;
 
 class UniqueIntegrityCheck
 {
-    private $config;
-
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
-
     public function run(AbstractDbQueries $dbQueries)
     {
         $tables = $dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);

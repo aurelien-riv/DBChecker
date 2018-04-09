@@ -2,18 +2,11 @@
 
 namespace DBChecker\modules\RelCheck;
 
-use DBChecker\Config;
 use DBChecker\DBQueries\AbstractDbQueries;
 
 class RelCheck
 {
-    private $config;
     private $tables;
-
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
 
     public function run(AbstractDbQueries $dbQueries)
     {

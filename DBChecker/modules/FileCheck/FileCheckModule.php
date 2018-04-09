@@ -2,19 +2,13 @@
 
 namespace DBChecker\modules\FileCheck;
 
-use DBChecker\Config;
 use DBChecker\ModuleInterface;
+use DBChecker\ModuleWorkerInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class FileCheckModule implements ModuleInterface
 {
-    protected $configuration;
     protected $config;
-
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
 
     public function getName()
     {
@@ -32,12 +26,19 @@ class FileCheckModule implements ModuleInterface
                     ->info("If true, http and https URL will be fetched to detect 4xx and 5xx errors")
                 ->end()
                 ->arrayNode('ssh')
+                    ->info('Checks path using SFTP instead of local is_file')
                     ->children()
                         ->scalarNode('host')->end()
-                        ->integerNode('port')->defaultValue(22)->end()
+                        ->integerNode('port')
+                            ->defaultValue(22)
+                        ->end()
                         ->scalarNode('user')->end()
-                        ->scalarNode('password')->defaultNull()->end()
-                        ->scalarNode('pkey_file')->defaultNull()->end()
+                        ->scalarNode('password')
+                            ->defaultNull()
+                        ->end()
+                        ->scalarNode('pkey_file')
+                            ->defaultNull()
+                        ->end()
                         ->scalarNode('pkey_passphrase')
                             ->defaultNull()
                             ->info('Passphrase for the private key, or "prompt" for interactive')
@@ -59,11 +60,20 @@ class FileCheckModule implements ModuleInterface
 
     public function loadConfig(array $config)
     {
-        return $config;
+        $this->config = $config;
     }
 
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @return FileCheck|ModuleWorkerInterface
+     * @throws \Exception
+     */
     public function getWorker()
     {
-        return new FileCheck($this->config);
+        return new FileCheck($this);
     }
 }

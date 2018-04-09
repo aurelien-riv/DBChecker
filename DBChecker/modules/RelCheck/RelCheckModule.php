@@ -8,13 +8,6 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class RelCheckModule implements ModuleInterface
 {
-    protected $config;
-
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
-
     public function getName()
     {
         return 'relcheck';
@@ -29,11 +22,15 @@ class RelCheckModule implements ModuleInterface
 
     public function loadConfig(array $config)
     {
-        return $config;
+    }
+
+    public function getConfig()
+    {
+        return [];
     }
 
     public function getWorker()
     {
-        return new RelCheck($this->config);
+        return new RelCheck();
     }
 }
