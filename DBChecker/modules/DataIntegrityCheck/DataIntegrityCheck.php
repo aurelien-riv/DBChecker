@@ -35,7 +35,7 @@ class DataIntegrityCheck
     {
         echo "datainregritycheck";
         echo "  mapping:";
-        foreach ($this->config['mapping'] as $table => $_unused_expectedChecksum)
+        foreach (array_keys($this->config['mapping']) as $table)
         {
             $checksum = $dbQueries->getTableDataSha1sum($table);
             if ($checksum)
