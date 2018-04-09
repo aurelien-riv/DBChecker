@@ -18,7 +18,19 @@ class DataIntegrityCheckModule implements ModuleInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $treeBuilder->root($this->getName());
+        $treeBuilder->root($this->getName())
+            ->children()
+                ->arrayNode('mapping')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                    ->arrayPrototype()
+                        ->useAttributeAsKey('key')
+                        ->prototype('scalar')
+                            ->info('A SHA1 sum')
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
         return $treeBuilder;
     }
 

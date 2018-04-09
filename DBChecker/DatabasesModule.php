@@ -81,4 +81,9 @@ class DatabasesModule implements BaseModuleInterface
             $this->addConnection($cnx);
         }
     }
+
+    public function getConfig()
+    {
+        return [];
+    }
 }
