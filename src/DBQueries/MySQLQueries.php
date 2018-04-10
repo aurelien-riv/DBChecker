@@ -140,7 +140,7 @@ class MySQLQueries extends AbstractDbQueries
      * @return bool|\PDOStatement
      * Warning, composed key are not supported yet
      */
-    public function getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoinColumns)
+    public function getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoinColumns) : \PDOStatement
     {
         $columns          = array_unique($columns);
         $innerJoinColumns = array_unique($innerJoinColumns);
@@ -173,6 +173,21 @@ class MySQLQueries extends AbstractDbQueries
         $stmt->bindParam(':value', $value, \PDO::PARAM_STR);
         $stmt->execute();
         return $stmt;
+    }
+
+    protected function getConcatenatedColumnNames($table)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT GROUP_CONCAT(column_name)
+            FROM information_schema.columns 
+            WHERE table_schema=DATABASE() AND table_name=:table
+        ");
+        $stmt->bindParam(':table', $table, \PDO::PARAM_STR);
+        $stmt->execute();
+        $result = $stmt->fetchColumn();
+        $stmt->closeCursor();
+        return $result;
+
     }
 
     public function getTableDataSha1sum($table)
