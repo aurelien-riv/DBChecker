@@ -11,6 +11,11 @@ abstract class AbstractMatch
         $this->dbName = $dbName;
     }
 
+    public function __toString()
+    {
+        return $this->getMessage();
+    }
+
     /**
      * @return string
      */

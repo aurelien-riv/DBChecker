@@ -2,7 +2,8 @@
 
 namespace DBChecker\DBQueries;
 
-abstract class AbstractDbQueries
+abstract class AbstractDbQueries implements
+    \DBChecker\modules\MissingCompressionDetect\DBQueriesInterface
 {
     /**
      * Regex that matches a valid column name
@@ -18,7 +19,7 @@ abstract class AbstractDbQueries
         $this->name = $name;
     }
 
-    public function getName()
+    public function getName() : string
     {
         return $this->name;
     }
@@ -115,15 +116,8 @@ abstract class AbstractDbQueries
      * @param $table
      * @return string
      */
-    public abstract function getTableSchemaSha1sum($table);
+    public abstract function getTableSchemaSha1sum($table) : string;
     #endregion
-
-    #region Compression
-    /**
-     * @param int $octetLength
-     * @return bool|\PDOStatement
-     */
-    public abstract function getTableAndColumnNamesFilterByColumnMinOctetLength(int $octetLength);
 
     public function supportsTablespaceCompression() : bool
     {
@@ -134,7 +128,4 @@ abstract class AbstractDbQueries
     {
         return false;
     }
-
-    public abstract function getRandomValuesInColumnConcatenated($table, $column, $limit);
-    #endregion
 }

@@ -2,18 +2,8 @@
 
 namespace DBChecker\modules\MissingCompressionDetect;
 
-use DBChecker\AbstractMatch;
-
-class MissingCompressionMatch extends AbstractMatch
+class MissingCompressionMatch extends CompressionIssueMatch
 {
-    protected $table;
-
-    public function __construct($dbName, $table)
-    {
-        parent::__construct($dbName);
-        $this->table = $table;
-    }
-
     public function __toString()
     {
         return $this->getMessage();

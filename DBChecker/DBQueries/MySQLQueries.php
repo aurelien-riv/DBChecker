@@ -25,18 +25,6 @@ class MySQLQueries extends AbstractDbQueries
         return $this->pdo->query("SHOW COLUMNS FROM $table");
     }
 
-    public function getTableAndColumnNamesFilterByColumnMinOctetLength(int $octetLength)
-    {
-        $stmt = $this->pdo->prepare("
-            SELECT DISTINCT TABLE_NAME, COLUMN_NAME 
-            FROM information_schema.COLUMNS 
-            WHERE TABLE_SCHEMA = DATABASE() AND CHARACTER_OCTET_LENGTH > :octetLength;
-        ");
-        $stmt->bindParam(':octetLength', $octetLength, \PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt;
-    }
-
     public function getPKs($table)
     {
         return $this->pdo->query("SHOW INDEX FROM $table WHERE Key_name = 'PRIMARY'");
@@ -213,7 +201,7 @@ class MySQLQueries extends AbstractDbQueries
         return empty($result) ? 0 : $result;
     }
 
-    public function getTableSchemaSha1sum($table)
+    public function getTableSchemaSha1sum($table) : string
     {
         $columns = $this->getConcatenatedColumnNames($table);
         return hash('sha1', $columns);
@@ -239,19 +227,32 @@ class MySQLQueries extends AbstractDbQueries
         return (in_array($result->ROW_FORMAT, ['Compressed', 'tokudb_zlib']));
     }
 
-    public function getRandomValuesInColumnConcatenated($table, $column, $limit)
+    public function getRandomValuesConcatenated(string $table, int $limit) : \PDOStatement
     {
+        $columns = $this->getConcatenatedColumnNames($table);
         $stmt = $this->pdo->prepare("
-            SELECT GROUP_CONCAT(d.$column) 
+            SELECT CONCAT_WS($columns) 
             FROM (
-                SELECT $column, 1 AS grp 
+                SELECT *, 1 AS grp 
                 FROM $table 
                 ORDER BY RAND() 
                 LIMIT :limit
             ) AS d 
             GROUP BY d.grp;
         ");
-        $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindParam(':limit',   $limit,   \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function getTableLargerThanMb(int $mb) : \PDOStatement
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT TABLE_NAME 
+            FROM information_schema.TABLES 
+            WHERE table_schema = DATABASE() AND ((data_length + index_length) / 1024 / 1024) > :minSize;
+        ");
+        $stmt->bindParam(':minSize', $mb, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt;
     }

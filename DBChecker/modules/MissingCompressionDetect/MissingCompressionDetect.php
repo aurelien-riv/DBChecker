@@ -4,6 +4,7 @@ namespace DBChecker\modules\MissingCompressionDetect;
 
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleWorkerInterface;
+use Symfony\Component\Filesystem\Exception\InvalidArgumentException;
 
 class MissingCompressionDetect implements ModuleWorkerInterface
 {
@@ -11,51 +12,47 @@ class MissingCompressionDetect implements ModuleWorkerInterface
     {
         $engineSupportsCompression = $dbQueries->supportsTablespaceCompression();
 
-        $schemas = $dbQueries->getTableAndColumnNamesFilterByColumnMinOctetLength(2048)->fetchAll(\PDO::FETCH_OBJ);
-        foreach ($schemas as $schema)
+        $tables = $dbQueries->getTableLargerThanMb(3)->fetchAll(\PDO::FETCH_OBJ);
+        foreach ($tables as $table)
         {
-            if (!$engineSupportsCompression)
-            {
-                yield new MissingCompressionUnsupportedMatch($dbQueries->getName(), $schema->TABLE_NAME);
-                continue;
-            }
+            $tableCompressed = $dbQueries->isTableCompressed($table->TABLE_NAME);
+            $needsCompression = $this->needsCompression($dbQueries, $table->TABLE_NAME);
+            yield from $this->yieldOnError($dbQueries, $table->TABLE_NAME, $tableCompressed, $needsCompression, $engineSupportsCompression);
+        }
+    }
 
-            $tableCompressed = $dbQueries->isTableCompressed($schema->TABLE_NAME);
-            $dataCompressed = $this->detectCompressedValue($dbQueries, $schema->TABLE_NAME, $schema->COLUMN_NAME);
-            if ($dataCompressed !== null)
+    public function yieldOnError(DBQueriesInterface $dbQueries, $tableName, $isCompressed, $needsCompression, $canCompress)
+    {
+        if ($needsCompression)
+        {
+            if (! $canCompress)
             {
-                if (! $dataCompressed && ! $tableCompressed)
-                {
-                    yield new MissingCompressionMatch($dbQueries->getName(), $schema->TABLE_NAME);
-                }
-                else if ($dataCompressed && $tableCompressed)
-                {
-                    yield new DuplicateCompressionMatch($dbQueries->getName(), $schema->TABLE_NAME, $schema->COLUMN_NAME);
-                }
+                yield new MissingCompressionUnsupportedMatch($dbQueries->getName(), $tableName);
             }
+            else if (! $isCompressed)
+            {
+                yield new MissingCompressionMatch($dbQueries->getName(), $tableName);
+            }
+        }
+        else if ($isCompressed)
+        {
+            yield new DuplicateCompressionMatch($dbQueries->getName(), $tableName);
         }
     }
 
     /**
-     * @param AbstractDbQueries $dbQueries
+     * @param DBQueriesInterface $dbQueries
      * @param string            $table
-     * @param string            $column
      * @return bool|null
-     * Returns null if no data, true if the data is already compressed (= a compression reduces the size of less than
-     * 80%), false otherwise.
+     * Returns true if the data is significantly smaller once compressed, false otherwise.
      */
-    private function detectCompressedValue(AbstractDbQueries $dbQueries, string $table, string $column) : ?bool
+    private function needsCompression(DBQueriesInterface $dbQueries, string $table) : bool
     {
-        $data = $dbQueries->getRandomValuesInColumnConcatenated($table, $column, 15)->fetchAll(\PDO::FETCH_COLUMN);
-        if ($data)
+        $data = $dbQueries->getRandomValuesConcatenated($table, 15)->fetchAll(\PDO::FETCH_COLUMN);
+        if (empty($data))
         {
-            $compressedDataLen = strlen(gzcompress($data[0]));
-            if ($compressedDataLen > strlen($data[0]) * 0.80)
-            {
-                return true;
-            }
-            return false;
+            throw new InvalidArgumentException("Table has no data");
         }
-        return null;
+        return ! (strlen(gzcompress($data[0])) > strlen($data[0]) * 0.80);
     }
 }
