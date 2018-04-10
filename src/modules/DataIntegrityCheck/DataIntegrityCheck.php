@@ -24,15 +24,17 @@ class DataIntegrityCheck implements ModuleWorkerInterface
         {
             $checksum = $dbQueries->getTableDataSha1sum($table);
             if ($checksum !== $expectedChecksum)
+            {
                 yield new DataIntegrityCheckMatch($dbQueries->getName(), $table, $checksum);
+            }
         }
     }
 
     /**
-     * @param AbstractDbQueries $dbQueries
+     * @param DBQueriesInterface $dbQueries
      * Proposes a new set of checksums for the configuration file
      */
-    public function updateConfig(AbstractDbQueries $dbQueries)
+    public function updateConfig(DBQueriesInterface $dbQueries)
     {
         echo "datainregritycheck";
         echo "  mapping:";
@@ -40,15 +42,17 @@ class DataIntegrityCheck implements ModuleWorkerInterface
         {
             $checksum = $dbQueries->getTableDataSha1sum($table);
             if ($checksum)
+            {
                 echo "    - $table: $checksum\n";
+            }
         }
     }
 
     /**
-     * @param AbstractDbQueries $dbQueries
+     * @param DBQueriesInterface $dbQueries
      * Generate a set of checksums for the configuration file
      */
-    public function generateConfig(AbstractDbQueries $dbQueries)
+    public function generateConfig(DBQueriesInterface $dbQueries)
     {
         echo "datainregritycheck";
         echo "  mapping:";
@@ -56,7 +60,9 @@ class DataIntegrityCheck implements ModuleWorkerInterface
         {
             $checksum = $dbQueries->getTableDataSha1sum($table);
             if ($checksum)
+            {
                 echo "    - $table: $checksum\n";
+            }
         }
     }
 }

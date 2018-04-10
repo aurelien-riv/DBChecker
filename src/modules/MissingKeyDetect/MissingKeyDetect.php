@@ -15,7 +15,7 @@ class MissingKeyDetect implements ModuleWorkerInterface
         $this->config = $module->getConfig();
     }
 
-    protected function isPk(AbstractDbQueries $dbQueries, \stdClass $column)
+    protected function isPk(DBQueriesInterface $dbQueries, \stdClass $column)
     {
         $pks = $dbQueries->getPks($column->TABLE_NAME)->fetchAll(\PDO::FETCH_OBJ);
         foreach ($pks as $pk)
@@ -28,14 +28,14 @@ class MissingKeyDetect implements ModuleWorkerInterface
         return false;
     }
 
-    protected function isFk(AbstractDbQueries $dbQueries, \stdClass $column)
+    protected function isFk(DBQueriesInterface $dbQueries, \stdClass $column)
     {
         return $dbQueries
                    ->getDistantTableAndColumnFromTableAndColumnFK($column->TABLE_NAME, $column->COLUMN_NAME)
                    ->fetch(\PDO::FETCH_OBJ) !== false;
     }
 
-    protected function initAlgorithm(AbstractDbQueries $dbQueries, &$notKeys, &$keys)
+    protected function initAlgorithm(DBQueriesInterface $dbQueries, &$notKeys, &$keys)
     {
         $columns = $dbQueries->getColumnNamesWithTableName()->fetchAll(\PDO::FETCH_OBJ);
         foreach ($columns as $column)
@@ -97,7 +97,7 @@ class MissingKeyDetect implements ModuleWorkerInterface
         return $matches;
     }
 
-    protected function runWithPatterns(AbstractDbQueries $dbQueries, $notKeys)
+    protected function runWithPatterns(string $dbName, $notKeys)
     {
         foreach ($notKeys as $notKey)
         {
@@ -105,14 +105,14 @@ class MissingKeyDetect implements ModuleWorkerInterface
             {
                 if (preg_match('/' . $pattern . '/', $notKey[1]))
                 {
-                    yield new MissingKeyDetectMatch($dbQueries->getName(), $notKey[0], $notKey[1]);
+                    yield new MissingKeyDetectMatch($dbName, $notKey[0], $notKey[1]);
                     break;
                 }
             }
         }
     }
 
-    protected function runWithAutodetect(AbstractDbQueries $dbQueries, $notKeys, $keys)
+    protected function runWithAutodetect(string $dbName, $notKeys, $keys)
     {
         $keyFragments = $this->getFrequentIdentifiersFragments($keys);
         foreach ($notKeys as $notKey)
@@ -121,7 +121,7 @@ class MissingKeyDetect implements ModuleWorkerInterface
             {
                 if (in_array($fragment, $keyFragments))
                 {
-                    yield new MissingKeyDetectMatch($dbQueries->getName(), $notKey[0], $notKey[1]);
+                    yield new MissingKeyDetectMatch($dbName, $notKey[0], $notKey[1]);
                     break;
                 }
             }
@@ -134,11 +134,11 @@ class MissingKeyDetect implements ModuleWorkerInterface
 
         if (! empty($this->config['patterns']))
         {
-            yield from $this->runWithPatterns($dbQueries, $notKeys);
+            yield from $this->runWithPatterns($dbQueries->getName(), $notKeys);
         }
         else
         {
-            yield from $this->runWithAutodetect($dbQueries, $notKeys, $keys);
+            yield from $this->runWithAutodetect($dbQueries->getName(), $notKeys, $keys);
         }
     }
 }

@@ -22,11 +22,13 @@ class FileCheckSftp
         }
         else
         {
-            throw new \Exception("No pkey_file provided");
+            throw new \InvalidArgumentException("No pkey_file provided");
         }
 
         if (! $this->sftp->login($config['user'], $auth))
-            throw new \Exception("Cannot connect to the server");
+        {
+            throw new \InvalidArgumentException("Cannot connect to the server");
+        }
     }
 
     public function file_exists($path)

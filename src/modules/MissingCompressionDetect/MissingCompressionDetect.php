@@ -32,11 +32,15 @@ class MissingCompressionDetect implements ModuleWorkerInterface
 
     public function yieldOnError(string $dbName, string $tableName, bool $isCompressed, bool $needsCompression, bool $canCompress)
     {
+        if ($isCompressed && ! $canCompress)
+        {
+            throw new \LogicException("A database cannot be compressed without compression support");
+        }
         if ($needsCompression)
         {
             if (! $canCompress)
             {
-                yield new MissingCompressionUnsupportedMatch($dbName, $tableName);
+                yield new CompressionUnsupportedMatch($dbName, $tableName);
             }
             else if (! $isCompressed)
             {

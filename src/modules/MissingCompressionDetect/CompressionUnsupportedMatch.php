@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\MissingCompressionDetect;
 
-class MissingCompressionUnsupportedMatch extends MissingCompressionMatch
+class CompressionUnsupportedMatch extends CompressionIssueMatch
 {
     public function getMessage()
     {

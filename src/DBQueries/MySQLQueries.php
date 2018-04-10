@@ -175,21 +175,6 @@ class MySQLQueries extends AbstractDbQueries
         return $stmt;
     }
 
-    public function getConcatenatedColumnNames($table)
-    {
-        $stmt = $this->pdo->prepare("
-            SELECT GROUP_CONCAT(column_name)
-            FROM information_schema.columns 
-            WHERE table_schema=DATABASE() AND table_name=:table
-        ");
-        $stmt->bindParam(':table', $table, \PDO::PARAM_STR);
-        $stmt->execute();
-        $result = $stmt->fetchColumn();
-        $stmt->closeCursor();
-        return $result;
-
-    }
-
     public function getTableDataSha1sum($table)
     {
         $columns = $this->getConcatenatedColumnNames($table);

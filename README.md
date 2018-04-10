@@ -4,7 +4,6 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/d8f1fb2026c68fde6b91/maintainability)](https://codeclimate.com/github/aurelien-riv/DBChecker/maintainability)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/?branch=master)
 [![Build Status](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/badges/build.png?b=master)](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/build-status/master)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/80e9a112-5fa1-4326-8583-1c703ecde499/mini.png)](https://insight.sensiolabs.com/projects/80e9a112-5fa1-4326-8583-1c703ecde499)
 
 [![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=sqale_rating)](https://sonarcloud.io/component_measures?id=DBChecker&metric=sqale_rating)
 [![Reliability](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=reliability_rating)](https://sonarcloud.io/component_measures?id=DBChecker&metric=reliability_rating)

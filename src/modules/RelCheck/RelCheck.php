@@ -32,7 +32,7 @@ class RelCheck implements ModuleWorkerInterface
         }
     }
 
-    protected function checkRelations(AbstractDbQueries $dbQueries, $tbl, $col, $rtbl, $rcol)
+    protected function checkRelations(DBQueriesInterface $dbQueries, $tbl, $col, $rtbl, $rcol)
     {
         $values = $dbQueries->getDistinctValuesWithoutNulls($tbl, $col)->fetchAll(\PDO::FETCH_COLUMN);
         foreach ($values as $value)
@@ -45,7 +45,7 @@ class RelCheck implements ModuleWorkerInterface
         }
     }
 
-    public function checkSourceAndReferencedColumns(AbstractDbQueries $dbQueries, $tbl, $col, $rtbl, $rcol)
+    public function checkSourceAndReferencedColumns(DBQueriesInterface $dbQueries, $tbl, $col, $rtbl, $rcol)
     {
         yield from $this->checkSchema($dbQueries, $tbl,  $col);
         yield from $this->checkSchema($dbQueries, $rtbl, $rcol);
@@ -53,12 +53,12 @@ class RelCheck implements ModuleWorkerInterface
 
     /**
      * Checks whether the table $tbl exists and contains the column $col
-     * @param AbstractDbQueries $dbQueries
+     * @param DBQueriesInterface $dbQueries
      * @param string            $tbl The name of the column that is supposed to exist in the database
      * @param string            $col The name of the column that is supposed to exist in the table $tbl
      * @return \Generator
      */
-    public function checkSchema(AbstractDbQueries $dbQueries, $tbl, $col)
+    public function checkSchema(DBQueriesInterface $dbQueries, $tbl, $col)
     {
         if (! in_array($tbl, $this->tables))
         {

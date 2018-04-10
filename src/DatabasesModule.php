@@ -67,6 +67,7 @@ class DatabasesModule implements BaseModuleInterface
     {
         $dns = "{$cnx['engine']}:dbname={$cnx['db']};host={$cnx['host']};port={$cnx['port']}";
         $pdo = new \PDO($dns, $cnx['login'], $cnx['password']);
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         if ($cnx['engine'] == 'mysql')
         {

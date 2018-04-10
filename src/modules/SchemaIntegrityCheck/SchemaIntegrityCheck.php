@@ -32,7 +32,7 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
         }
     }
 
-    public function checkForExtraTables(AbstractDbQueries $dbQueries)
+    public function checkForExtraTables(DBQueriesInterface $dbQueries)
     {
         foreach ($dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
         {
@@ -41,14 +41,16 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
                 foreach ($this->config['ignore'] as $ignore)
                 {
                     if (preg_match('/' . $ignore . '/', $table))
+                    {
                         continue 2;
+                    }
                 }
                 yield new SchemaIntegrityCheckMatch($dbQueries->getName(), $table, 'unexpected table');
             }
         }
     }
 
-    public function generateConfig(AbstractDbQueries $dbQueries)
+    public function generateConfig(DBQueriesInterface $dbQueries)
     {
         echo "schemaintegrity:";
         echo "  mapping:";
@@ -59,12 +61,16 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
                 foreach ($this->config['ignore'] as $ignore)
                 {
                     if (preg_match('/'.$ignore.'/', $table))
+                    {
                         continue 2;
+                    }
                 }
             }
             $checksum = $dbQueries->getTableSchemaSha1sum($table);
             if ($checksum)
+            {
                 echo "    - $table: $checksum\n";
+            }
         }
     }
 }
