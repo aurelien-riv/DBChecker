@@ -21,7 +21,6 @@ class FileCheck implements ModuleWorkerInterface
     private $http;
 
     /**
-     * FileCheck constructor.
      * @param FileCheckModule $module
      * @throws \Exception
      */
