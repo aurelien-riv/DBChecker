@@ -9,6 +9,9 @@
         "symfony/yaml":   "^4.0",
         "phpseclib/phpseclib": "^2.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^7"
+    },
     "autoload": {
         "psr-4": {
             "DBChecker\\": "src"
@@ -18,8 +21,5 @@
         "psr-4": {
             "DBCheckerTests\\": "tests"
         }
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^7"
     }
 }
