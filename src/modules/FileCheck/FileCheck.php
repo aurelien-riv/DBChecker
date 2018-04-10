@@ -56,14 +56,14 @@ class FileCheck implements ModuleWorkerInterface
         }
     }
 
-    protected function replaceVariablesFromPath($path, \stdClass $value, &$columns)
+    protected function replaceVariablesFromPath($path, $value, &$columns)
     {
         $columnIdentifier = AbstractDbQueries::IDENTIFIER;
         $pattern = "/\{($columnIdentifier(?:\.$columnIdentifier)?)\}/";
 
         return preg_replace_callback($pattern, function($match) use ($value, &$columns) {
-            $columns[$match[1]] = $value->{$match[1]};
-            return $value->{$match[1]};
+            $columns[$match[1]] = $value[$match[1]];
+            return $value[$match[1]];
         }, $path);
     }
 
@@ -78,7 +78,7 @@ class FileCheck implements ModuleWorkerInterface
             $this->extractVariablesFromPath($path, $columns, $innerJoins);
 
             $values = $dbQueries->getDistinctValuesWithJoinColumnsWithoutNulls($table, array_keys($columns), $innerJoins)
-                              ->fetchAll(\PDO::FETCH_OBJ);
+                              ->fetchAll(\PDO::FETCH_ASSOC);
             foreach ($values as $value)
             {
                 $tmpColumns = $columns;
