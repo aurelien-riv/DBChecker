@@ -35,11 +35,6 @@ abstract class AbstractDbQueries
     public abstract function getColumnNamesWithTableName();
 
     /**
-     * @param int $octetLength
-     * @return bool|\PDOStatement
-     */
-    public abstract function getTableNamesFilterByColumnMinOctetLength(int $octetLength);
-    /**
      * @param string $table
      * @return bool|\PDOStatement
      */
@@ -124,6 +119,12 @@ abstract class AbstractDbQueries
     #endregion
 
     #region Compression
+    /**
+     * @param int $octetLength
+     * @return bool|\PDOStatement
+     */
+    public abstract function getTableAndColumnNamesFilterByColumnMinOctetLength(int $octetLength);
+
     public function supportsTablespaceCompression() : bool
     {
         return false;
@@ -133,5 +134,7 @@ abstract class AbstractDbQueries
     {
         return false;
     }
+
+    public abstract function getRandomValuesInColumnConcatenated($table, $column, $limit);
     #endregion
 }

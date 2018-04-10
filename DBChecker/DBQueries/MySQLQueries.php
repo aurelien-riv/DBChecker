@@ -25,10 +25,10 @@ class MySQLQueries extends AbstractDbQueries
         return $this->pdo->query("SHOW COLUMNS FROM $table");
     }
 
-    public function getTableNamesFilterByColumnMinOctetLength(int $octetLength)
+    public function getTableAndColumnNamesFilterByColumnMinOctetLength(int $octetLength)
     {
         $stmt = $this->pdo->prepare("
-            SELECT DISTINCT TABLE_NAME 
+            SELECT DISTINCT TABLE_NAME, COLUMN_NAME 
             FROM information_schema.COLUMNS 
             WHERE TABLE_SCHEMA = DATABASE() AND CHARACTER_OCTET_LENGTH > :octetLength;
         ");
@@ -219,6 +219,7 @@ class MySQLQueries extends AbstractDbQueries
         return hash('sha1', $columns);
     }
 
+    #region Compression
     public function supportsTablespaceCompression() : bool
     {
         return true; // FIXME depends on the version of MySQL/MariaDB
@@ -235,6 +236,24 @@ class MySQLQueries extends AbstractDbQueries
         $stmt->execute();
         $result = $stmt->fetch(\PDO::FETCH_OBJ);
 
-        return ($result->ROW_FORMAT === 'Compressed');
+        return (in_array($result->ROW_FORMAT, ['Compressed', 'tokudb_zlib']));
     }
+
+    public function getRandomValuesInColumnConcatenated($table, $column, $limit)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT GROUP_CONCAT(d.$column) 
+            FROM (
+                SELECT $column, 1 AS grp 
+                FROM $table 
+                ORDER BY RAND() 
+                LIMIT :limit
+            ) AS d 
+            GROUP BY d.grp;
+        ");
+        $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt;
+    }
+    #endregion
 }

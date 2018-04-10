@@ -11,20 +11,51 @@ class MissingCompressionDetect implements ModuleWorkerInterface
     {
         $engineSupportsCompression = $dbQueries->supportsTablespaceCompression();
 
-        $tables = $dbQueries->getTableNamesFilterByColumnMinOctetLength(1024)->fetchAll(\PDO::FETCH_OBJ);
-        foreach ($tables as $table)
+        $schemas = $dbQueries->getTableAndColumnNamesFilterByColumnMinOctetLength(2048)->fetchAll(\PDO::FETCH_OBJ);
+        foreach ($schemas as $schema)
         {
-            if (! $engineSupportsCompression)
+            if (!$engineSupportsCompression)
             {
-                yield new MissingCompressionUnsupportedMatch($dbQueries->getName(), $table->TABLE_NAME);
+                yield new MissingCompressionUnsupportedMatch($dbQueries->getName(), $schema->TABLE_NAME);
                 continue;
             }
 
-            if (! $dbQueries->isTableCompressed($table->TABLE_NAME))
+            $tableCompressed = $dbQueries->isTableCompressed($schema->TABLE_NAME);
+            $dataCompressed = $this->detectCompressedValue($dbQueries, $schema->TABLE_NAME, $schema->COLUMN_NAME);
+            if ($dataCompressed !== null)
             {
-                yield new MissingCompressionMatch($dbQueries->getName(), $table->TABLE_NAME);
+                if (! $dataCompressed && ! $tableCompressed)
+                {
+                    yield new MissingCompressionMatch($dbQueries->getName(), $schema->TABLE_NAME);
+                }
+                else if ($dataCompressed && $tableCompressed)
+                {
+                    yield new DuplicateCompressionMatch($dbQueries->getName(), $schema->TABLE_NAME, $schema->COLUMN_NAME);
+                }
             }
         }
     }
 
+    /**
+     * @param AbstractDbQueries $dbQueries
+     * @param string            $table
+     * @param string            $column
+     * @return bool|null
+     * Returns null if no data, true if the data is already compressed (= a compression reduces the size of less than
+     * 80%), false otherwise.
+     */
+    private function detectCompressedValue(AbstractDbQueries $dbQueries, string $table, string $column) : ?bool
+    {
+        $data = $dbQueries->getRandomValuesInColumnConcatenated($table, $column, 15)->fetchAll(\PDO::FETCH_COLUMN);
+        if ($data)
+        {
+            $compressedDataLen = strlen(gzcompress($data[0]));
+            if ($compressedDataLen > strlen($data[0]) * 0.80)
+            {
+                return true;
+            }
+            return false;
+        }
+        return null;
+    }
 }
