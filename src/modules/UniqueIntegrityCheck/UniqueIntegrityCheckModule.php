@@ -10,7 +10,7 @@ class UniqueIntegrityCheckModule implements ModuleInterface
 {
     public function getName()
     {
-        return 'dataintegritycheck';
+        return 'uniqueintegritycheck';
     }
 
     public function getConfigTreeBuilder()

@@ -19,7 +19,6 @@ class FileCheckModule implements ModuleInterface
     {
         $treeBuilder = new TreeBuilder();
         $treeBuilder->root($this->getName())
-            ->addDefaultsIfNotSet()
             ->children()
                 ->booleanNode('enable_remotes')
                     ->defaultFalse()

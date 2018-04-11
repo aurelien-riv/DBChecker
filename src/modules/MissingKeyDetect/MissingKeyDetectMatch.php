@@ -36,6 +36,5 @@ class MissingKeyDetectMatch extends AbstractMatch
     {
         return $this->column;
     }
-
     #endregion
 }

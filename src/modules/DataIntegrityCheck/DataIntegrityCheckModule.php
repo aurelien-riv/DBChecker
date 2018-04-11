@@ -12,7 +12,7 @@ class DataIntegrityCheckModule implements ModuleInterface
 
     public function getName()
     {
-        return 'datainregritycheck';
+        return 'dataintegritycheck';
     }
 
     public function getConfigTreeBuilder()
@@ -25,7 +25,7 @@ class DataIntegrityCheckModule implements ModuleInterface
                     ->cannotBeEmpty()
                     ->arrayPrototype()
                         ->useAttributeAsKey('key')
-                        ->prototype('scalar')
+                        ->scalarPrototype()
                             ->info('A SHA1 sum')
                         ->end()
                     ->end()

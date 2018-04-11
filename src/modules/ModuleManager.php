@@ -44,6 +44,18 @@ class ModuleManager
         }
     }
 
+    public function getDatabaseModule() : DatabasesModule
+    {
+        foreach ($this->modules as $module)
+        {
+            if ($module instanceof DatabasesModule)
+            {
+                return $module;
+            }
+        }
+        return null;
+    }
+
     public function getWorkers()
     {
         foreach ($this->modules as $module)
