@@ -91,13 +91,14 @@ class MySQLQueries extends AbstractDbQueries
     }
     public function getUniqueIndexes($table)
     {
-        $stmt = $this->getUniqueIndexesV1($table);
-        $error = $stmt->errorInfo();
-        if (isset($error[1]) && $error[1] === 1054)
+        try
         {
-            $stmt = $this->getUniqueIndexesV2($table);
+            return $this->getUniqueIndexesV1($table);
         }
-        return $stmt;
+        catch (\PDOException $e)
+        {
+            return $this->getUniqueIndexesV2($table);
+        }
     }
     #endregion
 
@@ -245,16 +246,27 @@ class MySQLQueries extends AbstractDbQueries
         return $stmt;
     }
 
-    public function getTableLargerThanMb(int $mb) : \PDOStatement
+    public function getTableLargerThanMb(int $minSize_MB) : \PDOStatement
     {
         $stmt = $this->pdo->prepare("
             SELECT TABLE_NAME 
             FROM information_schema.TABLES 
             WHERE table_schema = DATABASE() AND ((data_length + index_length) / 1024 / 1024) > :minSize;
         ");
-        $stmt->bindParam(':minSize', $mb, \PDO::PARAM_INT);
+        $stmt->bindParam(':minSize', $minSize_MB, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt;
     }
     #endregion
+
+    public function getFragmentedTables() : \PDOStatement
+    {
+        return $this->pdo->query("
+          SELECT `TABLE_NAME`, DATA_FREE*100/(DATA_LENGTH+INDEX_LENGTH+DATA_FREE) AS FRAGMENTATION
+          FROM information_schema.TABLES 
+          WHERE TABLE_SCHEMA = DATABASE() 
+            AND DATA_LENGTH/1024/1024 > 10 
+            AND NOT ENGINE='MEMORY'
+          HAVING FRAGMENTATION > 10 ");
+    }
 }

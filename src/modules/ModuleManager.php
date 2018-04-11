@@ -7,6 +7,7 @@ use DBChecker\ModuleInterface;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\DataIntegrityCheck\DataIntegrityCheckModule;
 use DBChecker\modules\FileCheck\FileCheckModule;
+use DBChecker\modules\FragmentationCheck\FragmentationCheckModule;
 use DBChecker\modules\MissingCompressionDetect\MissingCompressionDetectModule;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
 use DBChecker\modules\RelCheck\RelCheckModule;
@@ -26,7 +27,8 @@ class ModuleManager
         MissingKeyDetectModule::class,
         SchemaIntegrityCheckModule::class,
         DataIntegrityCheckModule::class,
-        MissingCompressionDetectModule::class
+        MissingCompressionDetectModule::class,
+        FragmentationCheckModule::class
     ];
 
     public function loadModule(BaseModuleInterface $module, $settings)

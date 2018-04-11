@@ -1,15 +1,16 @@
 databases:
   connections:
-    - dsn: "sqlite::memory"
+    - dsn: "sqlite::memory:"
       name: database1
       engine: sqlite
-    - dsn: "sqlite::memory"
+    - dsn: "sqlite::memory:"
       name: database2
       engine: sqlite
 
 missingcompressiondetect:
 relcheck:
 uniqueintegritycheck:
+fragmentationcheck:
 
 filecheck:
   enable_remotes: true

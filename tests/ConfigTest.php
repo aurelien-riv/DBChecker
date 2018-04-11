@@ -29,7 +29,6 @@ final class ConfigTest extends \PHPUnit\Framework\TestCase
         $workers = iterator_to_array($this->config->getModuleWorkers());
         // -1 to exclude DatabaseModule
         $expected = count(ModuleManager::ENABLED_MODULES)-1;
-        $this->assertEquals($expected, count($workers));
-
+        $this->assertGreaterThanOrEqual($expected, count($workers));
     }
 }

@@ -16,7 +16,7 @@ trait UnsupportedActionTrait
         throw new BadMethodCallException("This method is not available for this database");
     }
 
-    public function getTableLargerThanMb(int $mb) : \PDOStatement
+    public function getTableLargerThanMb(int $minSize_MB) : \PDOStatement
     {
         throw new BadMethodCallException("This method is not available for this database");
     }
@@ -77,6 +77,11 @@ trait UnsupportedActionTrait
     }
 
     public function getValue($table, $column, $value)
+    {
+        throw new BadMethodCallException("This method is not available for this database");
+    }
+
+    public function getFragmentedTables() : \PDOStatement
     {
         throw new BadMethodCallException("This method is not available for this database");
     }
