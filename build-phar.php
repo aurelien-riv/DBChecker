@@ -1,6 +1,6 @@
 <?php
 
-$phar = new \Phar('DBChercker.phar', 0, 'DBChercker.phar');
+$phar = new \Phar('DBChecker.phar', 0, 'DBChecker.phar');
 $phar->setSignatureAlgorithm(\Phar::SHA1);
 
 $phar->startBuffering();
@@ -8,10 +8,7 @@ $phar->startBuffering();
 foreach (['src', 'vendor'] as $dir)
 {
     $it = new RecursiveDirectoryIterator(__DIR__."/$dir");
-    foreach(new RecursiveIteratorIterator($it) as $file) /** @var \DirectoryIterator $file */
-    {
-        $phar->addFile($file->getPath());
-    }
+    $phar->buildFromIterator(new RecursiveIteratorIterator($it), __DIR__);
 }
 
 $phar->setStub(file_get_contents(__DIR__.'/main.php') . "\n__HALT_COMPILER();");

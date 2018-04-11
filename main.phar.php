@@ -1,6 +1,13 @@
 <?php
 
-require_once((strpos(__FILE__, 'phar') ? 'phar://DBChecker.phar' : __DIR__) .'/vendor/autoload.php');
+if(\Phar::running())
+{
+    require_once('phar://DBChecker.phar/vendor/autoload.php');
+}
+else
+{
+    require_once(__DIR__.'/vendor/autoload.php');
+}
 
 use DBChecker\modules\FileCheck\FileCheckMatch;
 use DBChecker\modules\RelCheck\RelCheckMatch;
