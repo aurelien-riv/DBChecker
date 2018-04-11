@@ -1,7 +1,8 @@
 <?php
 
-namespace DBChecker;
+namespace DBChecker\modules\DataBase;
 
+use DBChecker\BaseModuleInterface;
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\DBQueries\MySQLQueries;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;

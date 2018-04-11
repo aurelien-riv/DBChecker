@@ -2,19 +2,13 @@
 
 namespace DBChecker;
 
-use DBChecker\modules\DataIntegrityCheck\DataIntegrityCheckModule;
-use DBChecker\modules\FileCheck\FileCheckModule;
-use DBChecker\modules\MissingCompressionDetect\MissingCompressionDetectModule;
-use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
-use DBChecker\modules\RelCheck\RelCheckModule;
-use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheckModule;
-use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
-use Symfony\Component\Config\Definition\Processor;
+use DBChecker\modules\DataBase\DatabasesModule;
+use DBChecker\modules\ModuleManager;
 use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
-    private $moduleWorkers = [];
+    private $moduleManager;
 
     /**
      * @var DatabasesModule $databases
@@ -25,52 +19,22 @@ class Config
     {
         $settings = Yaml::parseFile($yamlPath);
 
-        $this->databases = new DatabasesModule();
-        $this->loadModule($this->databases, $settings);
+        $this->databases     = new DatabasesModule();
+        $this->moduleManager = new ModuleManager();
+        $this->moduleManager->loadModule($this->databases, $settings);
 
-        foreach ($this->getModuleClasses() as $module)
+        foreach (ModuleManager::ENABLED_MODULES as $module)
         {
-            $this->loadModule(new $module($this), $settings);
-        }
-    }
-
-    private function getModuleClasses()
-    {
-        return [
-            RelCheckModule::class,
-            UniqueIntegrityCheckModule::class,
-            FileCheckModule::class,
-            MissingKeyDetectModule::class,
-            SchemaIntegrityCheckModule::class,
-            DataIntegrityCheckModule::class,
-            MissingCompressionDetectModule::class
-        ];
-    }
-
-    protected function loadModule(BaseModuleInterface $module, $settings)
-    {
-        $moduleName = $module->getName();
-
-        if (array_key_exists($moduleName, $settings))
-        {
-            $processor      = new Processor();
-            $tree           = $module->getConfigTreeBuilder()->buildTree();
-            $moduleSettings = $processor->process($tree, [$moduleName => $settings[$moduleName]]);
-
-            $module->loadConfig($moduleSettings);
-            if ($module instanceof ModuleInterface)
-            {
-                $this->moduleWorkers[] = $module->getWorker();
-            }
+            $this->moduleManager->loadModule(new $module(), $settings);
         }
     }
 
     /**
-     * @return ModuleWorkerInterface[]
+     * @return \Generator
      */
     public function getModuleWorkers()
     {
-        return $this->moduleWorkers;
+        yield from $this->moduleManager->getWorkers();
     }
 
     public function getQueries()
