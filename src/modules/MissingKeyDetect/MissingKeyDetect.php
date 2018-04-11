@@ -85,12 +85,14 @@ class MissingKeyDetect implements ModuleWorkerInterface
         $matches = [];
         foreach (mb_split('_', $identifier) as $fragment)
         {
-            preg_match_all('/(?:^|[A-Z]|[0-9]+)[a-z]*/', $fragment, $parts);
+            $pattern = '((?:[A-Z]+(?:[a-z]|[0-9])*)|(?:[a-z]+(?:[a-z]|[0-9])*))';
+            preg_match_all("/$pattern/", $fragment, $parts);
+            array_shift($parts);
             foreach ($parts as $part)
             {
-                if (isset($part[0]) && ! empty($part[0]))
+                foreach ($part as $item)
                 {
-                    $matches[] = $part[0];
+                    $matches[] = $item;
                 }
             }
         }
@@ -103,7 +105,7 @@ class MissingKeyDetect implements ModuleWorkerInterface
         {
             foreach ($this->config['patterns'] as $pattern)
             {
-                if (preg_match('/' . $pattern . '/', $notKey[1]))
+                if (preg_match("/$pattern/", $notKey[1]))
                 {
                     yield new MissingKeyDetectMatch($dbName, $notKey[0], $notKey[1]);
                     break;

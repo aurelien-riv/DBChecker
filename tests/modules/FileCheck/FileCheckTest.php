@@ -3,8 +3,8 @@
 namespace DBCheckerTests\modules\FileCheck\FileCheck;
 
 use DBChecker\modules\FileCheck\FileCheckModule;
+use DBChecker\modules\ModuleManager;
 use ReflectionClass;
-use Symfony\Component\Config\Definition\Processor;
 
 class FileCheckTest extends \PHPUnit\Framework\TestCase
 {
@@ -13,18 +13,13 @@ class FileCheckTest extends \PHPUnit\Framework\TestCase
     public function setUp()
     {
         parent::setUp();
-
         $module         = new FileCheckModule();
-
-        $processor      = new Processor();
-        $tree           = $module->getConfigTreeBuilder()->buildTree();
-        $moduleSettings = $processor->process($tree, [$module->getName() => [
+        $moduleManager = new ModuleManager();
+        $moduleManager->loadModule($module, [$module->getName() => [
             'mapping' => [
                 []
             ]
         ]]);
-        $module->loadConfig($moduleSettings);
-
         $this->instance = $module->getWorker();
     }
 

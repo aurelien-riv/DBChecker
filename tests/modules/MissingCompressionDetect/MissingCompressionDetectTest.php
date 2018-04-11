@@ -7,6 +7,7 @@ use DBChecker\modules\MissingCompressionDetect\DuplicateCompressionMatch;
 use DBChecker\modules\MissingCompressionDetect\MissingCompressionDetect;
 use DBChecker\modules\MissingCompressionDetect\MissingCompressionDetectModule;
 use DBChecker\modules\MissingCompressionDetect\MissingCompressionMatch;
+use DBChecker\modules\ModuleManager;
 
 final class MissingCompressionDetectTest extends \PHPUnit\Framework\TestCase
 {
@@ -18,8 +19,9 @@ final class MissingCompressionDetectTest extends \PHPUnit\Framework\TestCase
     public function setUp()
     {
         parent::setUp();
-        $module = new MissingCompressionDetectModule();
-        $module->loadConfig([]);
+        $module        = new MissingCompressionDetectModule();
+        $moduleManager = new ModuleManager();
+        $moduleManager->loadModule($module, []);
         $this->instance = $module->getWorker();
     }
 
