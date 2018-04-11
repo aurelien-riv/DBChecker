@@ -2,40 +2,89 @@
 
 namespace DBCheckerTests\modules\FileCheck\FileCheck;
 
+use DBChecker\modules\FileCheck\FileCheck;
+use DBChecker\modules\FileCheck\FileCheckMatch;
 use DBChecker\modules\FileCheck\FileCheckModule;
+use DBChecker\modules\FileCheck\FileCheckURLMatch;
 use DBChecker\modules\ModuleManager;
 use ReflectionClass;
 
 class FileCheckTest extends \PHPUnit\Framework\TestCase
 {
-    private $instance;
+    /**
+     * @var ModuleManager $module
+     */
+    private $moduleManager;
 
     public function setUp()
     {
         parent::setUp();
-        $module         = new FileCheckModule();
-        $moduleManager = new ModuleManager();
-        $moduleManager->loadModule($module, [$module->getName() => [
+        $this->moduleManager = new ModuleManager();
+    }
+
+    public function getInstanceWithEmptyConfig()
+    {
+        $module = new FileCheckModule();
+        $this->moduleManager->loadModule($module, [$module->getName() => [
             'mapping' => [
                 []
             ]
         ]]);
-        $this->instance = $module->getWorker();
+        return $this->moduleManager->getWorkers()->current();
     }
 
-    private function getMethod(string $method) : \ReflectionMethod
+    private function getMethod(FileCheck $instance, string $method) : \ReflectionMethod
     {
-        $reflector = new ReflectionClass(get_class($this->instance));
+        $reflector = new ReflectionClass(get_class($instance));
         $method = $reflector->getMethod($method);
         $method->setAccessible(true);
         return $method;
     }
 
+    private function callMethod(FileCheck $instance, string $method, $arguments=[])
+    {
+        $method = $this->getMethod($instance, $method);
+        return $method->invokeArgs($instance, $arguments);
+    }
+
+    public function testTestFile_URL_RemoteDisabled()
+    {
+        $instance = $this->getInstanceWithEmptyConfig();
+        $this->assertNull($this->callMethod($instance, 'testFile', ['', '', '', 'http://github.com'])->current());
+    }
+    public function testTestFile_URL_RemoteEnabled()
+    {
+        $module = new FileCheckModule();
+        $this->moduleManager->loadModule($module, [$module->getName() => [
+            'enable_remotes' => true,
+            'mapping' => [
+                []
+            ]
+        ]]);
+        $instance = $this->moduleManager->getWorkers()->current();
+        $this->assertInstanceOf(
+            FileCheckURLMatch::class,
+            $this->callMethod($instance, 'testFile', ['', '', '', 'http://does_not_exist.com'])->current()
+        );
+    }
+
+    public function testTestFile_File()
+    {
+        $instance = $this->getInstanceWithEmptyConfig();
+        $method = $this->getMethod($instance, 'testFile');
+        $this->assertNull($method->invokeArgs($instance, ['', '', '', __DIR__.'/FileCheckTest.php'])->current());
+        $this->assertInstanceOf(
+            FileCheckMatch::class,
+            $method->invokeArgs($instance, ['', '', '', 'does_not_exist'])->current()
+        );
+    }
+
+    #region extractVariables
     public function testExtractVariablesFromPath_basic()
     {
-        $method  = $this->getMethod('extractVariablesFromPath');
+        $instance = $this->getInstanceWithEmptyConfig();
         $columns = $innerJoins = [];
-        $method->invokeArgs($this->instance, ["{variable1}_{variable2}", &$columns, &$innerJoins]);
+        $this->callMethod($instance, 'extractVariablesFromPath', ["{variable1}_{variable2}", &$columns, &$innerJoins]);
 
         $this->assertArrayHasKey('variable1',  $columns);
         $this->assertArrayHasKey('variable2',  $columns);
@@ -43,15 +92,17 @@ class FileCheckTest extends \PHPUnit\Framework\TestCase
     }
     public function testExtractVariablesFromPath_withInnerJoins()
     {
-        $method  = $this->getMethod('extractVariablesFromPath');
+        $instance = $this->getInstanceWithEmptyConfig();
         $columns = $innerJoins = [];
-        $method->invokeArgs($this->instance, ["{variable3.variable4}_{variable5}", &$columns, &$innerJoins]);
+        $this->callMethod($instance, 'extractVariablesFromPath', ["{variable3.variable4}_{variable5}", &$columns, &$innerJoins]);
 
         $this->assertArrayHasKey('variable5',           $columns);
         $this->assertArrayHasKey('variable3.variable4', $columns);
         $this->assertContains('variable3', $innerJoins);
     }
+    #endregion
 
+    #region replaceVariables
     public function testReplaceVariablesFromPath_basic()
     {
         $columns = [
@@ -63,8 +114,8 @@ class FileCheckTest extends \PHPUnit\Framework\TestCase
             'variable7' => 'datavalue7'
         ];
 
-        $method  = $this->getMethod('replaceVariablesFromPath');
-        $value = $method->invokeArgs($this->instance, ["{variable6}_{variable7}", $data, &$columns]);
+        $instance = $this->getInstanceWithEmptyConfig();
+        $value = $this->callMethod($instance, 'replaceVariablesFromPath', ["{variable6}_{variable7}", $data, &$columns]);
 
         $this->assertEquals('datavalue6', $columns['variable6']);
         $this->assertEquals('datavalue7', $columns['variable7']);
@@ -81,11 +132,12 @@ class FileCheckTest extends \PHPUnit\Framework\TestCase
             'variable10.variable11' => 'datavalue11'
         ];
 
-        $method  = $this->getMethod('replaceVariablesFromPath');
-        $value = $method->invokeArgs($this->instance, ["{variable8.variable9}_{variable10.variable11}", $data, &$columns]);
+        $instance = $this->getInstanceWithEmptyConfig();
+        $value = $this->callMethod($instance, 'replaceVariablesFromPath',["{variable8.variable9}_{variable10.variable11}", $data, &$columns]);
 
         $this->assertEquals('datavalue9',  $columns['variable8.variable9']);
         $this->assertEquals('datavalue11', $columns['variable10.variable11']);
         $this->assertEquals('datavalue9_datavalue11', $value);
     }
+    #endregion
 }

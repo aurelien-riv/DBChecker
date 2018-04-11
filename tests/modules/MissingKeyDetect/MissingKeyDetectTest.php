@@ -21,13 +21,14 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
         $this->moduleManager = new ModuleManager();
     }
 
-    #region split
     public function getInstanceWithEmptyConfig()
     {
         $module = new MissingKeyDetectModule();
         $this->moduleManager->loadModule($module, [$module->getName() => []]);
         return $this->moduleManager->getWorkers()->current();
     }
+
+    #region split
     public function testSplit_CamelCase()
     {
         $data = $this->getInstanceWithEmptyConfig()->split("TestCamelCase");
