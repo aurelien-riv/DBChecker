@@ -1,0 +1,16 @@
+language: php
+php:
+  - '7.1'
+  - '7.2'
+
+addons:
+  sonarcloud:
+    organization: aurelien-riv-github
+    token:
+      secure: ${DBChecker-sonar}
+
+install: composer install
+
+script: phpunit --configuration phpunit.xml
+
+after_script: sonar-scanner
