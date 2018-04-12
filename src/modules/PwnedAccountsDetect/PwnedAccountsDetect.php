@@ -15,6 +15,11 @@ class PwnedAccountsDetect implements ModuleWorkerInterface
         $this->backend = new HaveIBeenPwnedBackend();
     }
 
+    /**
+     * @param \DBChecker\DBQueries\AbstractDbQueries $dbQueries
+     * @return array|\Generator
+     * @throws TlsHandcheckException
+     */
     public function run(\DBChecker\DBQueries\AbstractDbQueries $dbQueries)
     {
         foreach ($this->config['mapping'] as $mapping)
@@ -29,6 +34,14 @@ class PwnedAccountsDetect implements ModuleWorkerInterface
         }
     }
 
+    /**
+     * @param string $login
+     * @param string $dbName
+     * @param string $table
+     * @param string $column
+     * @return \Generator
+     * @throws TlsHandcheckException
+     */
     private function checkLogin(string $login, string $dbName, string $table, string $column)
     {
         if ($this->backend->isAccountPwned($login))
