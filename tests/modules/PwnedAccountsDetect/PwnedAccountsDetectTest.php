@@ -61,10 +61,10 @@ class PwnedAccountsDetectTest extends \PHPUnit\Framework\TestCase
         $instance = $this->getInstance();
         try
         {
-//            $this->assertInstanceOf(
-//                PwnedAccountDetectMatch::class,
-                $this->callMethod($instance, 'checkLogin', ["test@example.com", '', '', ''])->current();
-//            );
+            $this->assertInstanceOf(
+                PwnedAccountDetectMatch::class,
+                $this->callMethod($instance, 'checkLogin', ["test@example.com", '', '', ''])->current()
+            );
         }
         catch (TlsHandcheckException $e)
         {

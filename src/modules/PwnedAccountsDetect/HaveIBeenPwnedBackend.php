@@ -43,10 +43,7 @@ class HaveIBeenPwnedBackend
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($curl);
 
-        var_dump($data);
-        echo curl_error($curl) === "gnutls_handshake() failed: Handshake failed" ? "equal" : "not equal";
-
-        if ($data === null && curl_error($curl) === 'gnutls_handshake() failed: Handshake failed')
+        if ($data === false && curl_error($curl) === 'gnutls_handshake() failed: Handshake failed')
         {
             curl_close($curl);
             // This should only happen on Travis CI...
