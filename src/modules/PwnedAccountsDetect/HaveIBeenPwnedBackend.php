@@ -43,8 +43,8 @@ class HaveIBeenPwnedBackend
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($curl);
 
-        echo $data === null ? "null" : "not null";
-        echo curl_error($curl) === "gnutls_handshake() failed: Handshake failed\n";
+        var_dump($data);
+        echo curl_error($curl) === "gnutls_handshake() failed: Handshake failed" ? "equal" : "not equal";
 
         if ($data === null && curl_error($curl) === 'gnutls_handshake() failed: Handshake failed')
         {
