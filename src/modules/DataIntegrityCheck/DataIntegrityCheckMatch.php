@@ -16,12 +16,7 @@ class DataIntegrityCheckMatch extends AbstractMatch
         $this->checksum         = $checksum;
     }
 
-    public function __toString()
-    {
-        return (string) $this->getMessage();
-    }
-
-    public function getMessage()
+    public function getMessage() : string
     {
         return "{$this->dbName} > {$this->table} : checksum does not match ({$this->checksum})\n";
     }

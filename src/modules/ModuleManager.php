@@ -4,6 +4,7 @@ namespace DBChecker\modules;
 
 use DBChecker\BaseModuleInterface;
 use DBChecker\ModuleInterface;
+use DBChecker\modules\AnalyzeTableCheck\AnalyzeTableCheckModule;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\DataIntegrityCheck\DataIntegrityCheckModule;
 use DBChecker\modules\FileCheck\FileCheckModule;
@@ -28,7 +29,8 @@ class ModuleManager
         SchemaIntegrityCheckModule::class,
         DataIntegrityCheckModule::class,
         MissingCompressionDetectModule::class,
-        FragmentationCheckModule::class
+        FragmentationCheckModule::class,
+        AnalyzeTableCheckModule::class
     ];
 
     public function loadModule(BaseModuleInterface $module, $settings)

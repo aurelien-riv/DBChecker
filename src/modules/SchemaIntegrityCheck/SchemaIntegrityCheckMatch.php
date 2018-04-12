@@ -3,33 +3,22 @@
 namespace DBChecker\modules\SchemaIntegrityCheck;
 
 use DBChecker\AbstractMatch;
+use DBChecker\BaseMatch\TableTrait;
 
 class SchemaIntegrityCheckMatch extends AbstractMatch
 {
-    private $table;
+    use TableTrait;
     private $checksum;
 
     public function __construct($dbName, $table, $checksum)
     {
         parent::__construct($dbName);
-        $this->table            = $table;
-        $this->checksum         = $checksum;
+        $this->table    = $table;
+        $this->checksum = $checksum;
     }
 
-    public function __toString()
-    {
-        return (string) $this->getMessage();
-    }
-
-    public function getMessage()
+    public function getMessage() : string
     {
         return "{$this->dbName} > {$this->table} : checksum does not match ({$this->checksum})\n";
     }
-
-    #region getters
-    public function getTable()
-    {
-        return $this->table;
-    }
-    #endregion
 }

@@ -3,11 +3,12 @@
 namespace DBChecker\modules\FragmentationCheck;
 
 use DBChecker\AbstractMatch;
+use DBChecker\BaseMatch\TableTrait;
 
 class FragmentationCheckMatch extends AbstractMatch
 {
+    use TableTrait;
     private $fragmentation;
-    private $table;
 
     public function __construct($dbName, $table, $fragmentation)
     {
@@ -16,7 +17,7 @@ class FragmentationCheckMatch extends AbstractMatch
         $this->fragmentation = $fragmentation;
     }
 
-    public function getMessage()
+    public function getMessage() : string
     {
         return "{$this->dbName} > {$this->table} is fragmented ({$this->fragmentation}%)\n";
     }

@@ -4,10 +4,7 @@ namespace DBChecker\modules\RelCheck;
 
 interface DBQueriesInterface extends \DBChecker\DBQueries\DBQueriesInterface
 {
-    /**
-     * @return bool|\PDOStatement
-     */
-    public function getTableNames();
+    public function getTableNames() : \PDOStatement;
 
     /**
      * @return bool|\PDOStatement

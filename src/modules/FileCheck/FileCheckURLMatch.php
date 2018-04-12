@@ -12,7 +12,7 @@ class FileCheckURLMatch extends FileCheckMatch
         $this->header0 = $header0;
     }
 
-    public function getMessage()
+    public function getMessage() : string
     {
         $cols = $this->columns;
         if (is_array($this->columns))

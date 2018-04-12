@@ -3,10 +3,11 @@
 namespace DBChecker\modules\UniqueIntegrityCheck;
 
 use DBChecker\AbstractMatch;
+use DBChecker\BaseMatch\TableTrait;
 
 class UniqueIntegrityCheckMatch extends AbstractMatch
 {
-    private $table;
+    use TableTrait;
     private $values;
     private $count;
 
@@ -21,12 +22,7 @@ class UniqueIntegrityCheckMatch extends AbstractMatch
         $this->count  = $results->__count__;
     }
 
-    public function __toString()
-    {
-        return (string) $this->getMessage();
-    }
-
-    public function getMessage()
+    public function getMessage() : string
     {
         $data = '';
         foreach ($this->values as $column => $value)
@@ -42,11 +38,6 @@ class UniqueIntegrityCheckMatch extends AbstractMatch
     }
 
     #region getters
-    public function getTable()
-    {
-        return $this->table;
-    }
-
     public function getValues()
     {
         return $this->values;

@@ -21,8 +21,5 @@ abstract class AbstractMatch
         return $this->getMessage();
     }
 
-    /**
-     * @return string
-     */
-    public abstract function getMessage();
+    public abstract function getMessage() : string;
 }

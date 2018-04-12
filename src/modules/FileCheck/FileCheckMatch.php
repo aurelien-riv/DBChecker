@@ -3,10 +3,11 @@
 namespace DBChecker\modules\FileCheck;
 
 use DBChecker\AbstractMatch;
+use DBChecker\BaseMatch\TableTrait;
 
 class FileCheckMatch extends AbstractMatch
 {
-    protected $table;
+    use TableTrait;
     protected $columns;
     protected $path;
 
@@ -18,12 +19,7 @@ class FileCheckMatch extends AbstractMatch
         $this->path    = $path;
     }
 
-    public function __toString()
-    {
-        return (string) $this->getMessage();
-    }
-
-    public function getMessage()
+    public function getMessage() : string
     {
         $cols = '';
         foreach ($this->columns as $column => $value)
@@ -51,12 +47,7 @@ class FileCheckMatch extends AbstractMatch
     }
 
     #region getters
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    public function getColumn()
+    public function getColumns()
     {
         return $this->columns;
     }

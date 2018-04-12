@@ -3,11 +3,13 @@
 namespace DBChecker\modules\RelCheck;
 
 use DBChecker\AbstractMatch;
+use DBChecker\BaseMatch\ColumnTrait;
+use DBChecker\BaseMatch\TableTrait;
 
 class RelCheckMatch extends AbstractMatch
 {
-    private $table;
-    private $column;
+    use TableTrait;
+    use ColumnTrait;
     private $referencedTable;
     private $referencedColumn;
     private $value;
@@ -22,12 +24,7 @@ class RelCheckMatch extends AbstractMatch
         $this->value            = $value;
     }
 
-    public function __toString()
-    {
-        return (string) $this->getMessage();
-    }
-
-    public function getMessage()
+    public function getMessage() : string
     {
         return "{$this->dbName} > {$this->table}.{$this->column} -> {$this->referencedTable}.{$this->referencedColumn} # {$this->value}\n";
     }
@@ -38,16 +35,6 @@ class RelCheckMatch extends AbstractMatch
     }
 
     #region getters
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    public function getColumn()
-    {
-        return $this->column;
-    }
-
     public function getReferencedTable()
     {
         return $this->referencedTable;

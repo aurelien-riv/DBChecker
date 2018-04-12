@@ -12,7 +12,8 @@ abstract class AbstractDbQueries implements
     \DBChecker\modules\MissingKeyDetect\DBQueriesInterface,
     \DBChecker\modules\RelCheck\DBQueriesInterface,
     \DBChecker\modules\FragmentationCheck\DBQueriesInterface,
-    \DBChecker\modules\UniqueIntegrityCheck\DBQueriesInterface
+    \DBChecker\modules\UniqueIntegrityCheck\DBQueriesInterface,
+    \DBChecker\modules\AnalyzeTableCheck\DBQueriesInterface
 {
     /**
      * Regex that matches a valid column name
@@ -133,7 +134,7 @@ abstract class AbstractDbQueries implements
         throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
     }
 
-    public function getTableNames()
+    public function getTableNames() : \PDOStatement
     {
         throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
     }
@@ -174,6 +175,11 @@ abstract class AbstractDbQueries implements
     }
 
     public function getFragmentedTables() : \PDOStatement
+    {
+        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
+    }
+
+    public function analyzeTable(string $table) : \PDOStatement
     {
         throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
     }

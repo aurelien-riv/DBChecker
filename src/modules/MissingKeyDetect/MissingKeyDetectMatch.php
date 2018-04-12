@@ -3,38 +3,23 @@
 namespace DBChecker\modules\MissingKeyDetect;
 
 use DBChecker\AbstractMatch;
+use DBChecker\BaseMatch\ColumnTrait;
+use DBChecker\BaseMatch\TableTrait;
 
 class MissingKeyDetectMatch extends AbstractMatch
 {
-    private $table;
-    private $column;
+    use TableTrait;
+    use ColumnTrait;
 
     public function __construct($dbName, $table, $column)
     {
         parent::__construct($dbName);
-        $this->table            = $table;
-        $this->column           = $column;
+        $this->table  = $table;
+        $this->column = $column;
     }
 
-    public function __toString()
-    {
-        return (string) $this->getMessage();
-    }
-
-    public function getMessage()
+    public function getMessage() : string
     {
         return "{$this->dbName} > {$this->table}.{$this->column}\n";
     }
-
-    #region getters
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    public function getColumn()
-    {
-        return $this->column;
-    }
-    #endregion
 }

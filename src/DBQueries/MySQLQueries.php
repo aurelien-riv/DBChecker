@@ -4,9 +4,9 @@ namespace DBChecker\DBQueries;
 
 class MySQLQueries extends AbstractDbQueries
 {
-    public function getTableNames()
+    public function getTableNames() : \PDOStatement
     {
-        return $this->pdo->query("SHOW TABLES;");
+        return $this->pdo->query("SHOW FULL TABLES WHERE Table_Type = 'BASE TABLE'");
     }
 
     public function getColumnNamesWithTableName()
@@ -194,5 +194,10 @@ class MySQLQueries extends AbstractDbQueries
             AND DATA_LENGTH/1024/1024 > 10 
             AND NOT ENGINE='MEMORY'
           HAVING FRAGMENTATION > 10 ");
+    }
+
+    public function analyzeTable(string $table) : \PDOStatement
+    {
+        return $this->pdo->query("ANALYZE TABLE $table");
     }
 }

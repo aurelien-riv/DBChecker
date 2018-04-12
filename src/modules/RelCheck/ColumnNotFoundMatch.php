@@ -2,9 +2,11 @@
 
 namespace DBChecker\modules\RelCheck;
 
+use DBChecker\BaseMatch\ColumnTrait;
+
 class ColumnNotFoundMatch extends TableNotFoundMatch
 {
-    private $column;
+    use ColumnTrait;
 
     public function __construct($dbName, $table, $column)
     {
@@ -12,15 +14,8 @@ class ColumnNotFoundMatch extends TableNotFoundMatch
         $this->column = $column;
     }
 
-    public function getMessage()
+    public function getMessage() : string
     {
         return "{$this->dbName} > {$this->getTable()}.{$this->getColumn()} doesn't exist\n";
     }
-
-    #region getters
-    public function getColumn()
-    {
-        return $this->column;
-    }
-    #endregion
 }

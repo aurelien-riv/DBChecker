@@ -3,10 +3,11 @@
 namespace DBChecker\modules\RelCheck;
 
 use DBChecker\AbstractMatch;
+use DBChecker\BaseMatch\TableTrait;
 
 class TableNotFoundMatch extends AbstractMatch
 {
-    protected $table;
+    use TableTrait;
 
     public function __construct($dbName, $table)
     {
@@ -14,20 +15,8 @@ class TableNotFoundMatch extends AbstractMatch
         $this->table = $table;
     }
 
-    public function __toString()
-    {
-        return (string) $this->getMessage();
-    }
-
-    public function getMessage()
+    public function getMessage() : string
     {
         return "{$this->dbName} > {$this->table} doesn't exist\n";
     }
-
-    #region getters
-    public function getTable()
-    {
-        return $this->table;
-    }
-    #endregion
 }
