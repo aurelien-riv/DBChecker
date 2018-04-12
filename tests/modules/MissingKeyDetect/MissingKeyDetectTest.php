@@ -6,10 +6,13 @@ use DBChecker\modules\MissingKeyDetect\MissingKeyDetect;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectMatch;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
 use DBChecker\modules\ModuleManager;
+use DBCheckerTests\BypassVisibilityTrait;
 use ReflectionClass;
 
 final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
 {
+    use BypassVisibilityTrait;
+
     /**
      * @var ModuleManager $module
      */
@@ -51,14 +54,6 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
     }
     #endregion
 
-    private function getMethod($instance, string $method) : \ReflectionMethod
-    {
-        $reflector = new ReflectionClass(get_class($instance));
-        $method = $reflector->getMethod($method);
-        $method->setAccessible(true);
-        return $method;
-    }
-
     public function testRunWithPatterns()
     {
 
@@ -68,10 +63,8 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
                 '_id$'
             ]
         ]]);
-        /** @var MissingKeyDetect $instance */
         $instance = $this->moduleManager->getWorkers()->current();
-        $method = $this->getMethod($instance, 'runWithPatterns');
-        $data = $method->invokeArgs($instance, ["", [
+        $data = $this->callMethod($instance, 'runWithPatterns', ["", [
             ['', 'something'],
             ['', 'something_id'],
             ['', 'id'],

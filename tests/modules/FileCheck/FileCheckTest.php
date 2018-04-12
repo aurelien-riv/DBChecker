@@ -2,15 +2,16 @@
 
 namespace DBCheckerTests\modules\FileCheck\FileCheck;
 
-use DBChecker\modules\FileCheck\FileCheck;
 use DBChecker\modules\FileCheck\FileCheckMatch;
 use DBChecker\modules\FileCheck\FileCheckModule;
 use DBChecker\modules\FileCheck\FileCheckURLMatch;
 use DBChecker\modules\ModuleManager;
-use ReflectionClass;
+use DBCheckerTests\BypassVisibilityTrait;
 
 class FileCheckTest extends \PHPUnit\Framework\TestCase
 {
+    use BypassVisibilityTrait;
+
     /**
      * @var ModuleManager $module
      */
@@ -31,20 +32,6 @@ class FileCheckTest extends \PHPUnit\Framework\TestCase
             ]
         ]]);
         return $this->moduleManager->getWorkers()->current();
-    }
-
-    private function getMethod(FileCheck $instance, string $method) : \ReflectionMethod
-    {
-        $reflector = new ReflectionClass(get_class($instance));
-        $method = $reflector->getMethod($method);
-        $method->setAccessible(true);
-        return $method;
-    }
-
-    private function callMethod(FileCheck $instance, string $method, $arguments=[])
-    {
-        $method = $this->getMethod($instance, $method);
-        return $method->invokeArgs($instance, $arguments);
     }
 
     public function testTestFile_URL_RemoteDisabled()

@@ -11,6 +11,7 @@ use DBChecker\modules\FileCheck\FileCheckModule;
 use DBChecker\modules\FragmentationCheck\FragmentationCheckModule;
 use DBChecker\modules\MissingCompressionDetect\MissingCompressionDetectModule;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
+use DBChecker\modules\PwnedAccountsDetect\PwnedAccountsDetectModule;
 use DBChecker\modules\RelCheck\RelCheckModule;
 use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheckModule;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
@@ -30,7 +31,8 @@ class ModuleManager
         DataIntegrityCheckModule::class,
         MissingCompressionDetectModule::class,
         FragmentationCheckModule::class,
-        AnalyzeTableCheckModule::class
+        AnalyzeTableCheckModule::class,
+        PwnedAccountsDetectModule::class
     ];
 
     public function loadModule(BaseModuleInterface $module, $settings)

@@ -13,6 +13,11 @@ uniqueintegritycheck:
 fragmentationcheck:
 analyzetablecheck:
 
+pwnedaccountsdetect:
+  mapping:
+    - table: users
+      login_column: email
+
 filecheck:
   enable_remotes: true
   mapping:
