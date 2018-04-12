@@ -32,11 +32,15 @@ class HaveIBeenPwnedBackend
      */
     public function breachedaccount(string $account)
     {
-        $ch = curl_init(static::API_BASEURL."/breachedaccount/".$account);
-        curl_setopt($ch, CURLOPT_USERAGENT, "DBChecker-PwnedAccountsDetect");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $data = curl_exec($ch);
-        curl_close($ch);
+        $curl = curl_init(static::API_BASEURL."/breachedaccount/".$account);
+        curl_setopt($curl, CURLOPT_USERAGENT, "DBChecker-PwnedAccountsDetect");
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $data = curl_exec($curl);
+        if ($data === null)
+        {
+            var_dump(curl_getinfo($curl));
+        }
+        curl_close($curl);
         // Requests to the breaches and pastes APIs are limited to one
         // per every 1500 milliseconds each from any given IP address
         sleep(2);
