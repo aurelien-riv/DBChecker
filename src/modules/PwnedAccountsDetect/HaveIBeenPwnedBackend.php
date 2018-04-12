@@ -41,6 +41,7 @@ class HaveIBeenPwnedBackend
         echo "--------".time()."----------\n";
         var_dump($data);
         var_dump(curl_getinfo($curl));
+        echo curl_error($curl);
         echo "------------------\n";
 
         curl_close($curl);
