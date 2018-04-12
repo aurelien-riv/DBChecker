@@ -9,6 +9,7 @@ class HaveIBeenPwnedBackend
     public function isAccountPwned(string $account) : bool
     {
         $data = $this->breachedaccount($account);
+        echo "$account: $data\n";
         if (! $data)
         {
             return false;
@@ -36,10 +37,6 @@ class HaveIBeenPwnedBackend
         curl_setopt($curl, CURLOPT_USERAGENT, "DBChecker-PwnedAccountsDetect");
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($curl);
-        if ($data === null)
-        {
-            var_dump(curl_getinfo($curl));
-        }
         curl_close($curl);
         // Requests to the breaches and pastes APIs are limited to one
         // per every 1500 milliseconds each from any given IP address
