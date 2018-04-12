@@ -37,6 +37,12 @@ class HaveIBeenPwnedBackend
         curl_setopt($curl, CURLOPT_USERAGENT, "DBChecker-PwnedAccountsDetect");
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($curl);
+
+        echo "--------".time()."----------\n";
+        var_dump($data);
+        var_dump(curl_getinfo($curl));
+        echo "------------------\n";
+
         curl_close($curl);
         // Requests to the breaches and pastes APIs are limited to one
         // per every 1500 milliseconds each from any given IP address
