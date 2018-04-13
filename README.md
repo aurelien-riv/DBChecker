@@ -1,5 +1,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
+Travis on branch master : [![Build Status](https://travis-ci.org/aurelien-riv/DBChecker.svg?branch=master)](https://travis-ci.org/aurelien-riv/DBChecker)
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/354f5f8a337c4613a5204eecefedcfc5)](https://www.codacy.com/app/aurelien.riv/DBChecker?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aurelien-riv/DBChecker&amp;utm_campaign=Badge_Grade)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d8f1fb2026c68fde6b91/maintainability)](https://codeclimate.com/github/aurelien-riv/DBChecker/maintainability)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/aurelien-riv/DBChecker/?branch=master)

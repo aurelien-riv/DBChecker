@@ -28,6 +28,7 @@ class PwnedAccountsDetectTest extends \PHPUnit\Framework\TestCase
     {
         $module = new PwnedAccountsDetectModule();
         $this->moduleManager->loadModule($module, [$module->getName() => [
+            'show_new_only' => false,
             'mapping' => [
                 ['table' => '', 'login_column' => '']
             ]

@@ -19,6 +19,7 @@ class PwnedAccountsDetectModule implements ModuleInterface
         $treeBuilder = new TreeBuilder();
         $treeBuilder->root($this->getName())
             ->children()
+            ->booleanNode('show_new_only')->defaultTrue()->end()
             ->arrayNode('mapping')
                 ->isRequired()
                 ->requiresAtLeastOneElement()
