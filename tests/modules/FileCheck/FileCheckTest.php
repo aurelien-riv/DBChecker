@@ -1,6 +1,6 @@
 <?php
 
-namespace DBCheckerTests\modules\FileCheck\FileCheck;
+namespace DBCheckerTests\modules\FileCheck;
 
 use DBChecker\modules\FileCheck\FileCheckMatch;
 use DBChecker\modules\FileCheck\FileCheckModule;

@@ -94,7 +94,6 @@ class MySQLQueries extends AbstractDbQueries
     }
     #endregion
 
-
     protected function getConcatenatedColumnNames($table)
     {
         $stmt = $this->pdo->prepare("
@@ -120,6 +119,7 @@ class MySQLQueries extends AbstractDbQueries
         return empty($result) ? 0 : $result;
     }
 
+    // FIXME should not use only the column names!
     public function getTableSchemaSha1sum($table) : string
     {
         $columns = $this->getConcatenatedColumnNames($table);

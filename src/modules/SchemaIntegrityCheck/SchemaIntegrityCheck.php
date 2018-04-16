@@ -17,8 +17,10 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
 
     public function run(AbstractDBAL $dbal)
     {
-        foreach ($this->config['mapping'] as $table => $expectedChecksum)
+        foreach ($this->config['mapping'] as $mapping)
         {
+            $table = key($mapping);
+            $expectedChecksum = $mapping[key($mapping)];
             $checksum = $dbal->getTableSchemaSha1sum($table);
             if ($checksum !== $expectedChecksum)
             {
@@ -36,25 +38,29 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
     {
         foreach ($dbal->getTableNames() as $table)
         {
-            if (!isset($this->config['mapping'][$table]))
+            foreach ($this->config['mapping'] as $mapping)
             {
-                foreach ($this->config['ignore'] as $ignore)
+                if ($table === key($mapping))
                 {
-                    if (preg_match('/' . $ignore . '/', $table))
-                    {
-                        continue 2;
-                    }
+                    continue 2;
                 }
-                yield new SchemaIntegrityCheckMatch($dbal->getName(), $table, 'unexpected table');
             }
+            foreach ($this->config['ignore'] as $ignore)
+            {
+                if (preg_match('/' . $ignore . '/', $table))
+                {
+                    continue 2;
+                }
+            }
+            yield new SchemaIntegrityCheckMatch($dbal->getName(), $table, 'unexpected table');
         }
     }
 
-    public function generateConfig(DBQueriesInterface $dbQueries)
+    public function generateConfig(DBQueriesInterface $dbQueries) : string
     {
-        echo "schemaintegrity:";
-        echo "  mapping:";
-        foreach ($dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
+        $ret = "schemaintegritycheck:\n";
+        $ret .= "  mapping:\n";
+        foreach ($dbQueries->getTableNames() as $table)
         {
             foreach ($this->config['ignore'] ?? [] as $ignore)
             {
@@ -66,8 +72,9 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
             $checksum = $dbQueries->getTableSchemaSha1sum($table);
             if ($checksum)
             {
-                echo "    - $table: $checksum\n";
+                $ret .= "    - $table: $checksum\n";
             }
         }
+        return $ret;
     }
 }

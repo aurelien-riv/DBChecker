@@ -20,8 +20,10 @@ class DataIntegrityCheck implements ModuleWorkerInterface
 
     public function run(AbstractDBAL $dbal)
     {
-        foreach ($this->config['mapping'] as $table => $expectedChecksum)
+        foreach ($this->config['mapping'] as $mapping)
         {
+            $table = key($mapping);
+            $expectedChecksum = $mapping[key($mapping)];
             $checksum = $dbal->getTableDataSha1sum($table);
             if ($checksum !== $expectedChecksum)
             {
@@ -32,37 +34,40 @@ class DataIntegrityCheck implements ModuleWorkerInterface
 
     /**
      * @param DBQueriesInterface $dbQueries
+     * @return string
      * Proposes a new set of checksums for the configuration file
      */
-    public function updateConfig(DBQueriesInterface $dbQueries)
+    public function updateConfig(DBQueriesInterface $dbQueries) : string
     {
-        echo "datainregritycheck";
-        echo "  mapping:";
+        $ret =  "dataintegritycheck:\n";
+        $ret .= "  mapping:\n";
         foreach (array_keys($this->config['mapping']) as $table)
         {
             $checksum = $dbQueries->getTableDataSha1sum($table);
             if ($checksum)
             {
-                echo "    - $table: $checksum\n";
+                $ret = "    - $table: $checksum\n";
             }
         }
+        return $ret;
     }
 
     /**
      * @param DBQueriesInterface $dbQueries
-     * Generate a set of checksums for the configuration file
+     * @return string
      */
-    public function generateConfig(DBQueriesInterface $dbQueries)
+    public function generateConfig(DBQueriesInterface $dbQueries) : string
     {
-        echo "datainregritycheck";
-        echo "  mapping:";
-        foreach ($dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
+        $ret = "dataintegritycheck:\n";
+        $ret .= "  mapping:\n";
+        foreach ($dbQueries->getTableNames() as $table)
         {
             $checksum = $dbQueries->getTableDataSha1sum($table);
             if ($checksum)
             {
-                echo "    - $table: $checksum\n";
+                $ret .= "    - $table: $checksum\n";
             }
         }
+        return $ret;
     }
 }

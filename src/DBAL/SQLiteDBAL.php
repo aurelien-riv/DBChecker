@@ -46,11 +46,20 @@ class SQLiteDBAL extends AbstractDBAL
 
     public function getTableDataSha1sum(string $table) : string
     {
-        return $this->queries->getTableDataSha1sum($table);
+        $concatenated = '';
+        $data = $this->queries->selectEverythingFrom($table)->fetchAll(\PDO::FETCH_ASSOC);
+        foreach ($data as $datum)
+        {
+            foreach ($datum as $item)
+            {
+                $concatenated .= $item;
+            }
+        }
+        return hash('sha1', $concatenated);
     }
 
     public function getTableSchemaSha1sum(string $table) : string
     {
-        return $this->queries->getTableSchemaSha1sum($table);
+        return hash('sha1', implode(',', $this->getColumnNamesInTable($table)));
     }
 }

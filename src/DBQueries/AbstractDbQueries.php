@@ -99,4 +99,9 @@ abstract class  AbstractDbQueries
         $stmt->execute();
         return $stmt;
     }
+
+    public function selectEverythingFrom(string $table)
+    {
+        return $this->pdo->query("SELECT * FROM $table");
+    }
 }
