@@ -8,12 +8,11 @@ use DBChecker\modules\ModuleManager;
 use DBChecker\modules\RelCheck\RelCheck;
 use DBChecker\modules\RelCheck\RelCheckMatch;
 use DBChecker\modules\RelCheck\RelCheckModule;
-use DBCheckerTests\BypassVisibilityTrait;
-use DBCheckerTests\SQLiteDatabase;
+use DBCheckerTests\DatabaseUtilities;
 
 class RelCheckTest extends \PHPUnit\Framework\TestCase
 {
-    use BypassVisibilityTrait;
+    use DatabaseUtilities;
 
     /**
      * @var ModuleManager
@@ -38,7 +37,7 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
     {
         $settings = [
             'databases' => [
-                'connections' => [SQLiteDatabase::SQLITE_CONFIG]
+                'connections' => [$this->getSqliteMemoryConfig()]
             ],
             'relcheck' => []
         ];
