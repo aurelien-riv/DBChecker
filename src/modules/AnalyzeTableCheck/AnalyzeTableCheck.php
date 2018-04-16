@@ -12,7 +12,7 @@ class AnalyzeTableCheck implements ModuleWorkerInterface
         $tables = $dbal->getTableNames();
         foreach ($tables as $table)
         {
-            $analyze = $dbal->analyzeTable($table)->fetch(\PDO::FETCH_OBJ);
+            $analyze = $dbal->analyzeTable($table);
             if ($analyze->Msg_type !== 'status')
             {
                 yield new AnalyzeTableCheckMatch($dbal->getName(), $table, $analyze->Msg_text);

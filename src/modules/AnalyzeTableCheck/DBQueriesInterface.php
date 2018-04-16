@@ -8,5 +8,5 @@ interface DBQueriesInterface
 
     public function getTableNames() : array;
 
-    public function analyzeTable(string $table) : \PDOStatement;
+    public function analyzeTable(string $table) : \stdClass;
 }

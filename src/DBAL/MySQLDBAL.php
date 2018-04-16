@@ -64,4 +64,9 @@ class MySQLDBAL extends AbstractDBAL
     {
         return $this->queries->getUniqueIndexes($table)->fetchAll(\PDO::FETCH_COLUMN);
     }
+
+    public function analyzeTable(string $table) : \stdClass
+    {
+        return $this->queries->analyzeTable($table)->fetch(\PDO::FETCH_OBJ);
+    }
 }

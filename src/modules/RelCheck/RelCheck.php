@@ -32,9 +32,9 @@ class RelCheck implements ModuleWorkerInterface
         }
     }
 
-    protected function checkRelations(AbstractDBAL $dbal, $tbl, $col, $rtbl, $rcol)
+    protected function checkRelations(AbstractDBAL $dbal, string $tbl, string $col, string $rtbl, string $rcol)
     {
-        $values = $dbal->getDistinctValuesWithoutNulls($tbl, $col);
+        $values = $dbal->getDistinctValuesWithoutNulls($tbl, [$col]);
         foreach ($values as $value)
         {
             $valueExists = $dbal->getValue($rtbl, $rcol, $value);

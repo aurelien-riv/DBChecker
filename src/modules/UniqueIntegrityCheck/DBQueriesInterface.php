@@ -10,5 +10,5 @@ interface DBQueriesInterface
 
     public function getUniqueIndexes(string $table);
 
-    public function getDuplicateForColumnsWithCount(string $table, array $columns) : array;
+    public function getDuplicateForColumnsWithCount(string $table, string $columns) : array;
 }

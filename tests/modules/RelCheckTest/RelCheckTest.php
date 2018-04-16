@@ -3,7 +3,6 @@
 namespace DBCheckerTests\modules\RelCheckTest;
 
 use DBChecker\DBAL\SQLiteDBAL;
-use DBChecker\DBQueries\SQLiteQueries;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
 use DBChecker\modules\RelCheck\RelCheck;

@@ -112,6 +112,11 @@ abstract class AbstractDBAL implements
         throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
     }
 
+    public function analyzeTable(string $table) : \stdClass
+    {
+        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
+    }
+
     /**
      * @param string $table
      * @param string $columns A coma separated list of columns

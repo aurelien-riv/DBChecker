@@ -2,9 +2,6 @@
 
 namespace DBChecker\DBQueries;
 
-use DBChecker\DBAL\AbstractDBAL;
-use DBChecker\DBAL\SQLiteDBAL;
-
 class SQLiteQueries extends AbstractDbQueries
 {
     public function getTableNames() : \PDOStatement
