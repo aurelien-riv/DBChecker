@@ -2,7 +2,7 @@
 
 namespace DBChecker\DBQueries;
 
-abstract class AbstractDbQueries
+abstract class  AbstractDbQueries
 {
     /**
      * Regex that matches a valid column name

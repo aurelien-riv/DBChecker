@@ -21,4 +21,9 @@ class SQLiteQueries extends AbstractDbQueries
     {
         return $this->pdo->query("PRAGMA table_info($table);");
     }
+
+    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column) : \PDOStatement
+    {
+        throw new \BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
+    }
 }
