@@ -7,7 +7,7 @@ addons:
   sonarcloud:
     organization: aurelien-riv-github
     token:
-      secure: ${DBChecker-sonar}
+      secure: ${DBChecker-sonar-encrypted}
 
 install: composer install
 
