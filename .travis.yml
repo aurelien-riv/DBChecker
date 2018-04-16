@@ -1,4 +1,5 @@
 language: php
+
 php:
   - '7.1'
   - '7.2'
@@ -7,10 +8,8 @@ addons:
   sonarcloud:
     organization: aurelien-riv-github
     token:
-      secure: ${DBChecker-sonar-encrypted}
+      secure: "j/JxKRTU/shLfel5ndEwF1yKMg5ndM6V5mKZx7KNMiT8D20tQmIfMrk7fx0xNKqx8+X6ph5hVgr3vggaM0OS0N6F4zgJ8mjoz8MFKwnwKnB5aGAOj7m21b2j0etjTaBQMWwN6n9/uWjHXqLKaaTB2qzNVpBXZ2xeQjDyOxgq8zdve+W1ecYTCj50N1DwVDL1xvpgPzVB03QUr5TQEwtFU/IX/UHFZb/5xlJK1G5a4fu1SVQQnsXoGSODLVElxbTuNEEwp8ZYQPSpskyL7HiC1Gkk2b0WXNA+9pboG1Qp+gpz/wVxMB2+ZbJNbggxwdnjUIYkvdB1LjBDeqmsI+dexMCWenJ7ERtfQiPz5eE0jYVWvemYoPQLB+UimSqgRnkEt1AdtJmeQaVkj3i0aBrhCtv/eAjFMm9nIz2xKEOqUbKer6M+31hKC0sndOB70GiWIFhHqzCFqGSc82smEr/d5mdIYd8iPCuXreWmA4Kd/WSYkUDiJ/nQWnm9Ya8UqwANfMmm9WwUrozjmmOzNWV/Be4Sr3YL5LzkNugCkoRHPsRLv+yraNNMo2VRiC9AA5eZbbYpzoRcJR0tdUek6LZQ7lR0PBd7kk3bifoLa6vRTRCNjECP3ucQjTgxkP/weWPPGBUYy6WKi4chlXAyBg9+43OSixtPYyAldF7tqbA1AeE="
 
 install: composer install
-
 script: phpunit --configuration phpunit.xml
-
 after_script: sonar-scanner
