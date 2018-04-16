@@ -2,20 +2,20 @@
 
 namespace DBChecker\modules\AnalyzeTableCheck;
 
-use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 
 class AnalyzeTableCheck implements ModuleWorkerInterface
 {
-    public function run(AbstractDbQueries $dbQueries)
+    public function run(AbstractDbal $dbal)
     {
-        $tables = $dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
+        $tables = $dbal->getTableNames();
         foreach ($tables as $table)
         {
-            $analyze = $dbQueries->analyzeTable($table)->fetch(\PDO::FETCH_OBJ);
+            $analyze = $dbal->analyzeTable($table)->fetch(\PDO::FETCH_OBJ);
             if ($analyze->Msg_type !== 'status')
             {
-                yield new AnalyzeTableCheckMatch($dbQueries->getName(), $table, $analyze->Msg_text);
+                yield new AnalyzeTableCheckMatch($dbal->getName(), $table, $analyze->Msg_text);
             }
         }
     }

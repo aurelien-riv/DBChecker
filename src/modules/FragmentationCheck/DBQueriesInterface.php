@@ -2,7 +2,9 @@
 
 namespace DBChecker\modules\FragmentationCheck;
 
-interface DBQueriesInterface extends \DBChecker\DBQueries\DBQueriesInterface
+interface DBQueriesInterface
 {
-    public function getFragmentedTables() : \PDOStatement;
+    public function getName() : string;
+
+    public function getFragmentedTables() : array;
 }

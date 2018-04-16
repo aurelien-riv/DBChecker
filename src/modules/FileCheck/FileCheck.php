@@ -2,8 +2,7 @@
 
 namespace DBChecker\modules\FileCheck;
 
-use DBChecker\AbstractMatch;
-use DBChecker\Config;
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleWorkerInterface;
 
@@ -67,7 +66,7 @@ class FileCheck implements ModuleWorkerInterface
         }, $path);
     }
 
-    public function run(AbstractDbQueries $dbQueries)
+    public function run(AbstractDBAL $dbal)
     {
         foreach ($this->config['mapping'] as $mapping)
         {
@@ -77,13 +76,12 @@ class FileCheck implements ModuleWorkerInterface
             $columns = $innerJoins = [];
             $this->extractVariablesFromPath($path, $columns, $innerJoins);
 
-            $values = $dbQueries->getDistinctValuesWithJoinColumnsWithoutNulls($table, array_keys($columns), $innerJoins)
-                              ->fetchAll(\PDO::FETCH_ASSOC);
+            $values = $dbal->getDistinctValuesWithJoinColumnsWithoutNulls($table, array_keys($columns), $innerJoins);
             foreach ($values as $value)
             {
                 $tmpColumns = $columns;
                 $tmpPath = $this->replaceVariablesFromPath($path, $value, $tmpColumns);
-                yield from $this->testFile($dbQueries->getName(), $table, $tmpColumns, $tmpPath);
+                yield from $this->testFile($dbal->getName(), $table, $tmpColumns, $tmpPath);
             }
         }
     }

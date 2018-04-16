@@ -2,6 +2,7 @@
 
 namespace DBChecker\modules\MissingKeyDetect;
 
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleInterface;
 use DBChecker\ModuleWorkerInterface;
@@ -15,12 +16,11 @@ class MissingKeyDetect implements ModuleWorkerInterface
         $this->config = $module->getConfig();
     }
 
-    protected function isPk(DBQueriesInterface $dbQueries, \stdClass $column)
+    protected function isPk(AbstractDBAL $dbal, string $table, string $column)
     {
-        $pks = $dbQueries->getPks($column->TABLE_NAME)->fetchAll(\PDO::FETCH_OBJ);
-        foreach ($pks as $pk)
+        foreach ($dbal->getPks($table) as $pk)
         {
-            if ($pk->Column_name === $column->COLUMN_NAME)
+            if ($pk->Column_name === $column)
             {
                 return true;
             }
@@ -28,25 +28,25 @@ class MissingKeyDetect implements ModuleWorkerInterface
         return false;
     }
 
-    protected function isFk(DBQueriesInterface $dbQueries, \stdClass $column)
+    protected function isFk(AbstractDBAL $dbal, string $table, string $column)
     {
-        return $dbQueries
-                   ->getDistantTableAndColumnFromTableAndColumnFK($column->TABLE_NAME, $column->COLUMN_NAME)
-                   ->fetch(\PDO::FETCH_OBJ) !== false;
+        return $dbal->getDistantTableAndColumnFromTableAndColumnFK($table, $column) !== null;
     }
 
-    protected function initAlgorithm(DBQueriesInterface $dbQueries, &$notKeys, &$keys)
+    protected function initAlgorithm(AbstractDBAL $dbal, &$notKeys, &$keys)
     {
-        $columns = $dbQueries->getColumnNamesWithTableName()->fetchAll(\PDO::FETCH_OBJ);
-        foreach ($columns as $column)
+        foreach ($dbal->getTableNames() as $table)
         {
-            if ($this->isPk($dbQueries, $column) || $this->isFk($dbQueries,  $column))
+            foreach ($dbal->getColumnNamesInTable($table) as $column)
             {
-                $keys[] = $column->COLUMN_NAME;
-                continue;
-            }
+                if ($this->isPk($dbal, $table, $column) || $this->isFk($dbal, $table, $column))
+                {
+                    $keys[] = $column;
+                    continue;
+                }
 
-            $notKeys[] = [$column->TABLE_NAME, $column->COLUMN_NAME];
+                $notKeys[] = [$column, $column];
+            }
         }
     }
 
@@ -130,17 +130,17 @@ class MissingKeyDetect implements ModuleWorkerInterface
         }
     }
 
-    public function run(AbstractDbQueries $dbQueries)
+    public function run(AbstractDBAL $dbal)
     {
-        $this->initAlgorithm($dbQueries, $notKeys, $keys);
+        $this->initAlgorithm($dbal, $notKeys, $keys);
 
         if (! empty($this->config['patterns']))
         {
-            yield from $this->runWithPatterns($dbQueries->getName(), $notKeys);
+            yield from $this->runWithPatterns($dbal->getName(), $notKeys);
         }
         else
         {
-            yield from $this->runWithAutodetect($dbQueries->getName(), $notKeys, $keys);
+            yield from $this->runWithAutodetect($dbal->getName(), $notKeys, $keys);
         }
     }
 }

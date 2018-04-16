@@ -2,9 +2,11 @@
 
 namespace DBChecker\modules\AnalyzeTableCheck;
 
-interface DBQueriesInterface extends \DBChecker\DBQueries\DBQueriesInterface
+interface DBQueriesInterface
 {
-    public function getTableNames() : \PDOStatement;
+    public function getName() : string;
+
+    public function getTableNames() : array;
 
     public function analyzeTable(string $table) : \PDOStatement;
 }

@@ -2,19 +2,11 @@
 
 namespace DBChecker\modules\MissingKeyDetect;
 
-interface DBQueriesInterface extends \DBChecker\DBQueries\DBQueriesInterface
+interface DBQueriesInterface
 {
-    /**
-     * @param string $table
-     * @return bool|\PDOStatement
-     */
-    public function getPKs($table);
+    public function getName() : string;
 
-    /**
-     * @return bool|\PDOStatement
-     * Get all the {TABLE_NAME, COLUMN_NAME} from the database
-     */
-    public function getColumnNamesWithTableName();
+    public function getPKs(string $table) : array;
 
     /**
      * @param string $table
@@ -22,5 +14,5 @@ interface DBQueriesInterface extends \DBChecker\DBQueries\DBQueriesInterface
      * @return bool|\PDOStatement
      * Get the table name and the column name on the other side of a foreign key relation
      */
-    public function getDistantTableAndColumnFromTableAndColumnFK($table, $column);
+    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column);
 }

@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\DataIntegrityCheck;
 
-use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\ModuleInterface;
 use DBChecker\ModuleWorkerInterface;
 
@@ -18,14 +18,14 @@ class DataIntegrityCheck implements ModuleWorkerInterface
         $this->config = $module->getConfig();
     }
 
-    public function run(AbstractDbQueries $dbQueries)
+    public function run(AbstractDBAL $dbal)
     {
         foreach ($this->config['mapping'] as $table => $expectedChecksum)
         {
-            $checksum = $dbQueries->getTableDataSha1sum($table);
+            $checksum = $dbal->getTableDataSha1sum($table);
             if ($checksum !== $expectedChecksum)
             {
-                yield new DataIntegrityCheckMatch($dbQueries->getName(), $table, $checksum);
+                yield new DataIntegrityCheckMatch($dbal->getName(), $table, $checksum);
             }
         }
     }

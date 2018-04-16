@@ -2,17 +2,16 @@
 
 namespace DBChecker\modules\FragmentationCheck;
 
-use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 
 class FragmentationCheck implements ModuleWorkerInterface
 {
-    public function run(AbstractDbQueries $dbQueries)
+    public function run(AbstractDBAL $dbal)
     {
-        $tables = $dbQueries->getFragmentedTables()->fetchAll(\PDO::FETCH_OBJ);
-        foreach ($tables as $table)
+        foreach ($dbal->getFragmentedTables() as $table)
         {
-            yield new FragmentationCheckMatch($dbQueries->getName(), $table->TABLE_NAME, $table->FRAGMENTATION);
+            yield new FragmentationCheckMatch($dbal->getName(), $table->TABLE_NAME, $table->FRAGMENTATION);
         }
     }
 }

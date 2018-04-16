@@ -3,6 +3,8 @@
 namespace DBChecker\modules\DataBase;
 
 use DBChecker\BaseModuleInterface;
+use DBChecker\DBAL\MySQLDBAL;
+use DBChecker\DBAL\SQLiteDBAL;
 use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\DBQueries\MySQLQueries;
 use DBChecker\DBQueries\SQLiteQueries;
@@ -10,6 +12,7 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class DatabasesModule implements BaseModuleInterface
 {
+    private $dbals = [];
     private $connections = [];
 
     public function getName()
@@ -55,6 +58,11 @@ class DatabasesModule implements BaseModuleInterface
         return $this->connections;
     }
 
+    public function getDBALs()
+    {
+        return $this->dbals;
+    }
+
     public function addConnection($cnx)
     {
         $dsn = $cnx['dsn'] ?? "{$cnx['engine']}:dbname={$cnx['db']};host={$cnx['host']};port={$cnx['port']}";
@@ -63,11 +71,15 @@ class DatabasesModule implements BaseModuleInterface
 
         if ($cnx['engine'] == 'mysql')
         {
-            $this->connections[] = new MySQLQueries($pdo, $cnx['name'] ?? $cnx['db']);
+            $queries = new MySQLQueries($pdo, $cnx['name'] ?? $cnx['db']);
+            $this->dbals[] = new MySQLDBAL($queries);
+            $this->connections[] = $queries;
         }
         else if ($cnx['engine'] === 'sqlite')
         {
-            $this->connections[] = new SQLiteQueries($pdo, $cnx['name'] ?? $cnx['db']);
+            $queries = new SQLiteQueries($pdo, $cnx['name'] ?? $cnx['db']);
+            $this->dbals[] = new SQLiteDBAL($queries);
+            $this->connections[] = $queries;
         }
     }
 

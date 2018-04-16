@@ -2,33 +2,17 @@
 
 namespace DBChecker\modules\RelCheck;
 
-interface DBQueriesInterface extends \DBChecker\DBQueries\DBQueriesInterface
+interface DBQueriesInterface
 {
-    public function getTableNames() : \PDOStatement;
+    public function getName() : string;
 
-    /**
-     * @return bool|\PDOStatement
-     */
-    public function getFks();
+    public function getTableNames() : array;
 
-    /**
-     * @param string $table
-     * @return bool|\PDOStatement
-     */
-    public function getColumnNamesInTable($table);
+    public function getFks() : array;
 
-    /**
-     * @param string          $table
-     * @param string|string[] $columns
-     * @return bool|\PDOStatement
-     */
-    public function getDistinctValuesWithoutNulls($table, $columns);
+    public function getColumnNamesInTable(string $table) : array;
 
-    /**
-     * @param string $table
-     * @param string $column
-     * @param $value
-     * @return bool|\PDOStatement
-     */
-    public function getValue($table, $column, $value);
+    public function getDistinctValuesWithoutNulls(string $table, array $columns) : array;
+
+    public function getValue(string $table, string $column, $value);
 }

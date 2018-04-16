@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\SchemaIntegrityCheck;
 
-use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\ModuleInterface;
 use DBChecker\ModuleWorkerInterface;
 
@@ -15,26 +15,26 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
         $this->config = $module->getConfig();
     }
 
-    public function run(AbstractDbQueries $dbQueries)
+    public function run(AbstractDBAL $dbal)
     {
         foreach ($this->config['mapping'] as $table => $expectedChecksum)
         {
-            $checksum = $dbQueries->getTableSchemaSha1sum($table);
+            $checksum = $dbal->getTableSchemaSha1sum($table);
             if ($checksum !== $expectedChecksum)
             {
-                yield new SchemaIntegrityCheckMatch($dbQueries->getName(), $table, $checksum);
+                yield new SchemaIntegrityCheckMatch($dbal->getName(), $table, $checksum);
             }
         }
 
         if (! $this->config['allow_extras'])
         {
-            yield from $this->checkForExtraTables($dbQueries);
+            yield from $this->checkForExtraTables($dbal);
         }
     }
 
-    public function checkForExtraTables(DBQueriesInterface $dbQueries)
+    public function checkForExtraTables(AbstractDBAL $dbal)
     {
-        foreach ($dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
+        foreach ($dbal->getTableNames() as $table)
         {
             if (!isset($this->config['mapping'][$table]))
             {
@@ -45,7 +45,7 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
                         continue 2;
                     }
                 }
-                yield new SchemaIntegrityCheckMatch($dbQueries->getName(), $table, 'unexpected table');
+                yield new SchemaIntegrityCheckMatch($dbal->getName(), $table, 'unexpected table');
             }
         }
     }
@@ -56,14 +56,11 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
         echo "  mapping:";
         foreach ($dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN) as $table)
         {
-            if (isset($this->config['ignore']))
+            foreach ($this->config['ignore'] ?? [] as $ignore)
             {
-                foreach ($this->config['ignore'] as $ignore)
+                if (preg_match('/'.$ignore.'/', $table))
                 {
-                    if (preg_match('/'.$ignore.'/', $table))
-                    {
-                        continue 2;
-                    }
+                    continue 2;
                 }
             }
             $checksum = $dbQueries->getTableSchemaSha1sum($table);

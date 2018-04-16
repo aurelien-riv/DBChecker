@@ -2,23 +2,22 @@
 
 namespace DBChecker\modules\UniqueIntegrityCheck;
 
-use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 
 class UniqueIntegrityCheck implements ModuleWorkerInterface
 {
-    public function run(AbstractDbQueries $dbQueries)
+    public function run(AbstractDBAL $dbal)
     {
-        $tables = $dbQueries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
-        foreach ($tables as $table)
+        foreach ($dbal->getTableNames() as $table)
         {
-            $indexColumns = $dbQueries->getUniqueIndexes($table)->fetchAll(\PDO::FETCH_COLUMN);
+            $indexColumns = $dbal->getUniqueIndexes($table);
             foreach ($indexColumns as $columns)
             {
-                $resultset = $dbQueries->getDuplicateForColumnsWithCount($table, $columns)->fetchAll(\PDO::FETCH_OBJ);
+                $resultset = $dbal->getDuplicateForColumnsWithCount($table, $columns);
                 foreach ($resultset as $result)
                 {
-                    yield new UniqueIntegrityCheckMatch($dbQueries->getName(), $table, $columns, $result);
+                    yield new UniqueIntegrityCheckMatch($dbal->getName(), $table, $columns, $result);
                 }
             }
         }

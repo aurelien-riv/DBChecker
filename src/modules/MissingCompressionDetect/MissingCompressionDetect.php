@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\MissingCompressionDetect;
 
-use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 use Symfony\Component\Filesystem\Exception\InvalidArgumentException;
 
@@ -15,17 +15,17 @@ class MissingCompressionDetect implements ModuleWorkerInterface
         $this->config = $module->getConfig();
     }
 
-    public function run(AbstractDbQueries $dbQueries)
+    public function run(AbstractDBAL $dbal)
     {
-        $engineSupportsCompression = $dbQueries->supportsTablespaceCompression();
-        $dbName = $dbQueries->getName();
+        $engineSupportsCompression = $dbal->supportsTablespaceCompression();
+        $dbName = $dbal->getName();
 
-        $tables = $dbQueries->getTableLargerThanMb($this->config['largeTableSize'])->fetchAll(\PDO::FETCH_OBJ);
+        $tables = $dbal->getTableLargerThanMb($this->config['largeTableSize']);
         foreach ($tables as $table)
         {
             $tableName = $table->TABLE_NAME;
-            $tableCompressed = $dbQueries->isTableCompressed($tableName);
-            $needsCompression = $this->needsCompression($dbQueries, $tableName);
+            $tableCompressed = $dbal->isTableCompressed($tableName);
+            $needsCompression = $this->needsCompression($dbal, $tableName);
             yield from $this->yieldOnError($dbName, $tableName, $tableCompressed, $needsCompression, $engineSupportsCompression);
         }
     }
@@ -54,14 +54,14 @@ class MissingCompressionDetect implements ModuleWorkerInterface
     }
 
     /**
-     * @param DBQueriesInterface $dbQueries
-     * @param string            $table
+     * @param AbstractDBAL $dbal
+     * @param string       $table
      * @return bool|null
      * Returns true if the data is significantly smaller once compressed, false otherwise.
      */
-    private function needsCompression(DBQueriesInterface $dbQueries, string $table) : bool
+    private function needsCompression(AbstractDBAL $dbal, string $table) : bool
     {
-        $data = $dbQueries->getRandomValuesConcatenated($table, 15)->fetchAll(\PDO::FETCH_COLUMN);
+        $data = $dbal->getRandomValuesConcatenated($table, 15);
         if (empty($data))
         {
             throw new InvalidArgumentException("Table has no data");

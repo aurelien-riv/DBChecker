@@ -2,13 +2,15 @@
 
 namespace DBChecker\modules\MissingCompressionDetect;
 
-interface DBQueriesInterface extends \DBChecker\DBQueries\DBQueriesInterface
+interface DBQueriesInterface
 {
+    public function getName() : string;
+
     public function supportsTablespaceCompression() : bool;
 
     public function isTableCompressed(string $table) : bool;
 
-    public function getTableLargerThanMb(int $minSize_MB) : \PDOStatement;
+    public function getTableLargerThanMb(int $minSize_MB) : array;
 
-    public function getRandomValuesConcatenated(string $table, int $limit) : \PDOStatement;
+    public function getRandomValuesConcatenated(string $table, int $limit) : string;
 }

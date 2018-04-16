@@ -2,6 +2,7 @@
 
 namespace DBChecker\modules\PwnedAccountsDetect;
 
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 
 class PwnedAccountsDetect implements ModuleWorkerInterface
@@ -18,20 +19,19 @@ class PwnedAccountsDetect implements ModuleWorkerInterface
     }
 
     /**
-     * @param \DBChecker\DBQueries\AbstractDbQueries $dbQueries
+     * @param AbstractDBAL $dbal
      * @return array|\Generator
      * @throws TlsHandcheckException
      */
-    public function run(\DBChecker\DBQueries\AbstractDbQueries $dbQueries)
+    public function run(AbstractDBAL $dbal)
     {
         foreach ($this->config['mapping'] as $mapping)
         {
             $column =$mapping['login_column'];
-            $users = $dbQueries->getDistinctValuesWithoutNulls($mapping['table'], $column)
-                               ->fetchAll(\PDO::FETCH_OBJ);
+            $users = $dbal->getDistinctValuesWithoutNulls($mapping['table'], $column);
             foreach ($users as $user)
             {
-                yield from $this->checkLogin($user->{$column}, $dbQueries->getName(), $mapping['table'], $column);
+                yield from $this->checkLogin($user[$column], $dbal->getName(), $mapping['table'], $column);
             }
         }
     }

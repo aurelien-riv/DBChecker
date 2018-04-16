@@ -2,22 +2,14 @@
 
 namespace DBChecker\DBQueries;
 
+use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\DBAL\MySQLDBAL;
+
 class MySQLQueries extends AbstractDbQueries
 {
     public function getTableNames() : \PDOStatement
     {
         return $this->pdo->query("SHOW FULL TABLES WHERE Table_Type = 'BASE TABLE'");
-    }
-
-    public function getColumnNamesWithTableName()
-    {
-        $stmt = $this->pdo->prepare("
-            SELECT TABLE_NAME, COLUMN_NAME
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = DATABASE();
-        ");
-        $stmt->execute();
-        return $stmt;
     }
 
     public function getColumnNamesInTable($table)
@@ -30,7 +22,7 @@ class MySQLQueries extends AbstractDbQueries
         return $this->pdo->query("SHOW INDEX FROM $table WHERE Key_name = 'PRIMARY'");
     }
 
-    public function getDistantTableAndColumnFromTableAndColumnFK($table, $column)
+    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column)
     {
         $stmt = $this->pdo->prepare("
             SELECT REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME

@@ -2,13 +2,13 @@
 
 namespace DBChecker;
 
-use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\DBAL\AbstractDBAL;
 
 interface ModuleWorkerInterface
 {
     /**
-     * @param AbstractDbQueries $dbQueries
+     * @param AbstractDBAL $dbal
      * @return \Generator|array
      */
-    public function run(AbstractDbQueries $dbQueries);
+    public function run(AbstractDBAL $dbal);
 }

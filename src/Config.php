@@ -2,13 +2,13 @@
 
 namespace DBChecker;
 
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\modules\ModuleManager;
 use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
     private $moduleManager;
-
 
     public function __construct($yamlPath)
     {
@@ -29,6 +29,12 @@ class Config
         yield from $this->moduleManager->getWorkers();
     }
 
+    public function getDBALs() : array
+    {
+        return $this->moduleManager->getDatabaseModule()->getDBALs();
+    }
+
+    /** @deprecated  */
     public function getQueries()
     {
         return $this->moduleManager->getDatabaseModule()->getConnections();

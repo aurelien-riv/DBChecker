@@ -2,13 +2,11 @@
 
 namespace DBChecker\modules\SchemaIntegrityCheck;
 
-interface DBQueriesInterface extends \DBChecker\DBQueries\DBQueriesInterface
+interface DBQueriesInterface
 {
-    public function getTableNames() : \PDOStatement;
+    public function getName() : string;
 
-    /**
-     * @param $table
-     * @return string
-     */
-    public function getTableSchemaSha1sum($table) : string;
+    public function getTableNames() : array;
+
+    public function getTableSchemaSha1sum(string $table) : string;
 }

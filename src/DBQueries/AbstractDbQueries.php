@@ -2,18 +2,7 @@
 
 namespace DBChecker\DBQueries;
 
-use BadMethodCallException;
-
-abstract class AbstractDbQueries implements
-    \DBChecker\modules\MissingCompressionDetect\DBQueriesInterface,
-    \DBChecker\modules\DataIntegrityCheck\DBQueriesInterface,
-    \DBChecker\modules\SchemaIntegrityCheck\DBQueriesInterface,
-    \DBChecker\modules\FileCheck\DBQueriesInterface,
-    \DBChecker\modules\MissingKeyDetect\DBQueriesInterface,
-    \DBChecker\modules\RelCheck\DBQueriesInterface,
-    \DBChecker\modules\FragmentationCheck\DBQueriesInterface,
-    \DBChecker\modules\UniqueIntegrityCheck\DBQueriesInterface,
-    \DBChecker\modules\AnalyzeTableCheck\DBQueriesInterface
+abstract class AbstractDbQueries
 {
     /**
      * Regex that matches a valid column name
@@ -44,7 +33,7 @@ abstract class AbstractDbQueries implements
         return $stmt;
     }
 
-    public function getDuplicateForColumnsWithCount($table, $columns)
+    public function getDuplicateForColumnsWithCount(string $table, string $columns)
     {
         $query = "
             SELECT $columns, COUNT(*) as __count__
@@ -75,6 +64,8 @@ abstract class AbstractDbQueries implements
         $stmt->execute();
         return $stmt;
     }
+
+    public abstract function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column) : \PDOStatement;
 
     /**
      * @param string   $table
@@ -107,80 +98,5 @@ abstract class AbstractDbQueries implements
                                     . " WHERE " . implode(' IS NOT NULL AND ', $columns) . " IS NOT NULL;");
         $stmt->execute();
         return $stmt;
-    }
-
-    public function supportsTablespaceCompression() : bool
-    {
-        return false;
-    }
-
-    public function isTableCompressed(string $table) : bool
-    {
-        return false;
-    }
-
-    public function getUniqueIndexes($table)
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getTableLargerThanMb(int $minSize_MB) : \PDOStatement
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getRandomValuesConcatenated(string $table, int $limit) : \PDOStatement
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getTableNames() : \PDOStatement
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getTableDataSha1sum($table)
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getTableSchemaSha1sum($table) : string
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getPKs($table)
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getColumnNamesWithTableName()
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getDistantTableAndColumnFromTableAndColumnFK($table, $column)
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getFks()
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getColumnNamesInTable($table)
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function getFragmentedTables() : \PDOStatement
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
-    }
-
-    public function analyzeTable(string $table) : \PDOStatement
-    {
-        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
     }
 }
