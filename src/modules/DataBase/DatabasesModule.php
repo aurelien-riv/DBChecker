@@ -6,7 +6,6 @@ use DBChecker\BaseModuleInterface;
 use DBChecker\DBAL\MySQLDBAL;
 use DBChecker\DBAL\SQLiteDBAL;
 use DBChecker\DBQueries\AbstractDbQueries;
-use DBChecker\DBQueries\MsSQLQueries;
 use DBChecker\DBQueries\MySQLQueries;
 use DBChecker\DBQueries\SQLiteQueries;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -36,7 +35,7 @@ class DatabasesModule implements BaseModuleInterface
                             ->defaultNull()
                         ->end()
                         ->enumNode('engine')
-                            ->values(['mysql', 'sqlite', 'mssql'])
+                            ->values(['mysql', 'sqlite'])
                             ->isRequired()
                         ->end()
                         ->scalarNode('dsn')->end()
