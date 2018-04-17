@@ -83,9 +83,15 @@ abstract class AbstractDBAL implements
         return $this->queries->getValue($table, $column, $value)->fetchAll(\PDO::FETCH_COLUMN);
     }
 
-    public abstract function getTableDataSha1sum(string $table) : string;
+    public function getTableDataSha1sum(string $table) : string
+    {
+        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
+    }
 
-    public abstract function getTableSchemaSha1sum(string $table) : string;
+    public function getTableSchemaSha1sum(string $table) : string
+    {
+        throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
+    }
 
     public function getFragmentedTables() : array
     {

@@ -22,7 +22,7 @@ class MySQLQueries extends AbstractDbQueries
         return $this->pdo->query("SHOW INDEX FROM $table WHERE Key_name = 'PRIMARY'");
     }
 
-    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column)
+    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column) : \PDOStatement
     {
         $stmt = $this->pdo->prepare("
             SELECT REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME

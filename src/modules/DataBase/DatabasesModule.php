@@ -6,6 +6,7 @@ use DBChecker\BaseModuleInterface;
 use DBChecker\DBAL\MySQLDBAL;
 use DBChecker\DBAL\SQLiteDBAL;
 use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\DBQueries\MsSQLQueries;
 use DBChecker\DBQueries\MySQLQueries;
 use DBChecker\DBQueries\SQLiteQueries;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -35,7 +36,7 @@ class DatabasesModule implements BaseModuleInterface
                             ->defaultNull()
                         ->end()
                         ->enumNode('engine')
-                            ->values(['mysql', 'sqlite'])
+                            ->values(['mysql', 'sqlite', 'mssql'])
                             ->isRequired()
                         ->end()
                         ->scalarNode('dsn')->end()
@@ -65,17 +66,18 @@ class DatabasesModule implements BaseModuleInterface
 
     public function addConnection($cnx)
     {
-        $dsn = $cnx['dsn'] ?? "{$cnx['engine']}:dbname={$cnx['db']};host={$cnx['host']};port={$cnx['port']}";
+        $engine = $cnx['engine'];
+        $dsn = $cnx['dsn'] ?? "$engine:dbname={$cnx['db']};host={$cnx['host']};port={$cnx['port']}";
         $pdo = new \PDO($dsn, $cnx['login'], $cnx['password']);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        if ($cnx['engine'] == 'mysql')
+        if ($engine == 'mysql')
         {
             $queries = new MySQLQueries($pdo, $cnx['name'] ?? $cnx['db']);
             $this->dbals[] = new MySQLDBAL($queries);
             $this->connections[] = $queries;
         }
-        else if ($cnx['engine'] === 'sqlite')
+        else if ($engine === 'sqlite')
         {
             $queries = new SQLiteQueries($pdo, $cnx['name'] ?? $cnx['db']);
             $this->dbals[] = new SQLiteDBAL($queries);

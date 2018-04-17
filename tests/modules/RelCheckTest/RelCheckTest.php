@@ -2,10 +2,12 @@
 
 namespace DBCheckerTests\modules\RelCheckTest;
 
+use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\DBAL\MsSQLDBAL;
+use DBChecker\DBAL\MySQLDBAL;
 use DBChecker\DBAL\SQLiteDBAL;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
-use DBChecker\modules\RelCheck\RelCheck;
 use DBChecker\modules\RelCheck\RelCheckMatch;
 use DBChecker\modules\RelCheck\RelCheckModule;
 use DBCheckerTests\DatabaseUtilities;
@@ -18,26 +20,16 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
      * @var ModuleManager
      */
     private $moduleManager;
-    /**
-     * @var SQLiteDBAL
-     */
-    private $dbal;
 
     public function setUp()
     {
         parent::setUp();
-        $this->initModules();
-        $this->dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[0];
-        $queries = $this->getAttributeValue($this->dbal, 'queries');
-        $pdo = $this->getAttributeValue($queries, 'pdo');
-        $this->initDb($pdo);
-    }
-
-    private function initModules()
-    {
         $settings = [
             'databases' => [
-                'connections' => [$this->getSqliteMemoryConfig()]
+                'connections' => [
+                    $this->getSqliteMemoryConfig(),
+                    $this->getMysqlConfig()
+                ]
             ],
             'relcheck' => []
         ];
@@ -48,18 +40,50 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    private function initDb(\PDO $pdo)
+    public function tearDown()
+    {
+        parent::tearDown();
+        $this->cleanDbs($this->moduleManager->getDatabaseModule()->getDBALs());
+    }
+
+    private function init($dbIndex)
+    {
+        $dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[$dbIndex];
+        $queries = $this->getAttributeValue($dbal, 'queries');
+        $pdo = $this->getAttributeValue($queries, 'pdo');
+        $this->initDb($dbal, $pdo);
+        return $dbal;
+    }
+
+    private function initDb(AbstractDBAL $dbal, \PDO $pdo)
     {
         $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY);");
         $pdo->exec("CREATE TABLE t2 (id INTEGER PRIMARY KEY, FOREIGN KEY (id) REFERENCES t1(id));");
-        $pdo->exec("PRAGMA foreign_keys = OFF");
+        if ($dbal instanceof SQLiteDBAL)
+        {
+            $pdo->exec("PRAGMA foreign_keys = OFF");
+        }
+        else if ($dbal instanceof MsSQLDBAL)
+        {
+            $pdo->exec("ALTER TABLE t2 NOCHECK CONSTRAINT all");
+        }
+        else if ($dbal instanceof MySQLDBAL)
+        {
+            $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
+        }
         $pdo->exec("INSERT INTO t2 VALUES (1)");
     }
 
-    public function testRelCheck()
+    public function testRelCheckSQLite()
     {
-        /** @var RelCheck $relcheck */
+        $dbal = $this->init(0);
         $relcheck = $this->moduleManager->getWorkers()->current();
-        $this->assertInstanceOf(RelCheckMatch::class, $relcheck->run($this->dbal)->current());
+        $this->assertInstanceOf(RelCheckMatch::class, $relcheck->run($dbal)->current());
+    }
+    public function testRelCheckMySQL()
+    {
+        $dbal = $this->init(1);
+        $relcheck = $this->moduleManager->getWorkers()->current();
+        $this->assertInstanceOf(RelCheckMatch::class, $relcheck->run($dbal)->current());
     }
 }

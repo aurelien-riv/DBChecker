@@ -15,6 +15,7 @@ use DBChecker\modules\PwnedAccountsDetect\PwnedAccountsDetectModule;
 use DBChecker\modules\RelCheck\RelCheckModule;
 use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheckModule;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
+use DBChecker\ModuleWorkerInterface;
 use Symfony\Component\Config\Definition\Processor;
 
 class ModuleManager
@@ -62,7 +63,7 @@ class ModuleManager
         return null;
     }
 
-    public function getWorkers()
+    public function getWorkers() : \Generator
     {
         foreach ($this->modules as $module)
         {
