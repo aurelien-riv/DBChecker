@@ -47,11 +47,7 @@ trait DatabaseUtilities
             $queries = $this->getAttributeValue($dbal, 'queries');
             /** @var \PDO $pdo */
             $pdo = $this->getAttributeValue($queries, 'pdo');
-            if ($dbal instanceof MsSQLDBAL)
-            {
-                continue; /* FIXME nothing worked */
-            }
-            else if ($dbal instanceof MySQLDBAL)
+            if ($dbal instanceof MySQLDBAL)
             {
                 $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
                 foreach($dbal->getTableNames() as $table)
