@@ -33,9 +33,9 @@ trait DatabaseUtilities
         ];
     }
 
-    public function getPdo(ModuleManager $moduleManager)
+    public function getPdo(ModuleManager $moduleManager, $index=0)
     {
-        $dbal = $moduleManager->getDatabaseModule()->getDBALs()[0];
+        $dbal = $moduleManager->getDatabaseModule()->getDBALs()[$index];
         $queries = $this->getAttributeValue($dbal, 'queries');
         return $this->getAttributeValue($queries, 'pdo');
     }

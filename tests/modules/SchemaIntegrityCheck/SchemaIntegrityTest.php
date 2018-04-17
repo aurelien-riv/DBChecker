@@ -18,33 +18,37 @@ class SchemaIntegrityTest extends \PHPUnit\Framework\TestCase
      * @var ModuleManager $module
      */
     private $moduleManager;
-    private $dbal;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->initModules();
-        $this->initDb($this->getPdo($this->moduleManager));
-    }
-
-    private function initModules()
-    {
-        $this->moduleManager = new ModuleManager();
         $settings = [
             'databases' => [
-                'connections' => [$this->getSqliteMemoryConfig()]
+                'connections' => [
+                    $this->getSqliteMemoryConfig(),
+                    $this->getMysqlConfig()
+                ]
             ]
         ];
         $this->moduleManager = new ModuleManager();
         $this->moduleManager->loadModule(new DatabasesModule(), $settings);
-        $this->dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[0];
     }
 
-    private function initDb(\PDO $pdo)
+    public function tearDown()
     {
-        $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY, data VARCHAR(10));");
+        parent::tearDown();
+        $this->cleanDbs($this->moduleManager->getDatabaseModule()->getDBALs());
+    }
+
+    private function initDBal($dbIndex)
+    {
+        $dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[$dbIndex];
+        $queries = $this->getAttributeValue($dbal, 'queries');
+        $pdo = $this->getAttributeValue($queries, 'pdo');
+        $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY, data VARCHAR(64));");
         $pdo->exec("INSERT INTO t1 VALUES (1, 'this is a test')");
+        return $dbal;
     }
 
     private function getWorker($config) : SchemaIntegrityCheck
@@ -57,57 +61,125 @@ class SchemaIntegrityTest extends \PHPUnit\Framework\TestCase
         return $this->moduleManager->getWorkers()->current();
     }
 
-    public function testGenerateConfig()
+    #region SQLite
+    public function testGenerateConfigSQlite()
     {
+        $dbal = $this->initDBal(0);
         $schemaIntegrity = new SchemaIntegrityCheck(new SchemaIntegrityCheckModule());
-        $config = $schemaIntegrity->generateConfig($this->dbal);
+        $config = $schemaIntegrity->generateConfig($dbal);
         $this->assertEquals("schemaintegritycheck:\n  mapping:\n    - t1: f0443bd47ea6c32ab2beea43efeadaf3aee9b4f5\n", $config);
         return $config;
     }
 
     /**
-     * @depends testGenerateConfig
+     * @depends testGenerateConfigSQlite
      * @param string $config
      */
-    public function testRunWithoutChanges(string $config)
+    public function testRunWithoutChangesSQlite(string $config)
     {
+        $dbal = $this->initDBal(0);
         $worker = $this->getWorker($config);
-        $this->assertNull($worker->run($this->dbal)->current());
+        $this->assertNull($worker->run($dbal)->current());
     }
 
     /**
-     * @depends testGenerateConfig
+     * @depends testGenerateConfigSQlite
      * @param string $config
      */
-    public function testRunWithDataChanges(string $config)
+    public function testRunWithDataChangesSQlite(string $config)
     {
-        $pdo = $this->getPdo($this->moduleManager);
+        $dbal = $this->initDBal(0);
+        $pdo = $this->getPdo($this->moduleManager, 0);
         $pdo->exec("UPDATE t1 SET data = 'data changed'");
         $worker = $this->getWorker($config);
-        $this->assertNull($worker->run($this->dbal)->current());
+        $this->assertNull($worker->run($dbal)->current());
     }
 
     /**
-     * @depends testGenerateConfig
+     * @depends testGenerateConfigSQlite
      * @param string $config
      */
-    public function testRunWithSchemaChanges(string $config)
+    public function testRunWithSchemaChangesSQlite(string $config)
     {
-        $pdo = $this->getPdo($this->moduleManager);
+        $dbal = $this->initDBal(0);
+        $pdo = $this->getPdo($this->moduleManager, 0);
         $pdo->exec("ALTER TABLE t1 ADD COLUMN new VARCHAR(2)");
         $worker = $this->getWorker($config);
-        $this->assertInstanceOf(SchemaIntegrityCheckMatch::class, $worker->run($this->dbal)->current());
+        $this->assertInstanceOf(SchemaIntegrityCheckMatch::class, $worker->run($dbal)->current());
     }
 
     /**
-     * @depends testGenerateConfig
+     * @depends testGenerateConfigSQlite
      * @param string $config
      */
-    public function testRunWithUnknownTable(string $config)
+    public function testRunWithUnknownTableSQlite(string $config)
     {
-        $pdo = $this->getPdo($this->moduleManager);
+        $dbal = $this->initDBal(0);
+        $pdo = $this->getPdo($this->moduleManager, 0);
         $pdo->exec("CREATE TABLE t2 (id INTEGER PRIMARY KEY);");
         $worker = $this->getWorker($config);
-        $this->assertInstanceOf(SchemaIntegrityCheckMatch::class, $worker->run($this->dbal)->current());
+        $this->assertInstanceOf(SchemaIntegrityCheckMatch::class, $worker->run($dbal)->current());
     }
+    #endregion
+    
+    #region MySQL
+    public function testGenerateConfigMySQL()
+    {
+        $dbal = $this->initDBal(1);
+        $schemaIntegrity = new SchemaIntegrityCheck(new SchemaIntegrityCheckModule());
+        $config = $schemaIntegrity->generateConfig($dbal);
+        $this->assertEquals("schemaintegritycheck:\n  mapping:\n    - t1: f0443bd47ea6c32ab2beea43efeadaf3aee9b4f5\n", $config);
+        return $config;
+    }
+
+    /**
+     * @depends testGenerateConfigMySQL
+     * @param string $config
+     */
+    public function testRunWithoutChangesMySQL(string $config)
+    {
+        $dbal = $this->initDBal(1);
+        $worker = $this->getWorker($config);
+        $this->assertNull($worker->run($dbal)->current());
+    }
+
+    /**
+     * @depends testGenerateConfigMySQL
+     * @param string $config
+     */
+    public function testRunWithDataChangesMySQL(string $config)
+    {
+        $dbal = $this->initDBal(1);
+        $pdo = $this->getPdo($this->moduleManager, 1);
+        $pdo->exec("UPDATE t1 SET data = 'data changed'");
+        $worker = $this->getWorker($config);
+        $this->assertNull($worker->run($dbal)->current());
+    }
+
+    /**
+     * @depends testGenerateConfigMySQL
+     * @param string $config
+     */
+    public function testRunWithSchemaChangesMySQL(string $config)
+    {
+        $dbal = $this->initDBal(1);
+        $pdo = $this->getPdo($this->moduleManager, 1);
+        $pdo->exec("ALTER TABLE t1 ADD COLUMN new VARCHAR(2)");
+        $worker = $this->getWorker($config);
+        $this->assertInstanceOf(SchemaIntegrityCheckMatch::class, $worker->run($dbal)->current());
+    }
+
+    /**
+     * @depends testGenerateConfigMySQL
+     * @param string $config
+     */
+    public function testRunWithUnknownTableMySQL(string $config)
+    {
+        $dbal = $this->initDBal(1);
+        $pdo = $this->getPdo($this->moduleManager, 1);
+        $pdo->exec("CREATE TABLE t2 (id INTEGER PRIMARY KEY);");
+        $worker = $this->getWorker($config);
+        $this->assertInstanceOf(SchemaIntegrityCheckMatch::class, $worker->run($dbal)->current());
+    }
+    #endregion
 }
