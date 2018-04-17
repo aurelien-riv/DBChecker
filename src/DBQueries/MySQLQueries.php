@@ -111,9 +111,10 @@ class MySQLQueries extends AbstractDbQueries
     public function getTableDataSha1sum($table)
     {
         $columns = $this->getConcatenatedColumnNames($table);
-        $stmt = $this->pdo->prepare("SELECT SHA1(CONCAT_WS(:columns)) FROM $table");
-        $stmt->bindParam(':columns', $columns, \PDO::PARAM_STR);
-        $stmt->execute();
+        $stmt = $this->pdo->query("
+            SELECT SHA1(GROUP_CONCAT(s.d)) 
+            FROM (SELECT 1 AS i, CONCAT_WS('', $columns) AS d FROM $table) AS s
+            GROUP BY s.i");
         $result = $stmt->fetchColumn();
         $stmt->closeCursor();
         return empty($result) ? 0 : $result;

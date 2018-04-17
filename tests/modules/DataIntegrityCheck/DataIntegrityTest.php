@@ -18,33 +18,37 @@ class DataIntegrityTest extends \PHPUnit\Framework\TestCase
      * @var ModuleManager $module
      */
     private $moduleManager;
-    private $dbal;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->initModules();
-        $this->initDb($this->getPdo($this->moduleManager));
-    }
-
-    private function initModules()
-    {
-        $this->moduleManager = new ModuleManager();
         $settings = [
             'databases' => [
-                'connections' => [$this->getSqliteMemoryConfig()]
+                'connections' => [
+                    $this->getSqliteMemoryConfig(),
+                    $this->getMysqlConfig()
+                ]
             ]
         ];
         $this->moduleManager = new ModuleManager();
         $this->moduleManager->loadModule(new DatabasesModule(), $settings);
-        $this->dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[0];
     }
 
-    private function initDb(\PDO $pdo)
+    public function tearDown()
     {
-        $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY, data VARCHAR(10));");
+        parent::tearDown();
+        $this->cleanDbs($this->moduleManager->getDatabaseModule()->getDBALs());
+    }
+
+    private function initDBal($dbIndex)
+    {
+        $dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[$dbIndex];
+        $queries = $this->getAttributeValue($dbal, 'queries');
+        $pdo = $this->getAttributeValue($queries, 'pdo');
+        $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY, data VARCHAR(64));");
         $pdo->exec("INSERT INTO t1 VALUES (1, 'this is a test')");
+        return $dbal;
     }
 
     private function getWorker($config) : DataIntegrityCheck
@@ -57,33 +61,72 @@ class DataIntegrityTest extends \PHPUnit\Framework\TestCase
         return $this->moduleManager->getWorkers()->current();
     }
 
-    public function testGenerateConfig()
+    #region SQLite
+    public function testGenerateConfigSQLite()
     {
+        $dbal = $this->initDBal(0);
         $dataIntegrity = new DataIntegrityCheck(new DataIntegrityCheckModule());
-        $config = $dataIntegrity->generateConfig($this->dbal);
+        $config = $dataIntegrity->generateConfig($dbal);
         $this->assertEquals("dataintegritycheck:\n  mapping:\n    - t1: c2e264132bcc1243f127db9a1398a87a1ae7b9eb\n", $config);
         return $config;
     }
 
     /**
-     * @depends testGenerateConfig
+     * @depends testGenerateConfigSQLite
      * @param string $config
      */
-    public function testRunWithoutChanges(string $config)
+    public function testRunWithoutChangesSQLite(string $config)
     {
+        $dbal = $this->initDBal(0);
         $worker = $this->getWorker($config);
-        $this->assertNull($worker->run($this->dbal)->current());
+        $this->assertNull($worker->run($dbal)->current());
     }
 
     /**
-     * @depends testGenerateConfig
+     * @depends testGenerateConfigSQLite
      * @param string $config
      */
-    public function testRunWithChanges(string $config)
+    public function testRunWithChangesSQLite(string $config)
     {
-        $pdo = $this->getPdo($this->moduleManager);
+        $dbal = $this->initDBal(0);
+        $pdo = $this->getPdo($this->moduleManager, 0);
         $pdo->exec("INSERT INTO t1 VALUES (2, 'this is another test')");
         $worker = $this->getWorker($config);
-        $this->assertInstanceOf(DataIntegrityCheckMatch::class, $worker->run($this->dbal)->current());
+        $this->assertInstanceOf(DataIntegrityCheckMatch::class, $worker->run($dbal)->current());
     }
+    #endregion
+    #region MySQL
+    public function testGenerateConfigMySQL()
+    {
+        $dbal = $this->initDBal(1);
+        $dataIntegrity = new DataIntegrityCheck(new DataIntegrityCheckModule());
+        $config = $dataIntegrity->generateConfig($dbal);
+        $this->assertEquals("dataintegritycheck:\n  mapping:\n    - t1: c2e264132bcc1243f127db9a1398a87a1ae7b9eb\n", $config);
+        return $config;
+    }
+
+    /**
+     * @depends testGenerateConfigMySQL
+     * @param string $config
+     */
+    public function testRunWithoutChangesMySQL(string $config)
+    {
+        $dbal = $this->initDBal(1);
+        $worker = $this->getWorker($config);
+        $this->assertNull($worker->run($dbal)->current());
+    }
+
+    /**
+     * @depends testGenerateConfigMySQL
+     * @param string $config
+     */
+    public function testRunWithChangesMySQL(string $config)
+    {
+        $dbal = $this->initDBal(1);
+        $pdo = $this->getPdo($this->moduleManager, 1);
+        $pdo->exec("INSERT INTO t1 VALUES (2, 'this is another test')");
+        $worker = $this->getWorker($config);
+        $this->assertInstanceOf(DataIntegrityCheckMatch::class, $worker->run($dbal)->current());
+    }
+    #endregion
 }

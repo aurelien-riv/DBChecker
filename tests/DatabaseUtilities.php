@@ -2,8 +2,6 @@
 
 namespace DBCheckerTests;
 
-use DBChecker\DBAL\AbstractDBAL;
-use DBChecker\DBAL\MsSQLDBAL;
 use DBChecker\DBAL\MySQLDBAL;
 use DBChecker\DBAL\SQLiteDBAL;
 use DBChecker\modules\ModuleManager;
