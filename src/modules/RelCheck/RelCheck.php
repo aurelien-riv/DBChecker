@@ -9,12 +9,16 @@ class RelCheck implements ModuleWorkerInterface
 {
     private $tables;
 
-    public function run(AbstractDBAL $dbal)
+    private function init(AbstractDBAL $dbal)
     {
         $this->tables = $dbal->getTableNames();
+    }
 
-        $fkeys = $dbal->getFks();
-        foreach ($fkeys as $fkey)
+    public function run(AbstractDBAL $dbal)
+    {
+        $this->init($dbal);
+
+        foreach ($dbal->getFks() as $fkey)
         {
             $tbl  = $fkey['TABLE_NAME'];
             $rtbl = $fkey['REFERENCED_TABLE_NAME'];

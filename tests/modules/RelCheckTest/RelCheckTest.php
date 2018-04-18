@@ -3,11 +3,11 @@
 namespace DBCheckerTests\modules\RelCheckTest;
 
 use DBChecker\DBAL\AbstractDBAL;
-use DBChecker\DBAL\MsSQLDBAL;
 use DBChecker\DBAL\MySQLDBAL;
 use DBChecker\DBAL\SQLiteDBAL;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
+use DBChecker\modules\RelCheck\ColumnNotFoundMatch;
 use DBChecker\modules\RelCheck\RelCheckMatch;
 use DBChecker\modules\RelCheck\RelCheckModule;
 use DBChecker\modules\RelCheck\TableNotFoundMatch;
@@ -104,7 +104,7 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
         $dbal = $this->init(0);
         $relcheck = $this->moduleManager->getWorkers()->current();
         $relcheck->run($dbal)->current(); // init relcheck->tables
-        $this->assertInstanceOf(TableNotFoundMatch::class, $relcheck->checkSchema($dbal, "t3", "unknown")->current());
+        $this->assertInstanceOf(ColumnNotFoundMatch::class, $relcheck->checkSchema($dbal, "t2", "unknown")->current());
     }
     #endregion
 
@@ -140,8 +140,8 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
     {
         $dbal = $this->init(1);
         $relcheck = $this->moduleManager->getWorkers()->current();
-        $relcheck->run($dbal)->current(); // init relcheck->tables
-        $this->assertInstanceOf(TableNotFoundMatch::class, $relcheck->checkSchema($dbal, "t3", "unknown")->current());
+        $this->callMethod($relcheck, "init", [$dbal]);
+        $this->assertInstanceOf(ColumnNotFoundMatch::class, $relcheck->checkSchema($dbal, "t2", "unknown")->current());
     }
     #endregion
 }
