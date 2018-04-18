@@ -48,8 +48,22 @@ abstract class AbstractDBAL implements
         return false;
     }
 
+    protected function getInnerJoinString(string $table, array $innerJoinColumns)
+    {
+        $joins = '';
+        foreach (array_unique($innerJoinColumns) as $innerJoinColumn)
+        {
+            $relation = $this->getDistantTableAndColumnFromTableAndColumnFK($table, $innerJoinColumn);
+
+            $joins .= "INNER JOIN {$relation['table']} AS $innerJoinColumn
+                ON $innerJoinColumn.{$relation['column']} = $table.$innerJoinColumn ";
+        }
+        return $joins;
+    }
+
     public function getDistinctValuesWithJoinColumnsWithoutNulls(string $table, array $columns, array $innerJoins) : array
     {
+        $innerJoins = $this->getInnerJoinString($table, $innerJoins);
         return $this->queries->getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoins)->fetchAll(\PDO::FETCH_ASSOC);
     }
 
@@ -108,7 +122,7 @@ abstract class AbstractDBAL implements
         throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
     }
 
-    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column) : ?\stdClass
+    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column) : ?array
     {
         throw new BadMethodCallException(static::NOT_IMPLEMENTED_ERROR_MSG);
     }

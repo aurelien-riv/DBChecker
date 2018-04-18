@@ -14,13 +14,29 @@ class SQLiteDBAL extends AbstractDBAL
         return $this->queries->getTableNames()->fetchAll(\PDO::FETCH_COLUMN);
     }
 
+    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column) : ?array
+    {
+        $data = $this->queries->getFksForTable($table)->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($data ? $data : [] as $datum)
+        {
+            if ($datum['from'] === $column)
+            {
+                return [
+                    'table'  => $datum['table'],
+                    'column' => $datum['to']
+                ];
+            }
+        }
+        return null;
+    }
+
     public function getFks() : array
     {
         $data = [];
         foreach ($this->getTableNames() as $table)
         {
-            $datum = $this->queries->getFksForTable($table)->fetch(\PDO::FETCH_ASSOC);
-            if (! empty($datum))
+            foreach ($this->queries->getFksForTable($table)->fetchAll(\PDO::FETCH_ASSOC) as $datum)
             {
                 $data[] = [
                     'TABLE_NAME'             => $table,
@@ -36,10 +52,24 @@ class SQLiteDBAL extends AbstractDBAL
     public function getColumnNamesInTable(string $table) : array
     {
         $data = [];
-        $columns = $this->queries->getColumnNamesInTable($table)->fetchAll(\PDO::FETCH_ASSOC);
+        $columns = $this->queries->getTableInfo($table)->fetchAll(\PDO::FETCH_ASSOC);
         foreach ($columns as $column)
         {
             $data[] = $column['name'];
+        }
+        return $data;
+    }
+
+    public function getPKs(string $table) : array
+    {
+        $data = [];
+        $columns = $this->queries->getTableInfo($table)->fetchAll(\PDO::FETCH_ASSOC);
+        foreach ($columns as $column)
+        {
+            if ($column['pk'] == "1")
+            {
+                $data[] = $column['name'];
+            }
         }
         return $data;
     }

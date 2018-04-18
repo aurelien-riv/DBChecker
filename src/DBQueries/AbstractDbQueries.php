@@ -70,23 +70,13 @@ abstract class  AbstractDbQueries
     /**
      * @param string   $table
      * @param string[] $columns
-     * @param string[] $innerJoinColumns
+     * @param          $innerJoinString
      * @return bool|\PDOStatement
      * Warning, composed key are not supported yet
      */
-    public function getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoinColumns) : \PDOStatement
+    public function getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoinString) : \PDOStatement
     {
         $columns          = array_unique($columns);
-        $innerJoinColumns = array_unique($innerJoinColumns);
-
-        $joins = '';
-        foreach ($innerJoinColumns as $innerJoinColumn)
-        {
-            $relation = $this->getDistantTableAndColumnFromTableAndColumnFK($table, $innerJoinColumn)->fetch(\PDO::FETCH_OBJ);
-
-            $joins .= "INNER JOIN {$relation->REFERENCED_TABLE_NAME} AS $innerJoinColumn
-                ON $innerJoinColumn.{$relation->REFERENCED_COLUMN_NAME} = $table.$innerJoinColumn ";
-        }
 
         $selectColumns = '';
         foreach ($columns as $column)
@@ -94,7 +84,7 @@ abstract class  AbstractDbQueries
             $selectColumns .= "$column as `$column`,";
         }
         $stmt = $this->pdo->prepare("SELECT DISTINCT " . rtrim($selectColumns, ',')
-                                    . " FROM $table $joins"
+                                    . " FROM $table $innerJoinString"
                                     . " WHERE " . implode(' IS NOT NULL AND ', $columns) . " IS NOT NULL;");
         $stmt->execute();
         return $stmt;

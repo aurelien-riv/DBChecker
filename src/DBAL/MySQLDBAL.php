@@ -26,7 +26,13 @@ class MySQLDBAL extends AbstractDBAL
 
     public function getPKs(string $table) : array
     {
-        return $this->queries->getPKs($table)->fetchAll(\PDO::FETCH_OBJ);
+        $array = [];
+        $data = $this->queries->getPKs($table)->fetchAll(\PDO::FETCH_OBJ);
+        foreach ($data as $datum)
+        {
+            $array[] = $datum->Column_name;
+        }
+        return $array;
     }
 
     public function getTableDataSha1sum(string $table) : string
@@ -54,10 +60,17 @@ class MySQLDBAL extends AbstractDBAL
         return $this->queries->getRandomValuesConcatenated($table, $limit)->fetch(\PDO::FETCH_COLUMN);
     }
 
-    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column) : ?\stdClass
+    public function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column) : ?array
     {
         $data = $this->queries->getDistantTableAndColumnFromTableAndColumnFK($table, $column)->fetch(\PDO::FETCH_OBJ);
-        return ($data === false ? null : $data);
+        if ($data !== false)
+        {
+            return [
+                'table'  => $data->REFERENCED_TABLE_NAME,
+                'column' => $data->REFERENCED_COLUMN_NAME
+            ];
+        }
+        return null;
     }
 
     public function getUniqueIndexes(string $table) : array

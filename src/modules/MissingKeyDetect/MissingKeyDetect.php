@@ -18,9 +18,9 @@ class MissingKeyDetect implements ModuleWorkerInterface
 
     protected function isPk(AbstractDBAL $dbal, string $table, string $column)
     {
-        foreach ($dbal->getPks($table) as $pk)
+        foreach ($dbal->getPks($table) as $columns)
         {
-            if ($pk->Column_name === $column)
+            if ($columns === $column)
             {
                 return true;
             }
@@ -123,7 +123,7 @@ class MissingKeyDetect implements ModuleWorkerInterface
             {
                 if (in_array($fragment, $keyFragments))
                 {
-                    yield new MissingKeyDetectMatch($dbName, $notKey[0], $notKey[1]);
+                        yield new MissingKeyDetectMatch($dbName, $notKey[0], $notKey[1]);
                     break;
                 }
             }

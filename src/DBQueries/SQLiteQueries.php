@@ -14,7 +14,7 @@ class SQLiteQueries extends AbstractDbQueries
         return $this->pdo->query("PRAGMA foreign_key_list($table);");
     }
 
-    public function getColumnNamesInTable($table)
+    public function getTableInfo($table)
     {
         return $this->pdo->query("PRAGMA table_info($table);");
     }
