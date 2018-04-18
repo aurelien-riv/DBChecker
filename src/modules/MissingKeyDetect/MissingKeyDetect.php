@@ -45,7 +45,7 @@ class MissingKeyDetect implements ModuleWorkerInterface
                     continue;
                 }
 
-                $notKeys[] = [$column, $column];
+                $notKeys[] = [$table, $column];
             }
         }
     }

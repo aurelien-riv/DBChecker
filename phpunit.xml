@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<phpunit bootstrap="./vendor/autoload.php">
+<phpunit bootstrap="./vendor/autoload.php"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/7.1/phpunit.xsd">
     <testsuites>
         <testsuite name="The project's test suite">
             <directory>./tests</directory>
@@ -7,11 +9,12 @@
     </testsuites>
     <logging>
         <log type="coverage-clover" target="logs/clover.xml"/>
-        <log type="junit" target="logs/junit.xml" logIncompleteSkipped="false"/>
+        <log type="junit" target="logs/junit.xml"/>
     </logging>
     <filter>
-        <whitelist addUncoveredFilesFromWhitelist="true">
+        <whitelist>
             <directory suffix=".php">src</directory>
+            <file>build-phar.php</file>
         </whitelist>
     </filter>
 </phpunit>
