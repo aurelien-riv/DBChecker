@@ -10,6 +10,7 @@ use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
 use DBChecker\modules\RelCheck\RelCheckMatch;
 use DBChecker\modules\RelCheck\RelCheckModule;
+use DBChecker\modules\RelCheck\TableNotFoundMatch;
 use DBCheckerTests\DatabaseUtilities;
 
 class RelCheckTest extends \PHPUnit\Framework\TestCase
@@ -63,10 +64,6 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
         {
             $pdo->exec("PRAGMA foreign_keys = OFF");
         }
-        else if ($dbal instanceof MsSQLDBAL)
-        {
-            $pdo->exec("ALTER TABLE t2 NOCHECK CONSTRAINT all");
-        }
         else if ($dbal instanceof MySQLDBAL)
         {
             $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
@@ -74,16 +71,77 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
         $pdo->exec("INSERT INTO t2 VALUES (1)");
     }
 
+    #region SQLite
     public function testRelCheckSQLite()
     {
         $dbal = $this->init(0);
         $relcheck = $this->moduleManager->getWorkers()->current();
         $this->assertInstanceOf(RelCheckMatch::class, $relcheck->run($dbal)->current());
     }
+    public function testCheckSchema_SQLite()
+    {
+        $dbal = $this->init(0);
+        $relcheck = $this->moduleManager->getWorkers()->current();
+        $relcheck->run($dbal)->current(); // init relcheck->tables
+        $this->assertNull($relcheck->checkSchema($dbal, "t1", "id")->current());
+    }
+    public function testCheckSchema_UnknownTable_UnknownColumn_SQLite()
+    {
+        $dbal = $this->init(0);
+        $relcheck = $this->moduleManager->getWorkers()->current();
+        $relcheck->run($dbal)->current(); // init relcheck->tables
+        $this->assertInstanceOf(TableNotFoundMatch::class, $relcheck->checkSchema($dbal, "unknown", "unknown")->current());
+    }
+    public function testCheckSchema_UnknownTable_SQLite()
+    {
+        $dbal = $this->init(0);
+        $relcheck = $this->moduleManager->getWorkers()->current();
+        $relcheck->run($dbal)->current(); // init relcheck->tables
+        $this->assertInstanceOf(TableNotFoundMatch::class, $relcheck->checkSchema($dbal, "unknown", "id")->current());
+    }
+    public function testCheckSchema_UnknownColumn_SQLite()
+    {
+        $dbal = $this->init(0);
+        $relcheck = $this->moduleManager->getWorkers()->current();
+        $relcheck->run($dbal)->current(); // init relcheck->tables
+        $this->assertInstanceOf(TableNotFoundMatch::class, $relcheck->checkSchema($dbal, "t3", "unknown")->current());
+    }
+    #endregion
+
+    #region MySQL
     public function testRelCheckMySQL()
     {
         $dbal = $this->init(1);
         $relcheck = $this->moduleManager->getWorkers()->current();
         $this->assertInstanceOf(RelCheckMatch::class, $relcheck->run($dbal)->current());
     }
+    public function testCheckSchema_MySQL()
+    {
+        $dbal = $this->init(1);
+        $relcheck = $this->moduleManager->getWorkers()->current();
+        $relcheck->run($dbal)->current(); // init relcheck->tables
+        $this->assertNull($relcheck->checkSchema($dbal, "t1", "id")->current());
+    }
+    public function testCheckSchema_UnknownTable_UnknownColumn_MySQL()
+    {
+        $dbal = $this->init(1);
+        $relcheck = $this->moduleManager->getWorkers()->current();
+        $relcheck->run($dbal)->current(); // init relcheck->tables
+        $this->assertInstanceOf(TableNotFoundMatch::class, $relcheck->checkSchema($dbal, "unknown", "unknown")->current());
+    }
+    public function testCheckSchema_UnknownTable_MySQL()
+    {
+        $dbal = $this->init(1);
+        $relcheck = $this->moduleManager->getWorkers()->current();
+        $relcheck->run($dbal)->current(); // init relcheck->tables
+        $this->assertInstanceOf(TableNotFoundMatch::class, $relcheck->checkSchema($dbal, "unknown", "id")->current());
+    }
+    public function testCheckSchema_UnknownColumn_MySQL()
+    {
+        $dbal = $this->init(1);
+        $relcheck = $this->moduleManager->getWorkers()->current();
+        $relcheck->run($dbal)->current(); // init relcheck->tables
+        $this->assertInstanceOf(TableNotFoundMatch::class, $relcheck->checkSchema($dbal, "t3", "unknown")->current());
+    }
+    #endregion
 }

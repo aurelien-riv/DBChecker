@@ -33,10 +33,4 @@ class Config
     {
         return $this->moduleManager->getDatabaseModule()->getDBALs();
     }
-
-    /** @deprecated  */
-    public function getQueries()
-    {
-        return $this->moduleManager->getDatabaseModule()->getConnections();
-    }
 }

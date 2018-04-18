@@ -16,7 +16,7 @@ Travis on branch master : [![Build Status](https://travis-ci.org/aurelien-riv/DB
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=code_smells)](https://sonarcloud.io/project/issues?id=DBChecker&resolved=false&types=CODE_SMELL)
 [![Lines of code](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=ncloc)](https://sonarcloud.io/component_measures?id=DBChecker&metric=ncloc)
 [![Duplications](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=duplicated_lines_density)](https://sonarcloud.io/component_measures?id=DBChecker&metric=duplicated_lines_density)
-
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DBChecker&metric=coverage)](https://sonarcloud.io/component_measures?id=DBChecker&metric=coverage)
 # Usage #
 - Copy config.template.yaml to config.yaml (or something else, who cares?)
 - Run main.php config.yaml

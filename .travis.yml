@@ -13,6 +13,8 @@ addons:
 services:
   - mysql
 
+before_script: phpenv config-add .travis.php.ini
+
 before_install:
   - mysql -e 'CREATE DATABASE test;'
 

@@ -29,11 +29,6 @@ class RelCheckMatch extends AbstractMatch
         return "{$this->dbName} > {$this->table}.{$this->column} -> {$this->referencedTable}.{$this->referencedColumn} # {$this->value}\n";
     }
 
-    public function toSQLDelete()
-    {
-        return "DELETE FROM {$this->getTable()} WHERE {$this->getColumn()} = '{$this->value}';\n";
-    }
-
     #region getters
     public function getReferencedTable()
     {
