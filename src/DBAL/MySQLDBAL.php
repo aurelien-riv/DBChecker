@@ -82,4 +82,15 @@ class MySQLDBAL extends AbstractDBAL
     {
         return $this->queries->analyzeTable($table)->fetch(\PDO::FETCH_OBJ);
     }
+
+
+    public function supportsTablespaceCompression() : bool
+    {
+        return true;
+    }
+
+    public function isTableCompressed(string $table) : bool
+    {
+        return $this->queries->isTableCompressed($table);
+    }
 }

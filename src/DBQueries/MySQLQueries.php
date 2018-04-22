@@ -128,11 +128,6 @@ class MySQLQueries extends AbstractDbQueries
     }
 
     #region Compression
-    public function supportsTablespaceCompression() : bool
-    {
-        return true; // FIXME depends on the version of MySQL/MariaDB
-    }
-
     public function isTableCompressed(string $table) : bool
     {
         $stmt = $this->pdo->prepare("
