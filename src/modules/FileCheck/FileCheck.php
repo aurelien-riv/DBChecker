@@ -86,7 +86,7 @@ class FileCheck implements ModuleWorkerInterface
         }
     }
 
-    protected function testUrl(string $dbName, string $table, string $columns, string $path)
+    protected function testUrl(string $dbName, string $table, array $columns, string $path)
     {
         if ($this->http)
         {
@@ -98,7 +98,7 @@ class FileCheck implements ModuleWorkerInterface
         }
     }
 
-    protected function testFile(string $dbName, string $table, string $columns, string $path)
+    protected function testFile(string $dbName, string $table, array $columns, string $path)
     {
         if (preg_match('/^https?:\/\//', $path))
         {
