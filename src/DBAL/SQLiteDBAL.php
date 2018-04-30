@@ -49,6 +49,26 @@ class SQLiteDBAL extends AbstractDBAL
         return $data;
     }
 
+    public function getUniqueIndexes(string $table) : array
+    {
+        $data = [];
+        $indexes = $this->queries->getIndexList($table)->fetchAll(\PDO::FETCH_ASSOC);
+        foreach ($indexes as $index)
+        {
+            if ($index['unique'] === '1')
+            {
+                $columnNames = '';
+                $columns = $this->queries->getIndexInfo($index['name'])->fetchAll(\PDO::FETCH_ASSOC);
+                foreach ($columns as $column)
+                {
+                    $columnNames .= $column['name'].',';
+                }
+                $data[] = rtrim($columnNames, ',');
+            }
+        }
+        return $data;
+    }
+
     public function getColumnNamesInTable(string $table) : array
     {
         $data = [];
