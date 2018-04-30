@@ -34,25 +34,33 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
         }
     }
 
+    private function isIgnored(string $table)
+    {
+        foreach ($this->config['ignore'] as $ignore)
+        {
+            if (preg_match('/' . $ignore . '/', $table))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function checkForExtraTables(AbstractDBAL $dbal)
     {
         foreach ($dbal->getTableNames() as $table)
         {
-            foreach ($this->config['mapping'] as $mapping)
+            if (! $this->isIgnored($table))
             {
-                if ($table === key($mapping))
+                foreach ($this->config['mapping'] as $mapping)
                 {
-                    continue 2;
+                    if ($table === key($mapping))
+                    {
+                        continue 2;
+                    }
                 }
+                yield new SchemaIntegrityCheckMatch($dbal->getName(), $table, 'unexpected table');
             }
-            foreach ($this->config['ignore'] as $ignore)
-            {
-                if (preg_match('/' . $ignore . '/', $table))
-                {
-                    continue 2;
-                }
-            }
-            yield new SchemaIntegrityCheckMatch($dbal->getName(), $table, 'unexpected table');
         }
     }
 
@@ -71,17 +79,13 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
         $ret .= "  mapping:\n";
         foreach ($dbQueries->getTableNames() as $table)
         {
-            foreach ($this->config['ignore'] ?? [] as $ignore)
+            if (! $this->isIgnored($table))
             {
-                if (preg_match('/'.$ignore.'/', $table))
+                $checksum = $dbQueries->getTableSchemaSha1sum($table);
+                if ($checksum)
                 {
-                    continue 2;
+                    $ret .= "    - $table: $checksum\n";
                 }
-            }
-            $checksum = $dbQueries->getTableSchemaSha1sum($table);
-            if ($checksum)
-            {
-                $ret .= "    - $table: $checksum\n";
             }
         }
         return $ret;

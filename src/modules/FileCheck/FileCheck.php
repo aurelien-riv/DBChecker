@@ -86,18 +86,23 @@ class FileCheck implements ModuleWorkerInterface
         }
     }
 
-    protected function testFile(string $dbName, $table, $columns, $path)
+    protected function testUrl(string $dbName, string $table, string $columns, string $path)
+    {
+        if ($this->http)
+        {
+            $status = $this->http->testUrl($path);
+            if ($status !== true)
+            {
+                yield new FileCheckURLMatch($dbName, $table, $columns, $path, $status);
+            }
+        }
+    }
+
+    protected function testFile(string $dbName, string $table, string $columns, string $path)
     {
         if (preg_match('/^https?:\/\//', $path))
         {
-            if ($this->http)
-            {
-                $status = $this->http->testUrl($path);
-                if ($status !== true)
-                {
-                    yield new FileCheckURLMatch($dbName, $table, $columns, $path, $status);
-                }
-            }
+            yield from $this->testUrl($dbName, $table, $columns, $path);
         }
         else if ($this->sftp)
         {
