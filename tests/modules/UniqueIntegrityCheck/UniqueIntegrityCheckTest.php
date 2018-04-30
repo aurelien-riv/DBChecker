@@ -2,9 +2,9 @@
 
 namespace DBCheckerTests\modules\RelCheckTest;
 
-use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
+use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheck;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckMatch;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
 use DBCheckerTests\DatabaseUtilities;
@@ -48,11 +48,11 @@ class UniqueIntegrityCheckTest extends \PHPUnit\Framework\TestCase
         $dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[$dbIndex];
         $queries = $this->getAttributeValue($dbal, 'queries');
         $pdo = $this->getAttributeValue($queries, 'pdo');
-        $this->initDb($dbal, $pdo);
+        $this->initDb($pdo);
         return $dbal;
     }
 
-    private function initDb(AbstractDBAL $dbal, \PDO $pdo)
+    private function initDb(\PDO $pdo)
     {
         $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY, data1 CHAR(2), data2 CHAR(2));");
         $pdo->exec("CREATE UNIQUE INDEX t2_data_unique ON t1 (data1, data2);");
