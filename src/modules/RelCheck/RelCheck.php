@@ -25,13 +25,7 @@ class RelCheck implements ModuleWorkerInterface
             $col  = $fkey['COLUMN_NAME'];
             $rcol = $fkey['REFERENCED_COLUMN_NAME'];
 
-            $errors = $this->checkSourceAndReferencedColumns($dbal, $tbl, $col, $rtbl, $rcol);
-            if ($errors->current())
-            {
-                yield from $errors;
-                continue;
-            }
-
+            yield from $this->checkSourceAndReferencedColumns($dbal, $tbl, $col, $rtbl, $rcol);
             yield from $this->checkRelations($dbal, $tbl, $col, $rtbl, $rcol);
         }
     }

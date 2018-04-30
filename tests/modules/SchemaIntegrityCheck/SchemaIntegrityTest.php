@@ -48,6 +48,7 @@ class SchemaIntegrityTest extends \PHPUnit\Framework\TestCase
         $pdo = $this->getAttributeValue($queries, 'pdo');
         $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY, data VARCHAR(64));");
         $pdo->exec("INSERT INTO t1 VALUES (1, 'this is a test')");
+        $pdo->exec("CREATE TABLE ignore_me (id INTEGER PRIMARY KEY);");
         return $dbal;
     }
 
@@ -65,9 +66,9 @@ class SchemaIntegrityTest extends \PHPUnit\Framework\TestCase
     public function testGenerateConfigSQlite()
     {
         $dbal = $this->initDBal(0);
-        $schemaIntegrity = new SchemaIntegrityCheck(new SchemaIntegrityCheckModule());
-        $config = $schemaIntegrity->generateConfig($dbal);
-        $this->assertEquals("schemaintegritycheck:\n  mapping:\n    - t1: f0443bd47ea6c32ab2beea43efeadaf3aee9b4f5\n", $config);
+        $worker = $this->getWorker("schemaintegritycheck:\n  mapping:\n    - t1: null\n  ignore:\n    - 'ignore_.*'\n");
+        $config = $worker->generateConfig($dbal);
+        $this->assertEquals("schemaintegritycheck:\n  ignore:\n    - 'ignore_.*'\n  mapping:\n    - t1: f0443bd47ea6c32ab2beea43efeadaf3aee9b4f5\n", $config);
         return $config;
     }
 
@@ -126,9 +127,9 @@ class SchemaIntegrityTest extends \PHPUnit\Framework\TestCase
     public function testGenerateConfigMySQL()
     {
         $dbal = $this->initDBal(1);
-        $schemaIntegrity = new SchemaIntegrityCheck(new SchemaIntegrityCheckModule());
-        $config = $schemaIntegrity->generateConfig($dbal);
-        $this->assertEquals("schemaintegritycheck:\n  mapping:\n    - t1: f0443bd47ea6c32ab2beea43efeadaf3aee9b4f5\n", $config);
+        $worker = $this->getWorker("schemaintegritycheck:\n  mapping:\n    - t1: null\n  ignore:\n    - 'ignore_.*'\n");
+        $config = $worker->generateConfig($dbal);
+        $this->assertEquals("schemaintegritycheck:\n  ignore:\n    - 'ignore_.*'\n  mapping:\n    - t1: f0443bd47ea6c32ab2beea43efeadaf3aee9b4f5\n", $config);
         return $config;
     }
 

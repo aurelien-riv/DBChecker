@@ -59,6 +59,15 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
     public function generateConfig(DBQueriesInterface $dbQueries) : string
     {
         $ret = "schemaintegritycheck:\n";
+        $ignores = $this->config['ignore'];
+        if (! empty($ignores))
+        {
+            $ret .= "  ignore:\n";
+            foreach ($ignores as $ignore)
+            {
+                $ret .= "    - '$ignore'\n";
+        }
+        }
         $ret .= "  mapping:\n";
         foreach ($dbQueries->getTableNames() as $table)
         {

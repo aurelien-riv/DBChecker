@@ -25,3 +25,5 @@ script: phpunit --configuration phpunit.xml
 after_script:
   - sonar-scanner
   - php vendor/bin/codacycoverage clover logs/clover.xml
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover logs/clover.xml --repository=g/aurelien-riv/DBChecker
