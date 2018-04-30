@@ -37,7 +37,7 @@ class FileCheckTest extends \PHPUnit\Framework\TestCase
     public function testTestFile_URL_RemoteDisabled()
     {
         $instance = $this->getInstanceWithEmptyConfig();
-        $this->assertNull($this->callMethod($instance, 'testFile', ['', '', '', 'http://github.com'])->current());
+        $this->assertNull($this->callMethod($instance, 'testFile', ['', '', [], 'http://github.com'])->current());
     }
     public function testTestFile_URL_RemoteEnabled()
     {
@@ -51,7 +51,7 @@ class FileCheckTest extends \PHPUnit\Framework\TestCase
         $instance = $this->moduleManager->getWorkers()->current();
         $this->assertInstanceOf(
             FileCheckURLMatch::class,
-            $this->callMethod($instance, 'testFile', ['', '', '', 'http://does_not_exist.com'])->current()
+            $this->callMethod($instance, 'testFile', ['', '', [], 'http://does_not_exist.com'])->current()
         );
     }
 
@@ -59,10 +59,10 @@ class FileCheckTest extends \PHPUnit\Framework\TestCase
     {
         $instance = $this->getInstanceWithEmptyConfig();
         $method = $this->getMethod($instance, 'testFile');
-        $this->assertNull($method->invokeArgs($instance, ['', '', '', __DIR__.'/FileCheckTest.php'])->current());
+        $this->assertNull($method->invokeArgs($instance, ['', '', [], __DIR__.'/FileCheckTest.php'])->current());
         $this->assertInstanceOf(
             FileCheckMatch::class,
-            $method->invokeArgs($instance, ['', '', '', 'does_not_exist'])->current()
+            $method->invokeArgs($instance, ['', '', [], 'does_not_exist'])->current()
         );
     }
 
