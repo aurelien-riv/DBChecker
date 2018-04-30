@@ -3,16 +3,13 @@
 namespace DBCheckerTests\modules\RelCheckTest;
 
 use DBChecker\DBAL\AbstractDBAL;
-use DBChecker\DBAL\MySQLDBAL;
-use DBChecker\DBAL\SQLiteDBAL;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
-use DBChecker\modules\RelCheck\RelCheck;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckMatch;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
 use DBCheckerTests\DatabaseUtilities;
 
-class UniqueIntegrityCheck extends \PHPUnit\Framework\TestCase
+class UniqueIntegrityCheckTest extends \PHPUnit\Framework\TestCase
 {
     use DatabaseUtilities;
 
