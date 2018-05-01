@@ -33,46 +33,18 @@ class MissingKeyDetect implements ModuleWorkerInterface
         return $dbal->getDistantTableAndColumnFromTableAndColumnFK($table, $column) !== null;
     }
 
-    protected function initAlgorithm(AbstractDBAL $dbal, &$notKeys, &$keys)
+    protected function initAlgorithm(AbstractDBAL $dbal, &$notKeys)
     {
         foreach ($dbal->getTableNames() as $table)
         {
             foreach ($dbal->getColumnNamesInTable($table) as $column)
             {
-                if ($this->isPk($dbal, $table, $column) || $this->isFk($dbal, $table, $column))
+                if (! $this->isPk($dbal, $table, $column) && ! $this->isFk($dbal, $table, $column))
                 {
-                    $keys[] = $column;
-                    continue;
+                    $notKeys[] = [$table, $column];
                 }
-
-                $notKeys[] = [$table, $column];
             }
         }
-    }
-
-    public function getIdentifiersFragments($identifiers)
-    {
-        $fragments = [];
-        foreach ($identifiers as $identifier)
-        {
-            foreach ($this->split($identifier) as $fragment)
-            {
-                $fragments[] = $fragment;
-            }
-        }
-        return $fragments;
-    }
-    public function getFrequentIdentifiersFragments($identifiers)
-    {
-        $fragments = array_count_values($this->getIdentifiersFragments($identifiers));
-
-        $count = count($fragments);
-        $threshold = $this->config['threshold'];
-        $fragments = array_filter($fragments, function($item) use ($count, $threshold) {
-            return ($item > ($count * $threshold / 100));
-        });
-
-        return array_keys($fragments);
     }
 
     /**
@@ -114,33 +86,9 @@ class MissingKeyDetect implements ModuleWorkerInterface
         }
     }
 
-    protected function runWithAutodetect(string $dbName, $notKeys, $keys)
-    {
-        $keyFragments = $this->getFrequentIdentifiersFragments($keys);
-        foreach ($notKeys as $notKey)
-        {
-            foreach ($this->split($notKey[1]) as $fragment)
-            {
-                if (in_array($fragment, $keyFragments))
-                {
-                        yield new MissingKeyDetectMatch($dbName, $notKey[0], $notKey[1]);
-                    break;
-                }
-            }
-        }
-    }
-
     public function run(AbstractDBAL $dbal)
     {
-        $this->initAlgorithm($dbal, $notKeys, $keys);
-
-        if (! empty($this->config['patterns']))
-        {
-            yield from $this->runWithPatterns($dbal->getName(), $notKeys);
-        }
-        else
-        {
-            yield from $this->runWithAutodetect($dbal->getName(), $notKeys, $keys);
-        }
+        $this->initAlgorithm($dbal, $notKeys);
+        yield from $this->runWithPatterns($dbal->getName(), $notKeys);
     }
 }

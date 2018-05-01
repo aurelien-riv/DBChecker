@@ -59,7 +59,7 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
     public function getInstanceWithEmptyConfig()
     {
         $module = new MissingKeyDetectModule();
-        $this->moduleManager->loadModule($module, [$module->getName() => []]);
+        $this->moduleManager->loadModule($module, [$module->getName() => ['patterns' => ['']]]);
         return $this->moduleManager->getWorkers()->current();
     }
 
@@ -110,40 +110,5 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
             $this->assertInstanceOf(MissingKeyDetectMatch::class, $datum);
             $this->assertContains($datum->getColumn(), ['something_id', '_id']);
         }
-    }
-
-    public function testRun_AutoDetect_SQLite()
-    {
-        $relcheck = $this->getInstanceWithEmptyConfig();
-        $dbal = $this->init(0);
-
-        /** @var \Generator $generator */
-        $generator = $relcheck->run($dbal);
-
-        /** @var MissingKeyDetectMatch $error */
-        $error = $generator->current();
-        $this->assertInstanceOf(MissingKeyDetectMatch::class, $error);
-        $this->assertEquals($error->getTable(), "t3");
-        $this->assertEquals($error->getColumn(), "t2_id");
-
-        $generator->next();
-        $this->assertNull($generator->current());
-    }
-    public function testRun_AutoDetect_MySQL()
-    {
-        $relcheck = $this->getInstanceWithEmptyConfig();
-        $dbal = $this->init(1);
-
-        /** @var \Generator $generator */
-        $generator = $relcheck->run($dbal);
-
-        /** @var MissingKeyDetectMatch $error */
-        $error = $generator->current();
-        $this->assertInstanceOf(MissingKeyDetectMatch::class, $error);
-        $this->assertEquals($error->getTable(), "t3");
-        $this->assertEquals($error->getColumn(), "t2_id");
-
-        $generator->next();
-        $this->assertNull($generator->current());
     }
 }

@@ -21,12 +21,9 @@ class MissingKeyDetectModule implements ModuleInterface
         $treeBuilder->root($this->getName())
             ->children()
                 ->arrayNode('patterns')
+                    ->isRequired()
+                    ->cannotBeEmpty()
                     ->scalarPrototype()->end()
-                ->end()
-                ->floatNode('threshold')
-                    ->defaultValue(30)
-                    ->min(0)
-                    ->max(100)
                 ->end()
             ->end();
 
