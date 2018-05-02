@@ -2,7 +2,10 @@
 
 namespace DBCheckerTests\modules\MissingCompressionDetect;
 
+use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\modules\DataBase\DatabasesModule;
+use DBChecker\modules\FileCheck\FileCheckModule;
+use DBChecker\modules\MissingKeyDetect\MissingKeyDetect;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectMatch;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
 use DBChecker\modules\ModuleManager;
@@ -28,10 +31,18 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
                     $this->getMysqlConfig()
                 ]
             ],
-            'missingkeydetect' => []
+            'missingkeydetect' => [
+                'patterns' => [
+                    '_id$'
+                ]
+            ]
         ];
         $this->moduleManager = new ModuleManager();
         $this->moduleManager->loadModule(new DatabasesModule(), $settings);
+        $module = new MissingKeyDetectModule();
+        $this->moduleManager->loadModule($module, [
+            $module->getName() => $settings[$module->getName()]
+        ]);
     }
 
     public function tearDown()
@@ -40,7 +51,7 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
         $this->cleanDbs($this->moduleManager->getDatabaseModule()->getDBALs());
     }
 
-    private function init($dbIndex)
+    private function init($dbIndex) : AbstractDBAL
     {
         $dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[$dbIndex];
         $queries = $this->getAttributeValue($dbal, 'queries');
@@ -85,6 +96,30 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(['test456', 'Camel', 'Case'], $data);
     }
     #endregion
+
+    private function doTestRun($dbIndex)
+    {
+        /** @var MissingKeyDetect $worker */
+        $worker = $this->moduleManager->getWorkers()->current();
+        $generator = $worker->run($this->init($dbIndex));
+        /** @var MissingKeyDetectMatch $match */
+        $match = $generator->current();
+        $this->assertInstanceOf(MissingKeyDetectMatch::class, $match);
+        $this->assertEquals('t2_id', $match->getColumn());
+        $this->assertEquals('t3', $match->getTable());
+        $generator->next();
+        $this->assertNull($generator->current());
+    }
+
+    public function testRunSQLite()
+    {
+        $this->doTestRun(0);
+    }
+
+    public function testRunMySQL()
+    {
+        $this->doTestRun(1);
+    }
 
     public function testRunWithPatterns()
     {

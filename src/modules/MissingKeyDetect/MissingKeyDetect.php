@@ -3,7 +3,6 @@
 namespace DBChecker\modules\MissingKeyDetect;
 
 use DBChecker\DBAL\AbstractDBAL;
-use DBChecker\DBQueries\AbstractDbQueries;
 use DBChecker\ModuleInterface;
 use DBChecker\ModuleWorkerInterface;
 
