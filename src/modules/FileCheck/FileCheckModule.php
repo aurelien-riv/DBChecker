@@ -20,7 +20,7 @@ class FileCheckModule implements ModuleInterface
         $treeBuilder = new TreeBuilder();
         $node = $treeBuilder->root('ssh');
 
-        $node
+        return $node
             ->info('Checks path using SFTP instead of local is_file')
             ->children()
                 ->scalarNode('host')->end()
@@ -33,8 +33,6 @@ class FileCheckModule implements ModuleInterface
                     ->info('Passphrase for the private key, or "prompt" for interactive')
                 ->end()
             ->end();
-
-        return $node;
     }
 
     public function getConfigTreeBuilder()

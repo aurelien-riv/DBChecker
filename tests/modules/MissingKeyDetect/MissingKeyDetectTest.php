@@ -4,7 +4,6 @@ namespace DBCheckerTests\modules\MissingCompressionDetect;
 
 use DBChecker\DBAL\AbstractDBAL;
 use DBChecker\modules\DataBase\DatabasesModule;
-use DBChecker\modules\FileCheck\FileCheckModule;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetect;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectMatch;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
@@ -73,29 +72,6 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
         $this->moduleManager->loadModule($module, [$module->getName() => ['patterns' => ['']]]);
         return $this->moduleManager->getWorkers()->current();
     }
-
-    #region split
-    public function testSplit_CamelCase()
-    {
-        $data = $this->getInstanceWithEmptyConfig()->split("TestCamelCase");
-        $this->assertEquals(['Test', 'Camel', 'Case'], $data);
-    }
-    public function testSplit_mixedCamelCase()
-    {
-        $data = $this->getInstanceWithEmptyConfig()->split("testCamelCase");
-        $this->assertEquals(['test', 'Camel', 'Case'], $data);
-    }
-    public function testSplit_CamelCaseWithNumbers()
-    {
-        $data = $this->getInstanceWithEmptyConfig()->split("Test456CamelCase");
-        $this->assertEquals(['Test456', 'Camel', 'Case'], $data);
-    }
-    public function testSplit_mixedCamelCaseWithNumber()
-    {
-        $data = $this->getInstanceWithEmptyConfig()->split("test456CamelCase");
-        $this->assertEquals(['test456', 'Camel', 'Case'], $data);
-    }
-    #endregion
 
     private function doTestRun($dbIndex)
     {

@@ -15,6 +15,22 @@ class SchemaIntegrityCheckModule implements ModuleInterface
         return 'schemaintegritycheck';
     }
 
+    private function addMapping()
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('mapping');
+
+        return $node
+            ->isRequired()
+            ->cannotBeEmpty()
+            ->arrayPrototype()
+                ->useAttributeAsKey('key')
+                ->scalarPrototype()
+                    ->info('A SHA1 sum')
+                ->end()
+            ->end();
+    }
+
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
@@ -27,16 +43,7 @@ class SchemaIntegrityCheckModule implements ModuleInterface
                     ->info('Ignore extra tables that matches one of the regexp if allow_extras if false')
                     ->scalarPrototype()->end()
                 ->end()
-                ->arrayNode('mapping')
-                    ->isRequired()
-                    ->cannotBeEmpty()
-                    ->arrayPrototype()
-                        ->useAttributeAsKey('key')
-                        ->scalarPrototype()
-                            ->info('A SHA1 sum')
-                        ->end()
-                    ->end()
-                ->end()
+                ->append($this->addMapping())
             ->end();
         return $treeBuilder;
     }
