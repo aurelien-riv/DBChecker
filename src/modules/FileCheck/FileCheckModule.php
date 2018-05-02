@@ -15,6 +15,28 @@ class FileCheckModule implements ModuleInterface
         return 'filecheck';
     }
 
+    private function addSSHNode()
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('ssh');
+
+        $node
+            ->info('Checks path using SFTP instead of local is_file')
+            ->children()
+                ->scalarNode('host')->end()
+                ->integerNode('port')->defaultValue(22)->end()
+                ->scalarNode('user')->end()
+                ->scalarNode('password')->defaultNull()->end()
+                ->scalarNode('pkey_file')->defaultNull()->end()
+                ->scalarNode('pkey_passphrase')
+                    ->defaultNull()
+                    ->info('Passphrase for the private key, or "prompt" for interactive')
+                ->end()
+            ->end();
+
+        return $node;
+    }
+
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
@@ -24,26 +46,7 @@ class FileCheckModule implements ModuleInterface
                     ->defaultFalse()
                     ->info("If true, http and https URL will be fetched to detect 4xx and 5xx errors")
                 ->end()
-                ->arrayNode('ssh')
-                    ->info('Checks path using SFTP instead of local is_file')
-                    ->children()
-                        ->scalarNode('host')->end()
-                        ->integerNode('port')
-                            ->defaultValue(22)
-                        ->end()
-                        ->scalarNode('user')->end()
-                        ->scalarNode('password')
-                            ->defaultNull()
-                        ->end()
-                        ->scalarNode('pkey_file')
-                            ->defaultNull()
-                        ->end()
-                        ->scalarNode('pkey_passphrase')
-                            ->defaultNull()
-                            ->info('Passphrase for the private key, or "prompt" for interactive')
-                        ->end()
-                    ->end()
-                ->end()
+                ->append($this->addSSHNode())
                 ->arrayNode('mapping')
                     ->isRequired()
                     ->cannotBeEmpty()

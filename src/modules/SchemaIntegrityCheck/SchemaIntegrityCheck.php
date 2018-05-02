@@ -50,33 +50,42 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
     {
         foreach ($dbal->getTableNames() as $table)
         {
-            if (! $this->isIgnored($table))
+            if (! $this->isIgnored($table) && $this->isExtraTable($table))
             {
-                foreach ($this->config['mapping'] as $mapping)
-                {
-                    if ($table === key($mapping))
-                    {
-                        continue 2;
-                    }
-                }
                 yield new SchemaIntegrityCheckMatch($dbal->getName(), $table, 'unexpected table');
             }
         }
     }
 
-    public function generateConfig(DBQueriesInterface $dbQueries) : string
+    private function isExtraTable(string $table) : bool
     {
-        $ret = "schemaintegritycheck:\n";
+        foreach ($this->config['mapping'] as $mapping)
+        {
+            if ($table === key($mapping))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function generateIgnores() : string
+    {
         $ignores = $this->config['ignore'];
         if (! empty($ignores))
         {
-            $ret .= "  ignore:\n";
+            $ret = "  ignore:\n";
             foreach ($ignores as $ignore)
             {
                 $ret .= "    - '$ignore'\n";
+            }
+            return $ret;
         }
-        }
-        $ret .= "  mapping:\n";
+        return '';
+    }
+    private function generateMapping(DBQueriesInterface $dbQueries) : string
+    {
+        $ret = "  mapping:\n";
         foreach ($dbQueries->getTableNames() as $table)
         {
             if (! $this->isIgnored($table))
@@ -89,5 +98,12 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
             }
         }
         return $ret;
+    }
+
+    public function generateConfig(DBQueriesInterface $dbQueries) : string
+    {
+        $ret = "schemaintegritycheck:\n";
+        $ret .= $this->generateIgnores();
+        return $ret . $this->generateMapping($dbQueries);
     }
 }

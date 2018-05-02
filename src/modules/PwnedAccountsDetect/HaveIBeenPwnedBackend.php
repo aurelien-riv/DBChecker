@@ -6,18 +6,8 @@ class HaveIBeenPwnedBackend
 {
     const API_BASEURL = "https://haveibeenpwned.com/api/v2/";
 
-    /**
-     * @param string $account
-     * @return bool
-     * @throws TlsHandcheckException
-     */
-    public function isAccountPwned(string $account) : bool
+    private function hadPasswordLeaked(array $data) : bool
     {
-        $data = $this->breachedaccount($account);
-        if (! $data)
-        {
-            return false;
-        }
         foreach ($data as $datum)
         {
             foreach ($datum->DataClasses as $dataClass)
@@ -29,6 +19,21 @@ class HaveIBeenPwnedBackend
             }
         }
         return false;
+    }
+
+    /**
+     * @param string $account
+     * @return bool
+     * @throws TlsHandcheckException
+     */
+    public function isAccountPwned(string $account) : bool
+    {
+        $data = $this->breachedaccount($account);
+        if (empty($data))
+        {
+            return false;
+        }
+        return $this->hadPasswordLeaked($data);
     }
 
     /**

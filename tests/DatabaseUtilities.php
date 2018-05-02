@@ -47,16 +47,21 @@ trait DatabaseUtilities
             $pdo = $this->getAttributeValue($queries, 'pdo');
             if ($dbal instanceof MySQLDBAL)
             {
-                $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
-                foreach($dbal->getTableNames() as $table)
-                {
-                    $pdo->exec("DROP TABLE $table");
-                }
+                $this->cleanMySQL($dbal, $pdo);
             }
             else if ($dbal instanceof SQLiteDBAL)
             {
                 continue; // in memory database, nothing to do
             }
+        }
+    }
+
+    private function cleanMySQL(MySQLDBAL $dbal, \PDO $pdo)
+    {
+        $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
+        foreach($dbal->getTableNames() as $table)
+        {
+            $pdo->exec("DROP TABLE $table");
         }
     }
 }
