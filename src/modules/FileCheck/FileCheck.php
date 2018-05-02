@@ -38,7 +38,7 @@ class FileCheck implements ModuleWorkerInterface
         }
     }
 
-    protected function extractVariablesFromPath($path, &$columns=[], &$innerJoins=[])
+    private function extractVariablesFromPath($path, &$columns=[], &$innerJoins=[])
     {
         $columnIdentifier = AbstractDbQueries::IDENTIFIER;
 
@@ -55,7 +55,7 @@ class FileCheck implements ModuleWorkerInterface
         }
     }
 
-    protected function replaceVariablesFromPath($path, $value, &$columns)
+    private function replaceVariablesFromPath($path, $value, &$columns)
     {
         $columnIdentifier = AbstractDbQueries::IDENTIFIER;
         $pattern = "/\{($columnIdentifier(?:\.$columnIdentifier)?)\}/";
@@ -86,7 +86,7 @@ class FileCheck implements ModuleWorkerInterface
         }
     }
 
-    protected function testUrl(string $dbName, string $table, array $columns, string $path)
+    private function testUrl(string $dbName, string $table, array $columns, string $path)
     {
         if ($this->http)
         {
@@ -98,24 +98,24 @@ class FileCheck implements ModuleWorkerInterface
         }
     }
 
+    private function isFile(string $path) : bool
+    {
+        if ($this->sftp)
+        {
+            return $this->sftp->file_exists($path);
+        }
+        return is_file($path);
+    }
+
     protected function testFile(string $dbName, string $table, array $columns, string $path)
     {
         if (preg_match('/^https?:\/\//', $path))
         {
             yield from $this->testUrl($dbName, $table, $columns, $path);
         }
-        else if ($this->sftp)
-        {
-            if (! $this->sftp->file_exists($path))
-            {
-                yield new FileCheckMatch($dbName, $table, $columns, $path);
-            }
-        }
-        else if (! is_file($path))
+        else if (! $this->isFile($path))
         {
             yield new FileCheckMatch($dbName, $table, $columns, $path);
         }
     }
-
-
 }
