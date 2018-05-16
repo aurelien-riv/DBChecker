@@ -46,9 +46,7 @@ abstract class  AbstractDbQueries
         {
             $query .= " AND $columns IS NOT NULL";
         }
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute();
-        return $stmt;
+        return $this->pdo->query($query);
     }
 
     public function getDistinctValuesWithoutNulls($table, $columns)
@@ -59,10 +57,7 @@ abstract class  AbstractDbQueries
             $selectColumns = implode(',', $columns);
             $whereColumns = implode(' IS NOT NULL AND ', $columns);
         }
-        $query = "SELECT DISTINCT $selectColumns FROM $table WHERE $whereColumns IS NOT NULL;";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute();
-        return $stmt;
+        return $this->pdo->query("SELECT DISTINCT $selectColumns FROM $table WHERE $whereColumns IS NOT NULL;");
     }
 
     public abstract function getDistantTableAndColumnFromTableAndColumnFK(string $table, string $column) : \PDOStatement;
@@ -71,12 +66,14 @@ abstract class  AbstractDbQueries
      * @param string   $table
      * @param string[] $columns
      * @param          $innerJoinString
+     * @param int      $limit
+     * @param int      $offset
      * @return bool|\PDOStatement
      * Warning, composed key are not supported yet
      */
-    public function getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoinString) : \PDOStatement
+    public function getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoinString, int $limit, int $offset) : \PDOStatement
     {
-        $columns          = array_unique($columns);
+        $columns = array_unique($columns);
 
         $selectColumns = '';
         foreach ($columns as $column)
@@ -85,7 +82,10 @@ abstract class  AbstractDbQueries
         }
         $stmt = $this->pdo->prepare("SELECT DISTINCT " . rtrim($selectColumns, ',')
                                     . " FROM $table $innerJoinString"
-                                    . " WHERE " . implode(' IS NOT NULL AND ', $columns) . " IS NOT NULL;");
+                                    . " WHERE " . implode(' IS NOT NULL AND ', $columns) . " IS NOT NULL;"
+                                    . " LIMIT :limit OFFSET :offset");
+        $stmt->bindParam(':limit',  $limit,  \PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt;
     }

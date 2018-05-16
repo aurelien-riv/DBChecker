@@ -61,10 +61,10 @@ abstract class AbstractDBAL implements
         return $joins;
     }
 
-    public function getDistinctValuesWithJoinColumnsWithoutNulls(string $table, array $columns, array $innerJoins) : array
+    public function getDistinctValuesWithJoinColumnsWithoutNulls(string $table, array $columns, array $innerJoins, int $limit, int $offset) : array
     {
         $innerJoins = $this->getInnerJoinString($table, $innerJoins);
-        return $this->queries->getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoins)->fetchAll(\PDO::FETCH_ASSOC);
+        return $this->queries->getDistinctValuesWithJoinColumnsWithoutNulls($table, $columns, $innerJoins, $limit, $offset)->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function getTableNames() : array

@@ -68,6 +68,7 @@ class FileCheck implements ModuleWorkerInterface
 
     public function run(AbstractDBAL $dbal)
     {
+        $limit = 1000;
         foreach ($this->config['mapping'] as $mapping)
         {
             $table = key($mapping);
@@ -76,13 +77,21 @@ class FileCheck implements ModuleWorkerInterface
             $columns = $innerJoins = [];
             $this->extractVariablesFromPath($path, $columns, $innerJoins);
 
-            $values = $dbal->getDistinctValuesWithJoinColumnsWithoutNulls($table, array_keys($columns), $innerJoins);
-            foreach ($values as $value)
-            {
-                $tmpColumns = $columns;
-                $tmpPath = $this->replaceVariablesFromPath($path, $value, $tmpColumns);
-                yield from $this->testFile($dbal->getName(), $table, $tmpColumns, $tmpPath);
-            }
+            $offset = 0;
+            do {
+                $values = $dbal->getDistinctValuesWithJoinColumnsWithoutNulls($table, array_keys($columns), $innerJoins, $limit, $offset);
+                yield from $this->processData($dbal, $path, $table, $columns, $values);
+                $offset += $limit;
+            } while (count($values) === $limit);
+        }
+    }
+
+    private function processData(AbstractDBAL $dbal, $path, $table, $columns, $values)
+    {
+        foreach ($values as $value)
+        {
+            $tmpPath = $this->replaceVariablesFromPath($path, $value, $columns);
+            yield from $this->testFile($dbal->getName(), $table, $columns, $tmpPath);
         }
     }
 

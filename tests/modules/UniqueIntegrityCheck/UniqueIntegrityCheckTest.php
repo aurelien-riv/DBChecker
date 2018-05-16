@@ -1,7 +1,8 @@
 <?php
 
-namespace DBCheckerTests\modules\RelCheckTest;
+namespace DBCheckerTests\modules\UniqueIntegrityCheckTest;
 
+use DBChecker\DBAL\MySQLDBAL;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheck;
@@ -55,10 +56,9 @@ class UniqueIntegrityCheckTest extends \PHPUnit\Framework\TestCase
     private function initDb(\PDO $pdo)
     {
         $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY, data1 CHAR(2), data2 CHAR(2));");
-        $pdo->exec("CREATE UNIQUE INDEX t2_data_unique ON t1 (data1, data2);");
+        $pdo->exec("CREATE UNIQUE INDEX t1_data_unique ON t1 (data1, data2);");
         $pdo->exec("INSERT INTO t1 VALUES (1, 'v1', NULL);");
         $pdo->exec("INSERT INTO t1 VALUES (2, 'v1', NULL);");
-
     }
 
     #region SQLite

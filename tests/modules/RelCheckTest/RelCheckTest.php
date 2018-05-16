@@ -74,7 +74,7 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
         $pdo->exec("CREATE TABLE t4 (t4_id INTEGER PRIMARY KEY, FOREIGN KEY (t4_id) REFERENCES t3(t3_id));");
         if ($dbal instanceof SQLiteDBAL)
         {
-            $pdo->exec("PRAGMA foreign_keys = OFF");
+            $pdo->exec("PRAGMA foreign_keys = OFF"); // Valeur par défaut
         }
         else if ($dbal instanceof MySQLDBAL)
         {

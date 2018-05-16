@@ -6,5 +6,5 @@ interface DBQueriesInterface
 {
     public function getName() : string;
 
-    public function getDistinctValuesWithJoinColumnsWithoutNulls(string $table, array $columns, array $innerJoinColumns) : array;
+    public function getDistinctValuesWithJoinColumnsWithoutNulls(string $table, array $columns, array $innerJoinColumns, int $limit, int $offset) : array;
 }
