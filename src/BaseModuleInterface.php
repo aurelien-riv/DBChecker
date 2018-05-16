@@ -26,9 +26,4 @@ interface BaseModuleInterface
      * Load the settings of the module
      */
     public function loadConfig(array $config);
-
-    /**
-     * @return array
-     */
-    public function getConfig();
 }

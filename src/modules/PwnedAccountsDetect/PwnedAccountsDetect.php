@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\PwnedAccountsDetect;
 
-use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 
 class PwnedAccountsDetect implements ModuleWorkerInterface

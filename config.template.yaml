@@ -1,9 +1,9 @@
 databases:
   connections:
-    - dsn: "sqlite::memory:"
+    - db: ":memory:"
       name: database1
       engine: sqlite
-    - dsn: "sqlite::memory:"
+    - db: ":memory:"
       name: database2
       engine: sqlite
 

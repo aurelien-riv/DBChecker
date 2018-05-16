@@ -2,6 +2,7 @@
 
 namespace DBCheckerTests\modules\SchemaIntegrity;
 
+use DBChecker\InputModules\InputModuleManager;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
 use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheck;
@@ -32,7 +33,7 @@ class SchemaIntegrityTest extends \PHPUnit\Framework\TestCase
             ]
         ];
         $this->moduleManager = new ModuleManager();
-        $this->moduleManager->loadModule(new DatabasesModule(), $settings);
+        $this->moduleManager->loadModule(new InputModuleManager(), $settings);
     }
 
     public function tearDown()
@@ -43,7 +44,8 @@ class SchemaIntegrityTest extends \PHPUnit\Framework\TestCase
 
     private function initDBal($dbIndex)
     {
-        $dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[$dbIndex];
+        $dbals = iterator_to_array($this->moduleManager->getDatabaseModule()->getDBALs());
+        $dbal = $dbals[$dbIndex];
         $queries = $this->getAttributeValue($dbal, 'queries');
         $pdo = $this->getAttributeValue($queries, 'pdo');
         $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY, data VARCHAR(64));");

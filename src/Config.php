@@ -2,7 +2,9 @@
 
 namespace DBChecker;
 
-use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\AbstractDBAL;
+use DBChecker\InputModules\InputModuleManager;
+use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
 use Symfony\Component\Yaml\Yaml;
 
@@ -15,6 +17,8 @@ class Config
         $settings = Yaml::parseFile($yamlPath);
 
         $this->moduleManager = new ModuleManager();
+
+        $this->moduleManager->loadModule(new InputModuleManager(), $settings);
         foreach (ModuleManager::ENABLED_MODULES as $module)
         {
             $this->moduleManager->loadModule(new $module(), $settings);
@@ -29,7 +33,7 @@ class Config
         yield from $this->moduleManager->getWorkers();
     }
 
-    public function getDBALs() : array
+    public function getDBALs() : \Generator
     {
         return $this->moduleManager->getDatabaseModule()->getDBALs();
     }

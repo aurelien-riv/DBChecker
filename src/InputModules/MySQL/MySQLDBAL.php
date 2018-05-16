@@ -1,8 +1,8 @@
 <?php
 
-namespace DBChecker\DBAL;
+namespace DBChecker\InputModules\MySQL;
 
-use DBChecker\DBQueries\MySQLQueries;
+use DBChecker\InputModules\AbstractDBAL;
 
 /**
  * @property MySQLQueries $queries

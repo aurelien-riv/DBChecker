@@ -1,9 +1,8 @@
 <?php
 
-namespace DBChecker\DBQueries;
+namespace DBChecker\InputModules\MySQL;
 
-use DBChecker\DBAL\AbstractDBAL;
-use DBChecker\DBAL\MySQLDBAL;
+use DBChecker\InputModules\AbstractDbQueries;
 
 class MySQLQueries extends AbstractDbQueries
 {

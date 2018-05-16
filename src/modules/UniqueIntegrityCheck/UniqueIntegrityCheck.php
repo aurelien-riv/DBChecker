@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\UniqueIntegrityCheck;
 
-use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 
 class UniqueIntegrityCheck implements ModuleWorkerInterface

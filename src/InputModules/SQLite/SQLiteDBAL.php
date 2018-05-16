@@ -1,8 +1,8 @@
 <?php
 
-namespace DBChecker\DBAL;
+namespace DBChecker\InputModules\SQLite;
 
-use DBChecker\DBQueries\SQLiteQueries;
+use DBChecker\InputModules\AbstractDBAL;
 
 /**
  * @property SQLiteQueries $queries

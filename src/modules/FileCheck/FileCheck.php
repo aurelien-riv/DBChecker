@@ -2,8 +2,8 @@
 
 namespace DBChecker\modules\FileCheck;
 
-use DBChecker\DBAL\AbstractDBAL;
-use DBChecker\DBQueries\AbstractDbQueries;
+use DBChecker\InputModules\AbstractDBAL;
+use DBChecker\InputModules\AbstractDbQueries;
 use DBChecker\ModuleWorkerInterface;
 
 class FileCheck implements ModuleWorkerInterface

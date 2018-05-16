@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\RelCheck;
 
-use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 
 class RelCheck implements ModuleWorkerInterface

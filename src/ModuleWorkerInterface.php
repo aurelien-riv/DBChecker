@@ -2,7 +2,7 @@
 
 namespace DBChecker;
 
-use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\AbstractDBAL;
 
 interface ModuleWorkerInterface
 {

@@ -2,8 +2,9 @@
 
 namespace DBCheckerTests;
 
-use DBChecker\DBAL\MySQLDBAL;
-use DBChecker\DBAL\SQLiteDBAL;
+use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\MySQL\MySQLDBAL;
+use DBChecker\InputModules\SQLite\SQLiteDBAL;
 use DBChecker\modules\ModuleManager;
 
 trait DatabaseUtilities
@@ -13,7 +14,7 @@ trait DatabaseUtilities
     public static function getSqliteMemoryConfig()
     {
         return [
-            'dsn' => "sqlite::memory:",
+            'db' => ":memory:",
             'name' => 'test',
             'engine' => 'sqlite'
         ];
@@ -33,12 +34,16 @@ trait DatabaseUtilities
 
     public function getPdo(ModuleManager $moduleManager, $index=0)
     {
-        $dbal = $moduleManager->getDatabaseModule()->getDBALs()[$index];
+        $dbals = iterator_to_array($moduleManager->getDatabaseModule()->getDBALs());
+        $dbal = $dbals[$index];
         $queries = $this->getAttributeValue($dbal, 'queries');
         return $this->getAttributeValue($queries, 'pdo');
     }
 
-    public function cleanDbs(array $dbals)
+    /**
+     * @param \Generator|AbstractDBAL[] $dbals
+     */
+    public function cleanDbs(\Generator $dbals)
     {
         foreach ($dbals as $dbal)
         {

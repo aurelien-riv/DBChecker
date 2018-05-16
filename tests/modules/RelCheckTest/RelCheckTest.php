@@ -2,10 +2,10 @@
 
 namespace DBCheckerTests\modules\RelCheckTest;
 
-use DBChecker\DBAL\AbstractDBAL;
-use DBChecker\DBAL\MySQLDBAL;
-use DBChecker\DBAL\SQLiteDBAL;
-use DBChecker\modules\DataBase\DatabasesModule;
+use DBChecker\InputModules\AbstractDBAL;
+use DBChecker\InputModules\InputModuleManager;
+use DBChecker\InputModules\MySQL\MySQLDBAL;
+use DBChecker\InputModules\SQLite\SQLiteDBAL;
 use DBChecker\modules\ModuleManager;
 use DBChecker\modules\RelCheck\ColumnNotFoundMatch;
 use DBChecker\modules\RelCheck\RelCheck;
@@ -36,7 +36,7 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
             'relcheck' => []
         ];
         $this->moduleManager = new ModuleManager();
-        foreach ([DatabasesModule::class, RelCheckModule::class] as $module)
+        foreach ([InputModuleManager::class, RelCheckModule::class] as $module)
         {
             $this->moduleManager->loadModule(new $module(), $settings);
         }
@@ -50,7 +50,8 @@ class RelCheckTest extends \PHPUnit\Framework\TestCase
 
     private function init($dbIndex)
     {
-        $dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[$dbIndex];
+        $dbals = iterator_to_array($this->moduleManager->getDatabaseModule()->getDBALs());
+        $dbal = $dbals[$dbIndex];
         $queries = $this->getAttributeValue($dbal, 'queries');
         $pdo = $this->getAttributeValue($queries, 'pdo');
         $this->initDb($dbal, $pdo);

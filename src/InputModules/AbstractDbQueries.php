@@ -1,6 +1,6 @@
 <?php
 
-namespace DBChecker\DBQueries;
+namespace DBChecker\InputModules;
 
 abstract class  AbstractDbQueries
 {

@@ -1,6 +1,8 @@
 <?php
 
-namespace DBChecker\DBQueries;
+namespace DBChecker\InputModules\SQLite;
+
+use DBChecker\InputModules\AbstractDbQueries;
 
 class SQLiteQueries extends AbstractDbQueries
 {

@@ -3,6 +3,8 @@
 namespace DBChecker\modules;
 
 use DBChecker\BaseModuleInterface;
+use DBChecker\InputModules\InputModuleInterface;
+use DBChecker\InputModules\InputModuleManager;
 use DBChecker\ModuleInterface;
 use DBChecker\modules\AnalyzeTableCheck\AnalyzeTableCheckModule;
 use DBChecker\modules\DataBase\DatabasesModule;
@@ -15,7 +17,6 @@ use DBChecker\modules\PwnedAccountsDetect\PwnedAccountsDetectModule;
 use DBChecker\modules\RelCheck\RelCheckModule;
 use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheckModule;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
-use DBChecker\ModuleWorkerInterface;
 use Symfony\Component\Config\Definition\Processor;
 
 class ModuleManager
@@ -23,7 +24,7 @@ class ModuleManager
     private $modules = [];
 
     const ENABLED_MODULES = [
-        DatabasesModule::class,
+        InputModuleManager::class,
         RelCheckModule::class,
         UniqueIntegrityCheckModule::class,
         FileCheckModule::class,
@@ -51,11 +52,11 @@ class ModuleManager
         }
     }
 
-    public function getDatabaseModule() : DatabasesModule
+    public function getDatabaseModule() : InputModuleManager
     {
         foreach ($this->modules as $module)
         {
-            if ($module instanceof DatabasesModule)
+            if ($module instanceof InputModuleManager)
             {
                 return $module;
             }

@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\MissingCompressionDetect;
 
-use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 use Symfony\Component\Filesystem\Exception\InvalidArgumentException;
 

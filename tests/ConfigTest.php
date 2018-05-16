@@ -20,8 +20,7 @@ final class ConfigTest extends \PHPUnit\Framework\TestCase
 
     public function testDatabase()
     {
-        $queries = $this->config->getDBALs();
-        $this->assertEquals(2, count($queries));
+        $this->assertEquals(2, count(iterator_to_array($this->config->getDBALs())));
     }
 
     public function testWorkers()

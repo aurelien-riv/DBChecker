@@ -3,12 +3,14 @@
 namespace DBCheckerTests\modules\UniqueIntegrityCheckTest;
 
 use DBChecker\DBAL\MySQLDBAL;
+use DBChecker\InputModules\InputModuleManager;
 use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheck;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckMatch;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
 use DBCheckerTests\DatabaseUtilities;
+use JMS\Serializer\Tests\Fixtures\Input;
 
 class UniqueIntegrityCheckTest extends \PHPUnit\Framework\TestCase
 {
@@ -32,7 +34,7 @@ class UniqueIntegrityCheckTest extends \PHPUnit\Framework\TestCase
             'uniqueintegritycheck' => []
         ];
         $this->moduleManager = new ModuleManager();
-        foreach ([DatabasesModule::class, UniqueIntegrityCheckModule::class] as $module)
+        foreach ([InputModuleManager::class, UniqueIntegrityCheckModule::class] as $module)
         {
             $this->moduleManager->loadModule(new $module(), $settings);
         }
@@ -46,7 +48,8 @@ class UniqueIntegrityCheckTest extends \PHPUnit\Framework\TestCase
 
     private function init($dbIndex)
     {
-        $dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[$dbIndex];
+        $dbals = iterator_to_array($this->moduleManager->getDatabaseModule()->getDBALs());
+        $dbal = $dbals[$dbIndex];
         $queries = $this->getAttributeValue($dbal, 'queries');
         $pdo = $this->getAttributeValue($queries, 'pdo');
         $this->initDb($pdo);

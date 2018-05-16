@@ -2,8 +2,8 @@
 
 namespace DBCheckerTests\modules\MissingCompressionDetect;
 
-use DBChecker\DBAL\AbstractDBAL;
-use DBChecker\modules\DataBase\DatabasesModule;
+use DBChecker\InputModules\AbstractDBAL;
+use DBChecker\InputModules\InputModuleManager;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetect;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectMatch;
 use DBChecker\modules\MissingKeyDetect\MissingKeyDetectModule;
@@ -37,7 +37,7 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
             ]
         ];
         $this->moduleManager = new ModuleManager();
-        $this->moduleManager->loadModule(new DatabasesModule(), $settings);
+        $this->moduleManager->loadModule(new InputModuleManager(), $settings);
         $module = new MissingKeyDetectModule();
         $this->moduleManager->loadModule($module, [
             $module->getName() => $settings[$module->getName()]
@@ -52,7 +52,8 @@ final class MissingKeyDetectTest extends \PHPUnit\Framework\TestCase
 
     private function init($dbIndex) : AbstractDBAL
     {
-        $dbal = $this->moduleManager->getDatabaseModule()->getDBALs()[$dbIndex];
+        $dbals = iterator_to_array($this->moduleManager->getDatabaseModule()->getDBALs());
+        $dbal = $dbals[$dbIndex];
         $queries = $this->getAttributeValue($dbal, 'queries');
         $pdo = $this->getAttributeValue($queries, 'pdo');
         $this->initDb($pdo);

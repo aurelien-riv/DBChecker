@@ -1,9 +1,8 @@
 <?php
 
-namespace DBChecker\DBAL;
+namespace DBChecker\InputModules;
 
 use BadMethodCallException;
-use DBChecker\DBQueries\AbstractDbQueries;
 
 abstract class AbstractDBAL implements
     \DBChecker\modules\MissingCompressionDetect\DBQueriesInterface,

@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\FragmentationCheck;
 
-use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 
 class FragmentationCheck implements ModuleWorkerInterface

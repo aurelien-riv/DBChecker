@@ -2,7 +2,7 @@
 
 namespace DBChecker\modules\AnalyzeTableCheck;
 
-use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\AbstractDBAL;
 use DBChecker\ModuleWorkerInterface;
 
 class AnalyzeTableCheck implements ModuleWorkerInterface
