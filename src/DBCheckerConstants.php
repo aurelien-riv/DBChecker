@@ -1,6 +1,11 @@
 <?php
 
-define("DBCHECKER_VAR_DIR", __DIR__."/../var/");
+$dir = Phar::running(false);
+if (empty($dir))
+{
+    $dir = __DIR__;
+}
+define("DBCHECKER_VAR_DIR", "$dir/../var/");
 
 if (! is_dir(DBCHECKER_VAR_DIR))
 {
