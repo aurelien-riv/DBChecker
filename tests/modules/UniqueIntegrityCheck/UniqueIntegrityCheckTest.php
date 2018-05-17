@@ -2,15 +2,12 @@
 
 namespace DBCheckerTests\modules\UniqueIntegrityCheckTest;
 
-use DBChecker\DBAL\MySQLDBAL;
 use DBChecker\InputModules\InputModuleManager;
-use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheck;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckMatch;
 use DBChecker\modules\UniqueIntegrityCheck\UniqueIntegrityCheckModule;
 use DBCheckerTests\DatabaseUtilities;
-use JMS\Serializer\Tests\Fixtures\Input;
 
 class UniqueIntegrityCheckTest extends \PHPUnit\Framework\TestCase
 {

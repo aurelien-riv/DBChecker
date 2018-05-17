@@ -16,6 +16,7 @@ class DataIntegrityCheck implements ModuleWorkerInterface
     /**
      * DataIntegrityCheck constructor.
      * @param ModuleInterface|DataIntegrityCheckModule $module
+     * @scrutinizer ignore-call
      */
     public function __construct(ModuleInterface $module)
     {

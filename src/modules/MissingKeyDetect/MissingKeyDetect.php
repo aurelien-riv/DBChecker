@@ -10,6 +10,11 @@ class MissingKeyDetect implements ModuleWorkerInterface
 {
     private $config;
 
+    /**
+     * MissingKeyDetect constructor.
+     * @param ModuleInterface|MissingKeyDetectModule $module
+     * @scrutinizer ignore-call
+     */
     public function __construct(ModuleInterface $module)
     {
         $this->config = $module->getConfig();

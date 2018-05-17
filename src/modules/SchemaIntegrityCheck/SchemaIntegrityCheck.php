@@ -14,6 +14,7 @@ class SchemaIntegrityCheck implements ModuleWorkerInterface
     /**
      * SchemaIntegrityCheck constructor.
      * @param ModuleInterface|DataIntegrityCheckModule $module
+     * @scrutinizer ignore-call
      */
     public function __construct(ModuleInterface $module)
     {

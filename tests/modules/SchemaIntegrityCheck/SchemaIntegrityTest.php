@@ -3,7 +3,6 @@
 namespace DBCheckerTests\modules\SchemaIntegrity;
 
 use DBChecker\InputModules\InputModuleManager;
-use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\ModuleManager;
 use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheck;
 use DBChecker\modules\SchemaIntegrityCheck\SchemaIntegrityCheckMatch;
