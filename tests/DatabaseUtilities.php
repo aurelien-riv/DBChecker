@@ -2,7 +2,7 @@
 
 namespace DBCheckerTests;
 
-use DBChecker\DBAL\AbstractDBAL;
+use DBChecker\InputModules\AbstractDBAL;
 use DBChecker\InputModules\MySQL\MySQLDBAL;
 use DBChecker\InputModules\SQLite\SQLiteDBAL;
 use DBChecker\modules\ModuleManager;
@@ -32,10 +32,15 @@ trait DatabaseUtilities
         ];
     }
 
-    public function getPdo(ModuleManager $moduleManager, $index=0)
+    public function getDbal(ModuleManager $moduleManager, $index=0)
     {
         $dbals = iterator_to_array($moduleManager->getDatabaseModule()->getDBALs());
-        $dbal = $dbals[$index];
+        return $dbals[$index];
+    }
+
+    public function getPdo(ModuleManager $moduleManager, $index=0)
+    {
+        $dbal = $this->getDbal($moduleManager, $index);
         $queries = $this->getAttributeValue($dbal, 'queries');
         return $this->getAttributeValue($queries, 'pdo');
     }

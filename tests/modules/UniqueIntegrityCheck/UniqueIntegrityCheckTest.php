@@ -48,8 +48,7 @@ class UniqueIntegrityCheckTest extends \PHPUnit\Framework\TestCase
 
     private function init($dbIndex)
     {
-        $dbals = iterator_to_array($this->moduleManager->getDatabaseModule()->getDBALs());
-        $dbal = $dbals[$dbIndex];
+        $dbal = $this->getDbal($this->moduleManager, $dbIndex);
         $queries = $this->getAttributeValue($dbal, 'queries');
         $pdo = $this->getAttributeValue($queries, 'pdo');
         $this->initDb($pdo);

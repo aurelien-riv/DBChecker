@@ -13,6 +13,10 @@ class DataIntegrityCheck implements ModuleWorkerInterface
 {
     private $config;
 
+    /**
+     * DataIntegrityCheck constructor.
+     * @param ModuleInterface|DataIntegrityCheckModule $module
+     */
     public function __construct(ModuleInterface $module)
     {
         $this->config = $module->getConfig();

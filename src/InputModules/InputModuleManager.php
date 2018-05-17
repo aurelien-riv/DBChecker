@@ -23,6 +23,7 @@ class InputModuleManager implements BaseModuleInterface
             ->addDefaultsIfNotSet()
             ->children()
                 ->arrayNode('connections')
+                ->isRequired()
                 ->requiresAtLeastOneElement()
                 ->arrayPrototype()
                     ->ignoreExtraKeys(false)

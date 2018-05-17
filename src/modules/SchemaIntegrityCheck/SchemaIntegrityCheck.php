@@ -4,12 +4,17 @@ namespace DBChecker\modules\SchemaIntegrityCheck;
 
 use DBChecker\InputModules\AbstractDBAL;
 use DBChecker\ModuleInterface;
+use DBChecker\modules\DataIntegrityCheck\DataIntegrityCheckModule;
 use DBChecker\ModuleWorkerInterface;
 
 class SchemaIntegrityCheck implements ModuleWorkerInterface
 {
     private $config;
 
+    /**
+     * SchemaIntegrityCheck constructor.
+     * @param ModuleInterface|DataIntegrityCheckModule $module
+     */
     public function __construct(ModuleInterface $module)
     {
         $this->config = $module->getConfig();

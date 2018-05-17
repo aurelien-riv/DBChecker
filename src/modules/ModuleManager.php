@@ -3,11 +3,9 @@
 namespace DBChecker\modules;
 
 use DBChecker\BaseModuleInterface;
-use DBChecker\InputModules\InputModuleInterface;
 use DBChecker\InputModules\InputModuleManager;
 use DBChecker\ModuleInterface;
 use DBChecker\modules\AnalyzeTableCheck\AnalyzeTableCheckModule;
-use DBChecker\modules\DataBase\DatabasesModule;
 use DBChecker\modules\DataIntegrityCheck\DataIntegrityCheckModule;
 use DBChecker\modules\FileCheck\FileCheckModule;
 use DBChecker\modules\FragmentationCheck\FragmentationCheckModule;
@@ -37,6 +35,14 @@ class ModuleManager
         PwnedAccountsDetectModule::class
     ];
 
+    public function loadModules($settings)
+    {
+        foreach (static::ENABLED_MODULES as $module)
+        {
+            $this->loadModule(new $module(), $settings);
+        }
+    }
+
     public function loadModule(BaseModuleInterface $module, $settings)
     {
         $moduleName = $module->getName();
@@ -50,6 +56,10 @@ class ModuleManager
             $module->loadConfig($moduleSettings);
             $this->modules[] = $module;
         }
+        else if ($module instanceof InputModuleManager)
+        {
+            throw new \InvalidArgumentException("No input module has been defined");
+        }
     }
 
     public function getDatabaseModule() : InputModuleManager
@@ -61,7 +71,7 @@ class ModuleManager
                 return $module;
             }
         }
-        return null;
+        throw new \LogicException("This code shouldn't be reached");
     }
 
     public function getWorkers() : \Generator

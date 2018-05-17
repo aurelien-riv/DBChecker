@@ -44,8 +44,7 @@ class SchemaIntegrityTest extends \PHPUnit\Framework\TestCase
 
     private function initDBal($dbIndex)
     {
-        $dbals = iterator_to_array($this->moduleManager->getDatabaseModule()->getDBALs());
-        $dbal = $dbals[$dbIndex];
+        $dbal = $this->getDbal($this->moduleManager, $dbIndex);
         $queries = $this->getAttributeValue($dbal, 'queries');
         $pdo = $this->getAttributeValue($queries, 'pdo');
         $pdo->exec("CREATE TABLE t1 (id INTEGER PRIMARY KEY, data VARCHAR(64));");
